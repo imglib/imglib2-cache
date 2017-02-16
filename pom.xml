@@ -54,6 +54,13 @@
 		</contributor>
 	</contributors>
 
+	<repositories>
+		<repository>
+			<id>imagej.public</id>
+			<url>http://maven.imagej.net/content/groups/public</url>
+		</repository>
+	</repositories>
+
 	<scm>
 		<connection>scm:git:git://github.com/imglib/imglib2-cache</connection>
 		<developerConnection>scm:git:git@github.com:imglib/imglib2-cache</developerConnection>
