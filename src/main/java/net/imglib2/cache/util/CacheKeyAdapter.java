@@ -5,11 +5,11 @@ import java.util.concurrent.ExecutionException;
 import net.imglib2.cache.Cache;
 import net.imglib2.cache.CacheLoader;
 
-public class CacheAdapter< K, L, V, C extends Cache< L, V > >
-		extends AbstractCacheAdapter< K, L, V, C >
+public class CacheKeyAdapter< K, L, V, C extends Cache< L, V > >
+		extends AbstractCacheKeyAdapter< K, L, V, C >
 		implements Cache< K, V >
 {
-	public CacheAdapter( final C cache, final KeyBimap< K, L > keymap )
+	public CacheKeyAdapter( final C cache, final KeyBimap< K, L > keymap )
 	{
 		super( cache, keymap );
 	}

@@ -6,11 +6,11 @@ import net.imglib2.cache.CacheLoader;
 import net.imglib2.cache.ListenableCache;
 import net.imglib2.cache.RemovalListener;
 
-public class ListenableCacheAdapter< K, L, V, C extends ListenableCache< L, V > >
-		extends AbstractCacheAdapter< K, L, V, C >
+public class ListenableCacheKeyAdapter< K, L, V, C extends ListenableCache< L, V > >
+		extends AbstractCacheKeyAdapter< K, L, V, C >
 		implements ListenableCache< K, V >
 {
-	public ListenableCacheAdapter( final C cache, final KeyBimap< K, L > keymap )
+	public ListenableCacheKeyAdapter( final C cache, final KeyBimap< K, L > keymap )
 	{
 		super( cache, keymap );
 	}

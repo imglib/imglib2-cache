@@ -2,14 +2,14 @@ package net.imglib2.cache.util;
 
 import net.imglib2.cache.AbstractCache;
 
-public class AbstractCacheAdapter< K, L, V, C extends AbstractCache< L, V > >
+public class AbstractCacheKeyAdapter< K, L, V, C extends AbstractCache< L, V > >
 		implements AbstractCache< K, V >
 {
 	protected final C cache;
 
 	protected final KeyBimap< K, L > keymap;
 
-	public AbstractCacheAdapter( final C cache, final KeyBimap< K, L > keymap )
+	public AbstractCacheKeyAdapter( final C cache, final KeyBimap< K, L > keymap )
 	{
 		this.cache = cache;
 		this.keymap = keymap;

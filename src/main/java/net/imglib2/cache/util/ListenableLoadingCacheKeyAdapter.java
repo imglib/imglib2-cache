@@ -5,11 +5,11 @@ import java.util.concurrent.ExecutionException;
 import net.imglib2.cache.ListenableLoadingCache;
 import net.imglib2.cache.RemovalListener;
 
-public class ListenableLoadingCacheAdapter< K, L, V, C extends ListenableLoadingCache< L, V > >
-		extends AbstractCacheAdapter< K, L, V, C >
+public class ListenableLoadingCacheKeyAdapter< K, L, V, C extends ListenableLoadingCache< L, V > >
+		extends AbstractCacheKeyAdapter< K, L, V, C >
 		implements ListenableLoadingCache< K, V >
 {
-	public ListenableLoadingCacheAdapter( final C cache, final KeyBimap< K, L > keymap )
+	public ListenableLoadingCacheKeyAdapter( final C cache, final KeyBimap< K, L > keymap )
 	{
 		super( cache, keymap );
 	}
