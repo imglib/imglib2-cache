@@ -1,0 +1,42 @@
+package net.imglib2.cache.util;
+
+import net.imglib2.cache.Cache;
+import net.imglib2.cache.ListenableCache;
+import net.imglib2.cache.ListenableLoadingCache;
+import net.imglib2.cache.LoadingCache;
+import net.imglib2.cache.volatiles.VolatileCache;
+import net.imglib2.cache.volatiles.VolatileCacheLoader;
+import net.imglib2.cache.volatiles.VolatileLoadingCache;
+
+public class Caches
+{
+	public static < K, L, V > Cache< K, V >
+			mapKeys( final Cache< L, V > cache, final KeyBimap< K, L > keymap )
+	{
+		return new CacheKeyAdapter<>( cache, keymap );
+	}
+
+	public static < K, L, V > ListenableCache< K, V >
+			mapKeys( final ListenableCache< L, V > cache, final KeyBimap< K, L > keymap )
+	{
+		return new ListenableCacheKeyAdapter<>( cache, keymap );
+	}
+
+	public static < K, L, V > LoadingCache< K, V >
+			mapKeys( final LoadingCache< L, V > cache, final KeyBimap< K, L > keymap )
+	{
+		return new LoadingCacheKeyAdapter<>( cache, keymap );
+	}
+
+	public static < K, L, V > ListenableLoadingCache< K, V >
+			mapKeys( final ListenableLoadingCache< L, V > cache, final KeyBimap< K, L > keymap )
+	{
+		return new ListenableLoadingCacheKeyAdapter<>( cache, keymap );
+	}
+
+	public static < K, V > VolatileLoadingCache< K, V >
+			withLoader( final VolatileCache< K, V > cache, final VolatileCacheLoader< K, V > loader )
+	{
+		return new VolatileCacheAsVolatileLoadingCacheAdapter<>( cache, loader );
+	}
+}
