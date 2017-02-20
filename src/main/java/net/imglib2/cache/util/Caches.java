@@ -1,6 +1,7 @@
 package net.imglib2.cache.util;
 
 import net.imglib2.cache.Cache;
+import net.imglib2.cache.CacheLoader;
 import net.imglib2.cache.ListenableCache;
 import net.imglib2.cache.ListenableLoadingCache;
 import net.imglib2.cache.LoadingCache;
@@ -38,5 +39,11 @@ public class Caches
 			withLoader( final VolatileCache< K, V > cache, final VolatileCacheLoader< K, V > loader )
 	{
 		return new VolatileCacheAsVolatileLoadingCacheAdapter<>( cache, loader );
+	}
+
+	public static < K, V > LoadingCache< K, V >
+			withLoader( final Cache< K, V > cache, final CacheLoader< K, V > loader )
+	{
+		return new CacheAsLoadingCacheAdapter<>( cache, loader );
 	}
 }
