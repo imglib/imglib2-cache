@@ -6,6 +6,7 @@ import net.imglib2.cache.ListenableCache;
 import net.imglib2.cache.ListenableLoadingCache;
 import net.imglib2.cache.LoadingCache;
 import net.imglib2.cache.UncheckedLoadingCache;
+import net.imglib2.cache.volatiles.UncheckedVolatileLoadingCache;
 import net.imglib2.cache.volatiles.VolatileCache;
 import net.imglib2.cache.volatiles.VolatileCacheLoader;
 import net.imglib2.cache.volatiles.VolatileLoadingCache;
@@ -52,5 +53,11 @@ public class Caches
 			unchecked( final LoadingCache< K, V > cache )
 	{
 		return new LoadingCacheAsUncheckedLoadingCacheAdapter<>( cache );
+	}
+
+	public static < K, V > UncheckedVolatileLoadingCache< K, V >
+			unchecked( final VolatileLoadingCache< K, V > cache )
+	{
+		return new VolatileLoadingCacheAsUncheckedVolatileLoadingCacheAdapter<>( cache );
 	}
 }
