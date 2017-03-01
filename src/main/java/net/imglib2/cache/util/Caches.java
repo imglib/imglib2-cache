@@ -5,6 +5,7 @@ import net.imglib2.cache.CacheLoader;
 import net.imglib2.cache.ListenableCache;
 import net.imglib2.cache.ListenableLoadingCache;
 import net.imglib2.cache.LoadingCache;
+import net.imglib2.cache.RemovalListener;
 import net.imglib2.cache.UncheckedLoadingCache;
 import net.imglib2.cache.volatiles.UncheckedVolatileLoadingCache;
 import net.imglib2.cache.volatiles.VolatileCache;
@@ -47,6 +48,12 @@ public class Caches
 			withLoader( final Cache< K, V > cache, final CacheLoader< K, V > loader )
 	{
 		return new CacheAsLoadingCacheAdapter<>( cache, loader );
+	}
+
+	public static < K, V > Cache< K, V >
+			withRemovalListener( final ListenableCache< K, V > cache, final RemovalListener< K, V > removalListener )
+	{
+		return new ListenableCacheAsCacheAdapter<>( cache, removalListener );
 	}
 
 	public static < K, V > UncheckedLoadingCache< K, V >
