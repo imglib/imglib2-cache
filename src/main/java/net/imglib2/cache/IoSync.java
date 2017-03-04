@@ -3,9 +3,8 @@ package net.imglib2.cache;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import net.imglib2.cache.CacheLoader;
-import net.imglib2.cache.RemovalListener;
 import net.imglib2.cache.ref.SoftRefListenableCache;
 
 /**
@@ -60,16 +59,35 @@ public class IoSync< K, V > implements CacheLoader< K, V >, RemovalListener< K, 
 	 */
 	final BlockingQueue< K > queue;
 
+	public < T extends CacheLoader< K, V > & RemovalListener< K, V > > IoSync( final T io )
+	{
+		this( io, io, 1 );
+	}
+
+	public < T extends CacheLoader< K, V > & RemovalListener< K, V > > IoSync(
+			final T io,
+			final int numThreads )
+	{
+		this( io, io, numThreads );
+	}
+
 	public IoSync(
 			final CacheLoader< K, V > loader,
-			final RemovalListener< K, V > saver )
+			final RemovalListener< K, V > saver,
+			final int numThreads )
 	{
 		this.saver = saver;
 		this.loader = loader;
 		map = new ConcurrentHashMap<>();
 		queue = new LinkedBlockingQueue<>();
 
-		new Thread( new Writer() ).start();
+		final String[] names = createThreadNames( numThreads );
+		for ( int i = 0; i < numThreads; ++i )
+		{
+			final Thread t = new Thread( new Writer(), names[ i ] );
+			t.setDaemon( true );
+			t.start();
+		}
 	}
 
 	@Override
@@ -179,5 +197,20 @@ public class IoSync< K, V > implements CacheLoader< K, V >, RemovalListener< K, 
 				}
 			}
 		}
+	}
+
+	static final AtomicInteger ioSyncNumber = new AtomicInteger( 1 );
+
+	static String[] createThreadNames( final int numThreads )
+	{
+		final String threadNameFormat = String.format(
+				"io-sync-%d-writer-%%d",
+				ioSyncNumber.getAndIncrement() );
+
+		final String[] names = new String[ numThreads ];
+		for ( int i = 0; i < numThreads; ++i )
+			names[ i ] = String.format( threadNameFormat, ( i + 1 ) );
+
+		return names;
 	}
 }
