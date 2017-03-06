@@ -33,7 +33,7 @@ public class SoftRefListenableCache< K, V > implements ListenableCache< K, V >
 	static final class CachePhantomReference< V > extends PhantomReference< V >
 	{
 		static Field referent = null;
-		{
+		static {
 			try
 			{
 				referent = Reference.class.getDeclaredField( "referent" );
