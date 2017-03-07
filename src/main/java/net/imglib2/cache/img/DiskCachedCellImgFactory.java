@@ -48,7 +48,9 @@ import java.nio.file.Path;
 
 import net.imglib2.Dirty;
 import net.imglib2.cache.IoSync;
+import net.imglib2.cache.ListenableCache;
 import net.imglib2.cache.UncheckedLoadingCache;
+import net.imglib2.cache.ref.GuardedStrongRefListenableCache;
 import net.imglib2.cache.ref.SoftRefListenableCache;
 import net.imglib2.exception.IncompatibleTypeException;
 import net.imglib2.img.ImgFactory;
@@ -68,34 +70,34 @@ import net.imglib2.type.NativeType;
 import net.imglib2.util.Fraction;
 
 /**
- * Factory for creating {@link DiskCachedCellImg}s. The cell dimensions for a
- * standard cell can be supplied in the constructor of the factory. If no cell
- * dimensions are given, the factory creates cells of size <em>10 x 10 x
- * ... x 10</em>.
+ * Factory for creating {@link DiskCachedCellImg}s. See
+ * {@link DiskCachedCellImgOptions} for available configuration options and
+ * defaults.
  *
  * @author Tobias Pietzsch
  */
 public class DiskCachedCellImgFactory< T extends NativeType< T > > extends NativeImgFactory< T >
 {
-	private final boolean dirtyAccesses;
+	private DiskCachedCellImgOptions.Values options;
 
-	private final int[] defaultCellDimensions;
-
+	/**
+	 * Create a new {@link DiskCachedCellImgFactory} with default configuration.
+	 */
 	public DiskCachedCellImgFactory()
 	{
-		this( 10 );
+		this( DiskCachedCellImgOptions.options() );
 	}
 
-	public DiskCachedCellImgFactory( final int... cellDimensions )
+	/**
+	 * Create a new {@link DiskCachedCellImgFactory} with the specified
+	 * configuration.
+	 *
+	 * @param optional
+	 *            configuration options.
+	 */
+	public DiskCachedCellImgFactory( final DiskCachedCellImgOptions optional )
 	{
-		this( true, cellDimensions );
-	}
-
-	public DiskCachedCellImgFactory( final boolean dirtyAccesses, final int... cellDimensions )
-	{
-		this.dirtyAccesses = dirtyAccesses;
-		defaultCellDimensions = cellDimensions.clone();
-		CellImgFactory.verifyDimensions( defaultCellDimensions );
+		this.options = optional.values;
 	}
 
 	@Override
@@ -107,7 +109,7 @@ public class DiskCachedCellImgFactory< T extends NativeType< T > > extends Nativ
 	@Override
 	public DiskCachedCellImg< T, ? extends ByteAccess > createByteInstance( final long[] dimensions, final Fraction entitiesPerPixel )
 	{
-		return dirtyAccesses
+		return options.dirtyAccesses()
 				? createDirtyInstance( dimensions, entitiesPerPixel, BYTE )
 				: createInstance( dimensions, entitiesPerPixel, BYTE );
 	}
@@ -115,7 +117,7 @@ public class DiskCachedCellImgFactory< T extends NativeType< T > > extends Nativ
 	@Override
 	public DiskCachedCellImg< T, ? extends CharAccess > createCharInstance( final long[] dimensions, final Fraction entitiesPerPixel )
 	{
-		return dirtyAccesses
+		return options.dirtyAccesses()
 				? createDirtyInstance( dimensions, entitiesPerPixel, CHAR )
 				: createInstance( dimensions, entitiesPerPixel, CHAR );
 	}
@@ -123,7 +125,7 @@ public class DiskCachedCellImgFactory< T extends NativeType< T > > extends Nativ
 	@Override
 	public DiskCachedCellImg< T, ? extends ShortAccess > createShortInstance( final long[] dimensions, final Fraction entitiesPerPixel )
 	{
-		return dirtyAccesses
+		return options.dirtyAccesses()
 				? createDirtyInstance( dimensions, entitiesPerPixel, SHORT )
 				: createInstance( dimensions, entitiesPerPixel, SHORT );
 	}
@@ -131,7 +133,7 @@ public class DiskCachedCellImgFactory< T extends NativeType< T > > extends Nativ
 	@Override
 	public DiskCachedCellImg< T, ? extends IntAccess > createIntInstance( final long[] dimensions, final Fraction entitiesPerPixel )
 	{
-		return dirtyAccesses
+		return options.dirtyAccesses()
 				? createDirtyInstance( dimensions, entitiesPerPixel, INT )
 				: createInstance( dimensions, entitiesPerPixel, INT );
 	}
@@ -139,7 +141,7 @@ public class DiskCachedCellImgFactory< T extends NativeType< T > > extends Nativ
 	@Override
 	public DiskCachedCellImg< T, ? extends LongAccess > createLongInstance( final long[] dimensions, final Fraction entitiesPerPixel )
 	{
-		return dirtyAccesses
+		return options.dirtyAccesses()
 				? createDirtyInstance( dimensions, entitiesPerPixel, LONG )
 				: createInstance( dimensions, entitiesPerPixel, LONG );
 	}
@@ -147,7 +149,7 @@ public class DiskCachedCellImgFactory< T extends NativeType< T > > extends Nativ
 	@Override
 	public DiskCachedCellImg< T, ? extends FloatAccess > createFloatInstance( final long[] dimensions, final Fraction entitiesPerPixel )
 	{
-		return dirtyAccesses
+		return options.dirtyAccesses()
 				? createDirtyInstance( dimensions, entitiesPerPixel, FLOAT )
 				: createInstance( dimensions, entitiesPerPixel, FLOAT );
 	}
@@ -155,7 +157,7 @@ public class DiskCachedCellImgFactory< T extends NativeType< T > > extends Nativ
 	@Override
 	public DiskCachedCellImg< T, ? extends DoubleAccess > createDoubleInstance( final long[] dimensions, final Fraction entitiesPerPixel )
 	{
-		return dirtyAccesses
+		return options.dirtyAccesses()
 				? createDirtyInstance( dimensions, entitiesPerPixel, DOUBLE )
 				: createInstance( dimensions, entitiesPerPixel, DOUBLE );
 	}
@@ -165,7 +167,7 @@ public class DiskCachedCellImgFactory< T extends NativeType< T > > extends Nativ
 	public < S > ImgFactory< S > imgFactory( final S type ) throws IncompatibleTypeException
 	{
 		if ( NativeType.class.isInstance( type ) )
-			return new DiskCachedCellImgFactory( defaultCellDimensions );
+			return new DiskCachedCellImgFactory( options.optionsFromValues() );
 		throw new IncompatibleTypeException( this, type.getClass().getCanonicalName() + " does not implement NativeType." );
 	}
 
@@ -183,6 +185,7 @@ public class DiskCachedCellImgFactory< T extends NativeType< T > > extends Nativ
 				entitiesPerPixel );
 		return createCellImg( diskcache, grid, entitiesPerPixel );
 	}
+
 	private < A extends ArrayDataAccess< A > & Dirty >
 			DiskCachedCellImg< T, A >
 			createDirtyInstance( final long[] dimensions, final Fraction entitiesPerPixel, final PrimitiveType primitiveType )
@@ -202,7 +205,7 @@ public class DiskCachedCellImgFactory< T extends NativeType< T > > extends Nativ
 	{
 		CellImgFactory.verifyDimensions( dimensions );
 		final int n = dimensions.length;
-		final int[] cellDimensions = CellImgFactory.getCellDimensions( defaultCellDimensions, n, entitiesPerPixel );
+		final int[] cellDimensions = CellImgFactory.getCellDimensions( options.cellDimensions(), n, entitiesPerPixel );
 		return new CellGrid( dimensions, cellDimensions );
 	}
 
@@ -220,11 +223,28 @@ public class DiskCachedCellImgFactory< T extends NativeType< T > > extends Nativ
 
 	private < A > DiskCachedCellImg< T, A > createCellImg( final DiskCellCache< A > diskcache, final CellGrid grid, final Fraction entitiesPerPixel )
 	{
-		final IoSync< Long, Cell< A > > iosync = new IoSync<>( diskcache );
-		final UncheckedLoadingCache< Long, Cell< A > > cache = new SoftRefListenableCache< Long, Cell< A > >()
+		final IoSync< Long, Cell< A > > iosync = new IoSync<>(
+				diskcache,
+				options.numIoThreads(),
+				options.maxIoQueueSize() );
+
+		ListenableCache< Long, Cell< A > > listenableCache;
+		switch ( options.cacheType() )
+		{
+		case BOUNDED:
+			listenableCache = new GuardedStrongRefListenableCache<>( options.maxCacheSize() );
+			break;
+		case SOFTREF:
+		default:
+			listenableCache = new SoftRefListenableCache<>();
+			break;
+		}
+
+		final UncheckedLoadingCache< Long, Cell< A > > cache = listenableCache
 				.withRemovalListener( iosync )
 				.withLoader( iosync )
 				.unchecked();
+
 		return new DiskCachedCellImg<>( this, grid, entitiesPerPixel, cache::get );
 	}
 }
