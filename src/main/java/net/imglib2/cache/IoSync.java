@@ -59,27 +59,74 @@ public class IoSync< K, V > implements CacheLoader< K, V >, RemovalListener< K, 
 	 */
 	final BlockingQueue< K > queue;
 
+	/**
+	 * Create a new {@link IoSync} that asynchronously forwards to the specified
+	 * {@link RemovalListener}. Uses 1 writer thread and a bounded write queue
+	 * of size 10.
+	 *
+	 * @param io
+	 *            used to asynchronously write removed values, and to load
+	 *            values that are <em>not</em> currently enqueued for writing.
+	 */
 	public < T extends CacheLoader< K, V > & RemovalListener< K, V > > IoSync( final T io )
 	{
-		this( io, io, 1 );
+		this( io, io, 1, 10 );
 	}
 
+	/**
+	 * Create a new {@link IoSync} that asynchronously forwards to the specified
+	 * {@link RemovalListener}. The specified number of {@link Writer} threads
+	 * is started to handle writing values through {@code saver}. New writer
+	 * threads can be always started later, for example by
+	 * {@code new Thread(iosync.new Writer()).start()}.
+	 *
+	 * @param io
+	 *            used to asynchronously write removed values, and to load
+	 *            values that are <em>not</em> currently enqueued for writing.
+	 * @param numThreads
+	 *            how many writer threads to start (may be 0).
+	 * @param maxQueueSize
+	 *            the maximum size of the write queue. When the queue is full,
+	 *            {@link RemovalListener#onRemoval(Object, Object)} will block
+	 *            until earlier values have been written.
+	 */
 	public < T extends CacheLoader< K, V > & RemovalListener< K, V > > IoSync(
 			final T io,
-			final int numThreads )
+			final int numThreads,
+			final int maxQueueSize )
 	{
-		this( io, io, numThreads );
+		this( io, io, numThreads, maxQueueSize );
 	}
 
+	/**
+	 * Create a new {@link IoSync} that asynchronously forwards to the specified
+	 * {@link RemovalListener}. The specified number of {@link Writer} threads
+	 * is started to handle writing values through {@code saver}. New writer
+	 * threads can be always started later, for example by
+	 * {@code new Thread(iosync.new Writer()).start()}.
+	 *
+	 * @param loader
+	 *            used to load values that are <em>not</em> currently enqueued
+	 *            for writing.
+	 * @param saver
+	 *            used to asynchronously write removed values.
+	 * @param numThreads
+	 *            how many writer threads to start (may be 0).
+	 * @param maxQueueSize
+	 *            the maximum size of the write queue. When the queue is full,
+	 *            {@link RemovalListener#onRemoval(Object, Object)} will block
+	 *            until earlier values have been written.
+	 */
 	public IoSync(
 			final CacheLoader< K, V > loader,
 			final RemovalListener< K, V > saver,
-			final int numThreads )
+			final int numThreads,
+			final int maxQueueSize )
 	{
 		this.saver = saver;
 		this.loader = loader;
 		map = new ConcurrentHashMap<>();
-		queue = new LinkedBlockingQueue<>();
+		queue = new LinkedBlockingQueue<>( maxQueueSize );
 
 		final String[] names = createThreadNames( numThreads );
 		for ( int i = 0; i < numThreads; ++i )
@@ -158,7 +205,7 @@ public class IoSync< K, V > implements CacheLoader< K, V >, RemovalListener< K, 
 		}
 	}
 
-	class Writer implements Runnable
+	public class Writer implements Runnable
 	{
 		@Override
 		public void run()
