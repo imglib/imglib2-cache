@@ -104,59 +104,59 @@ public class EmptyCellCacheLoader< A extends ArrayDataAccess< A > > implements C
 		case BYTE:
 			return dirty
 					? ( volatil
-							? (net.imglib2.cache.img.EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new DirtyVolatileByteArray( 0, true ) )
-							: (net.imglib2.cache.img.EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new DirtyByteArray( 0 ) ) )
+							? ( EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new DirtyVolatileByteArray( 0, true ) )
+							: ( EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new DirtyByteArray( 0 ) ) )
 					: ( volatil
-							? (net.imglib2.cache.img.EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new VolatileByteArray( 0, true ) )
-							: (net.imglib2.cache.img.EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new ByteArray( 0 ) ) );
+							? ( EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new VolatileByteArray( 0, true ) )
+							: ( EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new ByteArray( 0 ) ) );
 		case CHAR:
 			return dirty
 					? ( volatil
-							? (net.imglib2.cache.img.EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new DirtyVolatileCharArray( 0, true ) )
-							: (net.imglib2.cache.img.EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new DirtyCharArray( 0 ) ) )
+							? ( EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new DirtyVolatileCharArray( 0, true ) )
+							: ( EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new DirtyCharArray( 0 ) ) )
 					: ( volatil
-							? (net.imglib2.cache.img.EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new VolatileCharArray( 0, true ) )
-							: (net.imglib2.cache.img.EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new CharArray( 0 ) ) );
+							? ( EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new VolatileCharArray( 0, true ) )
+							: ( EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new CharArray( 0 ) ) );
 		case DOUBLE:
 			return dirty
 					? ( volatil
-							? (net.imglib2.cache.img.EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new DirtyVolatileDoubleArray( 0, true ) )
-							: (net.imglib2.cache.img.EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new DirtyDoubleArray( 0 ) ) )
+							? ( EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new DirtyVolatileDoubleArray( 0, true ) )
+							: ( EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new DirtyDoubleArray( 0 ) ) )
 					: ( volatil
-							? (net.imglib2.cache.img.EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new VolatileDoubleArray( 0, true ) )
-							: (net.imglib2.cache.img.EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new DoubleArray( 0 ) ) );
+							? ( EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new VolatileDoubleArray( 0, true ) )
+							: ( EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new DoubleArray( 0 ) ) );
 		case FLOAT:
 			return dirty
 					? ( volatil
-							? (net.imglib2.cache.img.EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new DirtyVolatileFloatArray( 0, true ) )
-							: (net.imglib2.cache.img.EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new DirtyFloatArray( 0 ) ) )
+							? ( EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new DirtyVolatileFloatArray( 0, true ) )
+							: ( EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new DirtyFloatArray( 0 ) ) )
 					: ( volatil
-							? (net.imglib2.cache.img.EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new VolatileFloatArray( 0, true ) )
-							: (net.imglib2.cache.img.EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new FloatArray( 0 ) ) );
+							? ( EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new VolatileFloatArray( 0, true ) )
+							: ( EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new FloatArray( 0 ) ) );
 		case INT:
 			return dirty
 					? ( volatil
-							? (net.imglib2.cache.img.EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new DirtyVolatileIntArray( 0, true ) )
-							: (net.imglib2.cache.img.EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new DirtyIntArray( 0 ) ) )
+							? ( EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new DirtyVolatileIntArray( 0, true ) )
+							: ( EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new DirtyIntArray( 0 ) ) )
 					: ( volatil
-							? (net.imglib2.cache.img.EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new VolatileIntArray( 0, true ) )
-							: (net.imglib2.cache.img.EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new IntArray( 0 ) ) );
+							? ( EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new VolatileIntArray( 0, true ) )
+							: ( EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new IntArray( 0 ) ) );
 		case LONG:
 			return dirty
 					? ( volatil
-							? (net.imglib2.cache.img.EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new DirtyVolatileLongArray( 0, true ) )
-							: (net.imglib2.cache.img.EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new DirtyLongArray( 0 ) ) )
+							? ( EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new DirtyVolatileLongArray( 0, true ) )
+							: ( EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new DirtyLongArray( 0 ) ) )
 					: ( volatil
-							? (net.imglib2.cache.img.EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new VolatileLongArray( 0, true ) )
-							: (net.imglib2.cache.img.EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new LongArray( 0 ) ) );
+							? ( EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new VolatileLongArray( 0, true ) )
+							: ( EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new LongArray( 0 ) ) );
 		case SHORT:
 			return dirty
 					? ( volatil
-							? (net.imglib2.cache.img.EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new DirtyVolatileShortArray( 0, true ) )
-							: (net.imglib2.cache.img.EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new DirtyShortArray( 0 ) ) )
+							? ( EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new DirtyVolatileShortArray( 0, true ) )
+							: ( EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new DirtyShortArray( 0 ) ) )
 					: ( volatil
-							? (net.imglib2.cache.img.EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new VolatileShortArray( 0, true ) )
-							: (net.imglib2.cache.img.EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new ShortArray( 0 ) ) );
+							? ( EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new VolatileShortArray( 0, true ) )
+							: ( EmptyCellCacheLoader< A > ) new EmptyCellCacheLoader<>( grid, entitiesPerPixel, new ShortArray( 0 ) ) );
 		default:
 			return null;
 		}
