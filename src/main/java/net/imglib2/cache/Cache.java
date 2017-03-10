@@ -2,7 +2,7 @@ package net.imglib2.cache;
 
 import java.util.concurrent.ExecutionException;
 
-import net.imglib2.cache.util.LoadingCacheAsUncheckedLoadingCacheAdapter;
+import net.imglib2.cache.util.CacheAsUncheckedCacheAdapter;
 
 public interface Cache< K, V > extends AbstractCache< K, V >, CacheLoader< K, V >
 {
@@ -11,6 +11,6 @@ public interface Cache< K, V > extends AbstractCache< K, V >, CacheLoader< K, V 
 
 	public default UncheckedCache< K, V > unchecked()
 	{
-		return new LoadingCacheAsUncheckedLoadingCacheAdapter<>( this );
+		return new CacheAsUncheckedCacheAdapter<>( this );
 	}
 }

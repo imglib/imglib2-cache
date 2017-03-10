@@ -6,13 +6,13 @@ import net.imglib2.cache.LoaderCache;
 import net.imglib2.cache.CacheLoader;
 import net.imglib2.cache.Cache;
 
-public class CacheAsLoadingCacheAdapter< K, V > implements Cache< K, V >
+public class LoaderCacheAsCacheAdapter< K, V > implements Cache< K, V >
 {
 	private final LoaderCache< K, V > cache;
 
 	private final CacheLoader< K, V > loader;
 
-	public CacheAsLoadingCacheAdapter( final LoaderCache< K, V > cache, final CacheLoader< K, V > loader )
+	public LoaderCacheAsCacheAdapter( final LoaderCache< K, V > cache, final CacheLoader< K, V > loader )
 	{
 		this.cache = cache;
 		this.loader = loader;

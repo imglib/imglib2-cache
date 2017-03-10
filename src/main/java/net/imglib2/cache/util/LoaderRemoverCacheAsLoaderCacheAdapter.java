@@ -7,13 +7,13 @@ import net.imglib2.cache.CacheLoader;
 import net.imglib2.cache.LoaderRemoverCache;
 import net.imglib2.cache.CacheRemover;
 
-public class ListenableCacheAsCacheAdapter< K, V > implements LoaderCache< K, V >
+public class LoaderRemoverCacheAsLoaderCacheAdapter< K, V > implements LoaderCache< K, V >
 {
 	private final LoaderRemoverCache< K, V > cache;
 
 	private final CacheRemover< K, V > remover;
 
-	public ListenableCacheAsCacheAdapter( final LoaderRemoverCache< K, V > cache, final CacheRemover< K, V > remover )
+	public LoaderRemoverCacheAsLoaderCacheAdapter( final LoaderRemoverCache< K, V > cache, final CacheRemover< K, V > remover )
 	{
 		this.cache = cache;
 		this.remover = remover;

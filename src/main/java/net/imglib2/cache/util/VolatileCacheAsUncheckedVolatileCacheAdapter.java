@@ -6,11 +6,11 @@ import net.imglib2.cache.volatiles.CacheHints;
 import net.imglib2.cache.volatiles.UncheckedVolatileCache;
 import net.imglib2.cache.volatiles.VolatileCache;
 
-public class VolatileLoadingCacheAsUncheckedVolatileLoadingCacheAdapter< K, V > implements UncheckedVolatileCache< K, V >
+public class VolatileCacheAsUncheckedVolatileCacheAdapter< K, V > implements UncheckedVolatileCache< K, V >
 {
 	private final VolatileCache< K, V > cache;
 
-	public VolatileLoadingCacheAsUncheckedVolatileLoadingCacheAdapter( final VolatileCache< K, V > cache )
+	public VolatileCacheAsUncheckedVolatileCacheAdapter( final VolatileCache< K, V > cache )
 	{
 		this.cache = cache;
 	}

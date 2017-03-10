@@ -5,11 +5,11 @@ import java.util.concurrent.ExecutionException;
 import net.imglib2.cache.Cache;
 import net.imglib2.cache.UncheckedCache;
 
-public class LoadingCacheAsUncheckedLoadingCacheAdapter< K, V > implements UncheckedCache< K, V >
+public class CacheAsUncheckedCacheAdapter< K, V > implements UncheckedCache< K, V >
 {
 	private final Cache< K, V > cache;
 
-	public LoadingCacheAsUncheckedLoadingCacheAdapter( final Cache< K, V > cache )
+	public CacheAsUncheckedCacheAdapter( final Cache< K, V > cache )
 	{
 		this.cache = cache;
 	}

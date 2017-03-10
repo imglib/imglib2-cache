@@ -2,7 +2,7 @@ package net.imglib2.cache.volatiles;
 
 import java.util.concurrent.ExecutionException;
 
-import net.imglib2.cache.util.VolatileLoadingCacheAsUncheckedVolatileLoadingCacheAdapter;
+import net.imglib2.cache.util.VolatileCacheAsUncheckedVolatileCacheAdapter;
 
 public interface VolatileCache< K, V > extends AbstractVolatileCache< K, V >
 {
@@ -10,6 +10,6 @@ public interface VolatileCache< K, V > extends AbstractVolatileCache< K, V >
 
 	public default UncheckedVolatileCache< K, V > unchecked()
 	{
-		return new VolatileLoadingCacheAsUncheckedVolatileLoadingCacheAdapter<>( this );
+		return new VolatileCacheAsUncheckedVolatileCacheAdapter<>( this );
 	}
 }

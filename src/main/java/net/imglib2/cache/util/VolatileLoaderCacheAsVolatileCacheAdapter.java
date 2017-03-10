@@ -7,13 +7,13 @@ import net.imglib2.cache.volatiles.VolatileLoaderCache;
 import net.imglib2.cache.volatiles.VolatileCacheLoader;
 import net.imglib2.cache.volatiles.VolatileCache;
 
-public class VolatileCacheAsVolatileLoadingCacheAdapter< K, V > implements VolatileCache< K, V >
+public class VolatileLoaderCacheAsVolatileCacheAdapter< K, V > implements VolatileCache< K, V >
 {
 	private final VolatileLoaderCache< K, V > cache;
 
 	private final VolatileCacheLoader< K, V > loader;
 
-	public VolatileCacheAsVolatileLoadingCacheAdapter( final VolatileLoaderCache< K, V > cache, final VolatileCacheLoader< K, V > loader )
+	public VolatileLoaderCacheAsVolatileCacheAdapter( final VolatileLoaderCache< K, V > cache, final VolatileCacheLoader< K, V > loader )
 	{
 		this.cache = cache;
 		this.loader = loader;
