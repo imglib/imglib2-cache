@@ -17,7 +17,6 @@ import net.imglib2.cache.IoSync;
 import net.imglib2.cache.RemovalListener;
 import net.imglib2.img.cell.Cell;
 import net.imglib2.img.cell.CellGrid;
-import net.imglib2.type.NativeType;
 import net.imglib2.util.Fraction;
 import net.imglib2.util.Intervals;
 
@@ -55,7 +54,7 @@ public class DiskCellCache< A > implements RemovalListener< Long, Cell< A > >, C
 
 	private final CacheLoader< Long, Cell< A > > backingLoader;
 
-	public < T extends NativeType< T > > DiskCellCache(
+	public DiskCellCache(
 			final Path blockcache,
 			final CellGrid grid,
 			final CacheLoader< Long, Cell< A > > backingLoader,
