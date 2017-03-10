@@ -1,30 +1,30 @@
 package net.imglib2.cache.ref;
 
 import java.lang.ref.ReferenceQueue;
-import java.lang.ref.SoftReference;
+import java.lang.ref.WeakReference;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 
 import net.imglib2.cache.LoaderCache;
 import net.imglib2.cache.CacheLoader;
 
-public class SoftRefCache< K, V > implements LoaderCache< K, V >
+public class WeakRefLoaderCache< K, V > implements LoaderCache< K, V >
 {
 	final ConcurrentHashMap< K, Entry > map = new ConcurrentHashMap<>();
 
 	final ReferenceQueue< V > queue = new ReferenceQueue<>();
 
-	final class CacheSoftReference extends SoftReference< V >
+	final class CacheWeakReference extends WeakReference< V >
 	{
 		private final Entry entry;
 
-		public CacheSoftReference()
+		public CacheWeakReference()
 		{
 			super( null );
 			this.entry = null;
 		}
 
-		public CacheSoftReference( final V referent, final Entry entry )
+		public CacheWeakReference( final V referent, final Entry entry )
 		{
 			super( referent, queue );
 			this.entry = entry;
@@ -40,14 +40,14 @@ public class SoftRefCache< K, V > implements LoaderCache< K, V >
 	{
 		final K key;
 
-		private SoftReference< V > ref;
+		private CacheWeakReference ref;
 
 		boolean loaded;
 
 		public Entry( final K key )
 		{
 			this.key = key;
-			this.ref = new CacheSoftReference();
+			this.ref = new CacheWeakReference();
 			this.loaded = false;
 		}
 
@@ -59,7 +59,7 @@ public class SoftRefCache< K, V > implements LoaderCache< K, V >
 		public void setValue( final V value )
 		{
 			this.loaded = true;
-			this.ref = new CacheSoftReference( value, this );
+			this.ref = new CacheWeakReference( value, this );
 		}
 	}
 
@@ -132,7 +132,7 @@ public class SoftRefCache< K, V > implements LoaderCache< K, V >
 		while ( true )
 		{
 			@SuppressWarnings( "unchecked" )
-			final CacheSoftReference poll = ( CacheSoftReference ) queue.poll();
+			final CacheWeakReference poll = ( CacheWeakReference ) queue.poll();
 			if ( poll == null )
 				break;
 			poll.clean();

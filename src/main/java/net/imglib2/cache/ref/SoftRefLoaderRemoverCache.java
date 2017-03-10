@@ -24,7 +24,7 @@ import net.imglib2.cache.CacheRemover;
  *
  * @author Tobias Pietzsch &lt;tobias.pietzsch@gmail.com&gt;
  */
-public class SoftRefListenableCache< K, V > implements LoaderRemoverCache< K, V >
+public class SoftRefLoaderRemoverCache< K, V > implements LoaderRemoverCache< K, V >
 {
 	final ConcurrentHashMap< K, Entry > map = new ConcurrentHashMap<>();
 
@@ -45,9 +45,9 @@ public class SoftRefListenableCache< K, V > implements LoaderRemoverCache< K, V 
 			referent.setAccessible( true );
 		}
 
-		SoftRefListenableCache< ?, V >.Entry entry;
+		SoftRefLoaderRemoverCache< ?, V >.Entry entry;
 
-		public CachePhantomReference( final V referent, final ReferenceQueue< V > remove, final SoftRefListenableCache< ?, V >.Entry entry )
+		public CachePhantomReference( final V referent, final ReferenceQueue< V > remove, final SoftRefLoaderRemoverCache< ?, V >.Entry entry )
 		{
 			super( referent, remove );
 			this.entry = entry;

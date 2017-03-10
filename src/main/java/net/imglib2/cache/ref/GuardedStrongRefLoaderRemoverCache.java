@@ -42,7 +42,7 @@ import net.imglib2.cache.CacheRemover;
  *
  * @author Tobias Pietzsch
  */
-public class GuardedStrongRefListenableCache< K, V > implements LoaderRemoverCache< K, V >
+public class GuardedStrongRefLoaderRemoverCache< K, V > implements LoaderRemoverCache< K, V >
 {
 	final ConcurrentHashMap< K, Entry > map = new ConcurrentHashMap<>();
 
@@ -65,9 +65,9 @@ public class GuardedStrongRefListenableCache< K, V > implements LoaderRemoverCac
 			referent.setAccessible( true );
 		}
 
-		GuardedStrongRefListenableCache< ?, V >.Entry entry;
+		GuardedStrongRefLoaderRemoverCache< ?, V >.Entry entry;
 
-		public CachePhantomReference( final V referent, final ReferenceQueue< V > remove, final GuardedStrongRefListenableCache< ?, V >.Entry entry )
+		public CachePhantomReference( final V referent, final ReferenceQueue< V > remove, final GuardedStrongRefLoaderRemoverCache< ?, V >.Entry entry )
 		{
 			super( referent, remove );
 			this.entry = entry;
@@ -142,7 +142,7 @@ public class GuardedStrongRefListenableCache< K, V > implements LoaderRemoverCac
 		}
 	}
 
-	public GuardedStrongRefListenableCache( final long maximumSize )
+	public GuardedStrongRefLoaderRemoverCache( final long maximumSize )
 	{
 		strongCache = Caffeine.newBuilder().maximumSize( maximumSize ).build();
 	}

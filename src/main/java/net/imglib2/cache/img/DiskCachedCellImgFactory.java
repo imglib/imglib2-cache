@@ -52,8 +52,8 @@ import net.imglib2.cache.CacheLoader;
 import net.imglib2.cache.IoSync;
 import net.imglib2.cache.LoaderRemoverCache;
 import net.imglib2.cache.UncheckedCache;
-import net.imglib2.cache.ref.GuardedStrongRefListenableCache;
-import net.imglib2.cache.ref.SoftRefListenableCache;
+import net.imglib2.cache.ref.GuardedStrongRefLoaderRemoverCache;
+import net.imglib2.cache.ref.SoftRefLoaderRemoverCache;
 import net.imglib2.exception.IncompatibleTypeException;
 import net.imglib2.img.ImgFactory;
 import net.imglib2.img.NativeImgFactory;
@@ -266,11 +266,11 @@ public class DiskCachedCellImgFactory< T extends NativeType< T > > extends Nativ
 		switch ( options.cacheType() )
 		{
 		case BOUNDED:
-			listenableCache = new GuardedStrongRefListenableCache<>( options.maxCacheSize() );
+			listenableCache = new GuardedStrongRefLoaderRemoverCache<>( options.maxCacheSize() );
 			break;
 		case SOFTREF:
 		default:
-			listenableCache = new SoftRefListenableCache<>();
+			listenableCache = new SoftRefLoaderRemoverCache<>();
 			break;
 		}
 

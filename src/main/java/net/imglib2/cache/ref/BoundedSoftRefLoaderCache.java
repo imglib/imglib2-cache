@@ -9,7 +9,7 @@ import net.imglib2.cache.LoaderCache;
 import net.imglib2.cache.CacheLoader;
 
 /**
- * A cache that forwards to some other (usually {@link WeakRefCache}) cache and
+ * A cache that forwards to some other (usually {@link WeakRefLoaderCache}) cache and
  * additionally keeps {@link SoftReference}s to the <em>N</em> most recently
  * accessed values.
  *
@@ -18,21 +18,21 @@ import net.imglib2.cache.CacheLoader;
  *
  * @author Tobias Pietzsch &lt;tobias.pietzsch@gmail.com&gt;
  */
-public class BoundedSoftRefCache< K, V > implements LoaderCache< K, V >
+public class BoundedSoftRefLoaderCache< K, V > implements LoaderCache< K, V >
 {
 	private final LoaderCache< K, V > cache;
 
-	private final BoundedSoftRefCache< K, V >.SoftRefs softRefs;
+	private final BoundedSoftRefLoaderCache< K, V >.SoftRefs softRefs;
 
-	public BoundedSoftRefCache( final int maxSoftRefs, final LoaderCache< K, V > cache )
+	public BoundedSoftRefLoaderCache( final int maxSoftRefs, final LoaderCache< K, V > cache )
 	{
 		this.cache = cache;
 		this.softRefs = new SoftRefs( maxSoftRefs );
 	}
 
-	public BoundedSoftRefCache( final int maxSoftRefs )
+	public BoundedSoftRefLoaderCache( final int maxSoftRefs )
 	{
-		this.cache = new WeakRefCache<>();
+		this.cache = new WeakRefLoaderCache<>();
 		this.softRefs = new SoftRefs( maxSoftRefs );
 	}
 

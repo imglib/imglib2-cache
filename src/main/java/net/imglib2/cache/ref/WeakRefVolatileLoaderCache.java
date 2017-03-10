@@ -16,7 +16,7 @@ import net.imglib2.cache.volatiles.CacheHints;
 import net.imglib2.cache.volatiles.VolatileLoaderCache;
 import net.imglib2.cache.volatiles.VolatileCacheLoader;
 
-public class WeakRefVolatileCache< K, V > implements VolatileLoaderCache< K, V >
+public class WeakRefVolatileLoaderCache< K, V > implements VolatileLoaderCache< K, V >
 {
 	final ConcurrentHashMap< K, Entry > map = new ConcurrentHashMap<>();
 
@@ -120,7 +120,7 @@ public class WeakRefVolatileCache< K, V > implements VolatileLoaderCache< K, V >
 		}
 	}
 
-	public WeakRefVolatileCache(
+	public WeakRefVolatileLoaderCache(
 			final LoaderCache< K, V > backingCache,
 			final BlockingFetchQueues< Callable< ? > > fetchQueue )
 	{

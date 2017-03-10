@@ -5,7 +5,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import net.imglib2.cache.ref.SoftRefListenableCache;
+import net.imglib2.cache.ref.SoftRefLoaderRemoverCache;
 
 /**
  * Handle concurrent loading and saving of cache entries. It can be used
@@ -21,7 +21,7 @@ import net.imglib2.cache.ref.SoftRefListenableCache;
  * <p>
  * A crucial assumption is that only one thread calls get {@link #get(Object)}
  * {@link #onRemoval(Object, Object)} with the same key simultaneously. The
- * current {@link SoftRefListenableCache} implementation guarantees that. The
+ * current {@link SoftRefLoaderRemoverCache} implementation guarantees that. The
  * same is guaranteed to the connected {@link CacheRemover} and
  * {@link CacheLoader}.
  * </p>
