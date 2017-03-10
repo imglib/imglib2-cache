@@ -3,14 +3,14 @@ package net.imglib2.cache.util;
 import java.util.concurrent.ExecutionException;
 
 import net.imglib2.cache.volatiles.CacheHints;
-import net.imglib2.cache.volatiles.UncheckedVolatileLoadingCache;
-import net.imglib2.cache.volatiles.VolatileLoadingCache;
+import net.imglib2.cache.volatiles.UncheckedVolatileCache;
+import net.imglib2.cache.volatiles.VolatileCache;
 
-public class VolatileLoadingCacheAsUncheckedVolatileLoadingCacheAdapter< K, V > implements UncheckedVolatileLoadingCache< K, V >
+public class VolatileLoadingCacheAsUncheckedVolatileLoadingCacheAdapter< K, V > implements UncheckedVolatileCache< K, V >
 {
-	private final VolatileLoadingCache< K, V > cache;
+	private final VolatileCache< K, V > cache;
 
-	public VolatileLoadingCacheAsUncheckedVolatileLoadingCacheAdapter( final VolatileLoadingCache< K, V > cache )
+	public VolatileLoadingCacheAsUncheckedVolatileLoadingCacheAdapter( final VolatileCache< K, V > cache )
 	{
 		this.cache = cache;
 	}

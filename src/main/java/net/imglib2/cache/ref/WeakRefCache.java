@@ -5,10 +5,10 @@ import java.lang.ref.WeakReference;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 
-import net.imglib2.cache.Cache;
+import net.imglib2.cache.LoaderCache;
 import net.imglib2.cache.CacheLoader;
 
-public class WeakRefCache< K, V > implements Cache< K, V >
+public class WeakRefCache< K, V > implements LoaderCache< K, V >
 {
 	final ConcurrentHashMap< K, Entry > map = new ConcurrentHashMap<>();
 

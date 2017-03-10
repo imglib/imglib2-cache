@@ -9,10 +9,10 @@ import net.imglib2.cache.ref.SoftRefListenableCache;
 
 /**
  * Handle concurrent loading and saving of cache entries. It can be used
- * directly as a {@link RemovalListener} and {@link CacheLoader}. The
+ * directly as a {@link CacheRemover} and {@link CacheLoader}. The
  * {@link #onRemoval(Object, Object)} method enqueues values for writing and
  * returns immediately. Actual writing is done asynchronously on separate
- * threads, calling the connected {@link RemovalListener}.
+ * threads, calling the connected {@link CacheRemover}.
  * <p>
  * {@link IoSync} takes care of directly returning values that reloaded are
  * while they are written. It ensures that the final state of a value that is
@@ -22,7 +22,7 @@ import net.imglib2.cache.ref.SoftRefListenableCache;
  * A crucial assumption is that only one thread calls get {@link #get(Object)}
  * {@link #onRemoval(Object, Object)} with the same key simultaneously. The
  * current {@link SoftRefListenableCache} implementation guarantees that. The
- * same is guaranteed to the connected {@link RemovalListener} and
+ * same is guaranteed to the connected {@link CacheRemover} and
  * {@link CacheLoader}.
  * </p>
  * <p>
@@ -40,11 +40,11 @@ import net.imglib2.cache.ref.SoftRefListenableCache;
  *
  * @author Tobias Pietzsch
  */
-public class IoSync< K, V > implements CacheLoader< K, V >, RemovalListener< K, V >
+public class IoSync< K, V > implements CacheLoader< K, V >, CacheRemover< K, V >
 {
 	final CacheLoader< K, V > loader;
 
-	final RemovalListener< K, V > saver;
+	final CacheRemover< K, V > saver;
 
 	/**
 	 * A hash map containing key-value pairs that are enqueued for writing. This
@@ -61,21 +61,21 @@ public class IoSync< K, V > implements CacheLoader< K, V >, RemovalListener< K, 
 
 	/**
 	 * Create a new {@link IoSync} that asynchronously forwards to the specified
-	 * {@link RemovalListener}. Uses 1 writer thread and a bounded write queue
+	 * {@link CacheRemover}. Uses 1 writer thread and a bounded write queue
 	 * of size 10.
 	 *
 	 * @param io
 	 *            used to asynchronously write removed values, and to load
 	 *            values that are <em>not</em> currently enqueued for writing.
 	 */
-	public < T extends CacheLoader< K, V > & RemovalListener< K, V > > IoSync( final T io )
+	public < T extends CacheLoader< K, V > & CacheRemover< K, V > > IoSync( final T io )
 	{
 		this( io, io, 1, 10 );
 	}
 
 	/**
 	 * Create a new {@link IoSync} that asynchronously forwards to the specified
-	 * {@link RemovalListener}. The specified number of {@link Writer} threads
+	 * {@link CacheRemover}. The specified number of {@link Writer} threads
 	 * is started to handle writing values through {@code saver}. New writer
 	 * threads can be always started later, for example by
 	 * {@code new Thread(iosync.new Writer()).start()}.
@@ -87,10 +87,10 @@ public class IoSync< K, V > implements CacheLoader< K, V >, RemovalListener< K, 
 	 *            how many writer threads to start (may be 0).
 	 * @param maxQueueSize
 	 *            the maximum size of the write queue. When the queue is full,
-	 *            {@link RemovalListener#onRemoval(Object, Object)} will block
+	 *            {@link CacheRemover#onRemoval(Object, Object)} will block
 	 *            until earlier values have been written.
 	 */
-	public < T extends CacheLoader< K, V > & RemovalListener< K, V > > IoSync(
+	public < T extends CacheLoader< K, V > & CacheRemover< K, V > > IoSync(
 			final T io,
 			final int numThreads,
 			final int maxQueueSize )
@@ -100,7 +100,7 @@ public class IoSync< K, V > implements CacheLoader< K, V >, RemovalListener< K, 
 
 	/**
 	 * Create a new {@link IoSync} that asynchronously forwards to the specified
-	 * {@link RemovalListener}. The specified number of {@link Writer} threads
+	 * {@link CacheRemover}. The specified number of {@link Writer} threads
 	 * is started to handle writing values through {@code saver}. New writer
 	 * threads can be always started later, for example by
 	 * {@code new Thread(iosync.new Writer()).start()}.
@@ -114,12 +114,12 @@ public class IoSync< K, V > implements CacheLoader< K, V >, RemovalListener< K, 
 	 *            how many writer threads to start (may be 0).
 	 * @param maxQueueSize
 	 *            the maximum size of the write queue. When the queue is full,
-	 *            {@link RemovalListener#onRemoval(Object, Object)} will block
+	 *            {@link CacheRemover#onRemoval(Object, Object)} will block
 	 *            until earlier values have been written.
 	 */
 	public IoSync(
 			final CacheLoader< K, V > loader,
-			final RemovalListener< K, V > saver,
+			final CacheRemover< K, V > saver,
 			final int numThreads,
 			final int maxQueueSize )
 	{

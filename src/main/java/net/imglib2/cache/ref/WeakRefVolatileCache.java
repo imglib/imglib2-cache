@@ -6,23 +6,23 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 
-import net.imglib2.cache.Cache;
+import net.imglib2.cache.LoaderCache;
 import net.imglib2.cache.iotiming.CacheIoTiming;
 import net.imglib2.cache.iotiming.IoStatistics;
 import net.imglib2.cache.iotiming.IoTimeBudget;
 import net.imglib2.cache.queue.BlockingFetchQueues;
 import net.imglib2.cache.queue.FetcherThreads;
 import net.imglib2.cache.volatiles.CacheHints;
-import net.imglib2.cache.volatiles.VolatileCache;
+import net.imglib2.cache.volatiles.VolatileLoaderCache;
 import net.imglib2.cache.volatiles.VolatileCacheLoader;
 
-public class WeakRefVolatileCache< K, V > implements VolatileCache< K, V >
+public class WeakRefVolatileCache< K, V > implements VolatileLoaderCache< K, V >
 {
 	final ConcurrentHashMap< K, Entry > map = new ConcurrentHashMap<>();
 
 	final ReferenceQueue< V > queue = new ReferenceQueue<>();
 
-	final Cache< K, V > backingCache;
+	final LoaderCache< K, V > backingCache;
 
 	final BlockingFetchQueues< Callable< ? > > fetchQueue;
 
@@ -121,7 +121,7 @@ public class WeakRefVolatileCache< K, V > implements VolatileCache< K, V >
 	}
 
 	public WeakRefVolatileCache(
-			final Cache< K, V > backingCache,
+			final LoaderCache< K, V > backingCache,
 			final BlockingFetchQueues< Callable< ? > > fetchQueue )
 	{
 		this.fetchQueue = fetchQueue;

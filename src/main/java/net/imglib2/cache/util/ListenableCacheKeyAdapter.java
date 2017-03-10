@@ -3,12 +3,12 @@ package net.imglib2.cache.util;
 import java.util.concurrent.ExecutionException;
 
 import net.imglib2.cache.CacheLoader;
-import net.imglib2.cache.ListenableCache;
-import net.imglib2.cache.RemovalListener;
+import net.imglib2.cache.LoaderRemoverCache;
+import net.imglib2.cache.CacheRemover;
 
-public class ListenableCacheKeyAdapter< K, L, V, C extends ListenableCache< L, V > >
+public class ListenableCacheKeyAdapter< K, L, V, C extends LoaderRemoverCache< L, V > >
 		extends AbstractCacheKeyAdapter< K, L, V, C >
-		implements ListenableCache< K, V >
+		implements LoaderRemoverCache< K, V >
 {
 	public ListenableCacheKeyAdapter( final C cache, final KeyBimap< K, L > keymap )
 	{
@@ -16,7 +16,7 @@ public class ListenableCacheKeyAdapter< K, L, V, C extends ListenableCache< L, V
 	}
 
 	@Override
-	public V get( final K key, final CacheLoader< ? super K, ? extends V > loader, final RemovalListener< ? super K, ? super V > remover ) throws ExecutionException
+	public V get( final K key, final CacheLoader< ? super K, ? extends V > loader, final CacheRemover< ? super K, ? super V > remover ) throws ExecutionException
 	{
 		return cache.get(
 				keymap.getTarget( key ),

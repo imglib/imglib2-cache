@@ -14,14 +14,14 @@ import java.util.ArrayList;
 
 import net.imglib2.cache.CacheLoader;
 import net.imglib2.cache.IoSync;
-import net.imglib2.cache.RemovalListener;
+import net.imglib2.cache.CacheRemover;
 import net.imglib2.img.cell.Cell;
 import net.imglib2.img.cell.CellGrid;
 import net.imglib2.util.Fraction;
 import net.imglib2.util.Intervals;
 
 /**
- * Basic {@link RemovalListener}/{@link CacheLoader} for writing/reading cells
+ * Basic {@link CacheRemover}/{@link CacheLoader} for writing/reading cells
  * to a disk cache. Currently blocks are simply written as flat files to a
  * specified directory. {@link #createTempDirectory(String, boolean)} can be
  * used to create a temporary directory that will be automatically removed when
@@ -40,7 +40,7 @@ import net.imglib2.util.Intervals;
  *
  * @author Tobias Pietzsch
  */
-public class DiskCellCache< A > implements RemovalListener< Long, Cell< A > >, CacheLoader< Long, Cell< A > >
+public class DiskCellCache< A > implements CacheRemover< Long, Cell< A > >, CacheLoader< Long, Cell< A > >
 {
 	private final Path blockcache;
 

@@ -12,11 +12,11 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 
 import net.imglib2.cache.CacheLoader;
-import net.imglib2.cache.ListenableCache;
-import net.imglib2.cache.RemovalListener;
+import net.imglib2.cache.LoaderRemoverCache;
+import net.imglib2.cache.CacheRemover;
 
 /**
- * A {@link ListenableCache} that is backed by a cache with strong references to
+ * A {@link LoaderRemoverCache} that is backed by a cache with strong references to
  * values. At the moment the backing cache is we use is
  * <a href="https://github.com/ben-manes/caffeine">caffeine</a>. We can easily
  * add Guava, cache2k, etc options later.
@@ -42,7 +42,7 @@ import net.imglib2.cache.RemovalListener;
  *
  * @author Tobias Pietzsch
  */
-public class GuardedStrongRefListenableCache< K, V > implements ListenableCache< K, V >
+public class GuardedStrongRefListenableCache< K, V > implements LoaderRemoverCache< K, V >
 {
 	final ConcurrentHashMap< K, Entry > map = new ConcurrentHashMap<>();
 
@@ -96,7 +96,7 @@ public class GuardedStrongRefListenableCache< K, V > implements ListenableCache<
 
 		private CachePhantomReference< V > phantomRef;
 
-		private RemovalListener< ? super K, ? super V > remover;
+		private CacheRemover< ? super K, ? super V > remover;
 
 		boolean loaded;
 
@@ -120,7 +120,7 @@ public class GuardedStrongRefListenableCache< K, V > implements ListenableCache<
 			this.ref = new WeakReference<>( value );
 		}
 
-		public void setValue( final V value, final RemovalListener< ? super K, ? super V > remover )
+		public void setValue( final V value, final CacheRemover< ? super K, ? super V > remover )
 		{
 			this.loaded = true;
 			this.ref = new WeakReference<>( value );
@@ -159,7 +159,7 @@ public class GuardedStrongRefListenableCache< K, V > implements ListenableCache<
 	}
 
 	@Override
-	public V get( final K key, final CacheLoader< ? super K, ? extends V > loader, final RemovalListener< ? super K, ? super V > remover ) throws ExecutionException
+	public V get( final K key, final CacheLoader< ? super K, ? extends V > loader, final CacheRemover< ? super K, ? super V > remover ) throws ExecutionException
 	{
 		cleanUp();
 		V value = strongCache.getIfPresent( key );
@@ -219,8 +219,8 @@ public class GuardedStrongRefListenableCache< K, V > implements ListenableCache<
 
 	/**
 	 * Remove entries from the cache whose references have been
-	 * garbage-collected. The {@link RemovalListener} (specified in
-	 * {@link #get(Object, CacheLoader, RemovalListener)}), is notified for each
+	 * garbage-collected. The {@link CacheRemover} (specified in
+	 * {@link #get(Object, CacheLoader, CacheRemover)}), is notified for each
 	 * removed entry.
 	 */
 	public void cleanUp()

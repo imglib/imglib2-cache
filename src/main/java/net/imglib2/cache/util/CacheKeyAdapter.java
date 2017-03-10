@@ -2,12 +2,12 @@ package net.imglib2.cache.util;
 
 import java.util.concurrent.ExecutionException;
 
-import net.imglib2.cache.Cache;
+import net.imglib2.cache.LoaderCache;
 import net.imglib2.cache.CacheLoader;
 
-public class CacheKeyAdapter< K, L, V, C extends Cache< L, V > >
+public class CacheKeyAdapter< K, L, V, C extends LoaderCache< L, V > >
 		extends AbstractCacheKeyAdapter< K, L, V, C >
-		implements Cache< K, V >
+		implements LoaderCache< K, V >
 {
 	public CacheKeyAdapter( final C cache, final KeyBimap< K, L > keymap )
 	{

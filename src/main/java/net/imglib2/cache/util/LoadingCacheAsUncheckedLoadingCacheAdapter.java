@@ -2,14 +2,14 @@ package net.imglib2.cache.util;
 
 import java.util.concurrent.ExecutionException;
 
-import net.imglib2.cache.LoadingCache;
-import net.imglib2.cache.UncheckedLoadingCache;
+import net.imglib2.cache.Cache;
+import net.imglib2.cache.UncheckedCache;
 
-public class LoadingCacheAsUncheckedLoadingCacheAdapter< K, V > implements UncheckedLoadingCache< K, V >
+public class LoadingCacheAsUncheckedLoadingCacheAdapter< K, V > implements UncheckedCache< K, V >
 {
-	private final LoadingCache< K, V > cache;
+	private final Cache< K, V > cache;
 
-	public LoadingCacheAsUncheckedLoadingCacheAdapter( final LoadingCache< K, V > cache )
+	public LoadingCacheAsUncheckedLoadingCacheAdapter( final Cache< K, V > cache )
 	{
 		this.cache = cache;
 	}

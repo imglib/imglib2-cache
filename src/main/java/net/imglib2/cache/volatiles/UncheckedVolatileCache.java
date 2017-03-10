@@ -1,6 +1,6 @@
 package net.imglib2.cache.volatiles;
 
-public interface UncheckedVolatileCache< K, V > extends AbstractVolatileCache< K, V >
+public interface UncheckedVolatileCache< K, V > extends AbstractUncheckedVolatileCache< K, V >
 {
-	V get( K key, VolatileCacheLoader< ? super K, ? extends V > loader, CacheHints cacheHints );
+	V get( K key, CacheHints cacheHints );
 }

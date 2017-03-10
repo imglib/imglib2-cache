@@ -2,15 +2,15 @@ package net.imglib2.cache;
 
 import java.util.concurrent.ExecutionException;
 
-import net.imglib2.cache.util.CacheAsLoadingCacheAdapter;
+import net.imglib2.cache.util.LoadingCacheAsUncheckedLoadingCacheAdapter;
 
-public interface Cache< K, V > extends AbstractCache< K, V >
+public interface Cache< K, V > extends AbstractCache< K, V >, CacheLoader< K, V >
 {
-	V get( K key, CacheLoader< ? super K, ? extends V > loader ) throws ExecutionException;
+	@Override
+	V get( K key ) throws ExecutionException;
 
-	// TODO: add static Caches methods to Cache as interfaces? like this:
-	public default LoadingCache< K, V > withLoader( final CacheLoader< K, V > loader )
+	public default UncheckedCache< K, V > unchecked()
 	{
-		return new CacheAsLoadingCacheAdapter<>( this, loader );
+		return new LoadingCacheAsUncheckedLoadingCacheAdapter<>( this );
 	}
 }

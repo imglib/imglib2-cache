@@ -2,17 +2,17 @@ package net.imglib2.cache.util;
 
 import java.util.concurrent.ExecutionException;
 
-import net.imglib2.cache.Cache;
+import net.imglib2.cache.LoaderCache;
 import net.imglib2.cache.CacheLoader;
-import net.imglib2.cache.LoadingCache;
+import net.imglib2.cache.Cache;
 
-public class CacheAsLoadingCacheAdapter< K, V > implements LoadingCache< K, V >
+public class CacheAsLoadingCacheAdapter< K, V > implements Cache< K, V >
 {
-	private final Cache< K, V > cache;
+	private final LoaderCache< K, V > cache;
 
 	private final CacheLoader< K, V > loader;
 
-	public CacheAsLoadingCacheAdapter( final Cache< K, V > cache, final CacheLoader< K, V > loader )
+	public CacheAsLoadingCacheAdapter( final LoaderCache< K, V > cache, final CacheLoader< K, V > loader )
 	{
 		this.cache = cache;
 		this.loader = loader;

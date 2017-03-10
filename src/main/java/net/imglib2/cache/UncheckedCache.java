@@ -1,6 +1,7 @@
 package net.imglib2.cache;
 
-public interface UncheckedCache< K, V > extends AbstractCache< K, V >
+public interface UncheckedCache< K, V > extends AbstractCache< K, V >, CacheLoader< K, V >
 {
-	V get( K key, CacheLoader< ? super K, ? extends V > loader );
+	@Override
+	V get( K key );
 }

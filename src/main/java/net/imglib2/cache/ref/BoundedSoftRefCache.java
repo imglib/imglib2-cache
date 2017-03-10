@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 
-import net.imglib2.cache.Cache;
+import net.imglib2.cache.LoaderCache;
 import net.imglib2.cache.CacheLoader;
 
 /**
@@ -18,13 +18,13 @@ import net.imglib2.cache.CacheLoader;
  *
  * @author Tobias Pietzsch &lt;tobias.pietzsch@gmail.com&gt;
  */
-public class BoundedSoftRefCache< K, V > implements Cache< K, V >
+public class BoundedSoftRefCache< K, V > implements LoaderCache< K, V >
 {
-	private final Cache< K, V > cache;
+	private final LoaderCache< K, V > cache;
 
 	private final BoundedSoftRefCache< K, V >.SoftRefs softRefs;
 
-	public BoundedSoftRefCache( final int maxSoftRefs, final Cache< K, V > cache )
+	public BoundedSoftRefCache( final int maxSoftRefs, final LoaderCache< K, V > cache )
 	{
 		this.cache = cache;
 		this.softRefs = new SoftRefs( maxSoftRefs );

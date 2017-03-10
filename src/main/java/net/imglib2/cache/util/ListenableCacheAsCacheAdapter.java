@@ -2,18 +2,18 @@ package net.imglib2.cache.util;
 
 import java.util.concurrent.ExecutionException;
 
-import net.imglib2.cache.Cache;
+import net.imglib2.cache.LoaderCache;
 import net.imglib2.cache.CacheLoader;
-import net.imglib2.cache.ListenableCache;
-import net.imglib2.cache.RemovalListener;
+import net.imglib2.cache.LoaderRemoverCache;
+import net.imglib2.cache.CacheRemover;
 
-public class ListenableCacheAsCacheAdapter< K, V > implements Cache< K, V >
+public class ListenableCacheAsCacheAdapter< K, V > implements LoaderCache< K, V >
 {
-	private final ListenableCache< K, V > cache;
+	private final LoaderRemoverCache< K, V > cache;
 
-	private final RemovalListener< K, V > remover;
+	private final CacheRemover< K, V > remover;
 
-	public ListenableCacheAsCacheAdapter( final ListenableCache< K, V > cache, final RemovalListener< K, V > remover )
+	public ListenableCacheAsCacheAdapter( final LoaderRemoverCache< K, V > cache, final CacheRemover< K, V > remover )
 	{
 		this.cache = cache;
 		this.remover = remover;

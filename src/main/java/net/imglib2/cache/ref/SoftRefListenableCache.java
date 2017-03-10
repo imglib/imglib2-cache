@@ -9,8 +9,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 
 import net.imglib2.cache.CacheLoader;
-import net.imglib2.cache.ListenableCache;
-import net.imglib2.cache.RemovalListener;
+import net.imglib2.cache.LoaderRemoverCache;
+import net.imglib2.cache.CacheRemover;
 
 /**
  * TODO: Consider running periodically calling {@link #processRemovalQueue()}
@@ -24,7 +24,7 @@ import net.imglib2.cache.RemovalListener;
  *
  * @author Tobias Pietzsch &lt;tobias.pietzsch@gmail.com&gt;
  */
-public class SoftRefListenableCache< K, V > implements ListenableCache< K, V >
+public class SoftRefListenableCache< K, V > implements LoaderRemoverCache< K, V >
 {
 	final ConcurrentHashMap< K, Entry > map = new ConcurrentHashMap<>();
 
@@ -76,7 +76,7 @@ public class SoftRefListenableCache< K, V > implements ListenableCache< K, V >
 
 		private CachePhantomReference< V > phantomRef;
 
-		private RemovalListener< ? super K, ? super V > remover;
+		private CacheRemover< ? super K, ? super V > remover;
 
 		boolean loaded;
 
@@ -100,7 +100,7 @@ public class SoftRefListenableCache< K, V > implements ListenableCache< K, V >
 			this.ref = new SoftReference<>( value );
 		}
 
-		public void setValue( final V value, final RemovalListener< ? super K, ? super V > remover )
+		public void setValue( final V value, final CacheRemover< ? super K, ? super V > remover )
 		{
 			this.loaded = true;
 			this.ref = new SoftReference<>( value );
@@ -131,7 +131,7 @@ public class SoftRefListenableCache< K, V > implements ListenableCache< K, V >
 	}
 
 	@Override
-	public V get( final K key, final CacheLoader< ? super K, ? extends V > loader, final RemovalListener< ? super K, ? super V > remover ) throws ExecutionException
+	public V get( final K key, final CacheLoader< ? super K, ? extends V > loader, final CacheRemover< ? super K, ? super V > remover ) throws ExecutionException
 	{
 		cleanUp();
 		final Entry entry = map.computeIfAbsent( key, ( k ) -> new Entry( k ) );
@@ -187,8 +187,8 @@ public class SoftRefListenableCache< K, V > implements ListenableCache< K, V >
 
 	/**
 	 * Remove entries from the cache whose references have been
-	 * garbage-collected. The {@link RemovalListener} (specified in
-	 * {@link #get(Object, CacheLoader, RemovalListener)}), is notified for each
+	 * garbage-collected. The {@link CacheRemover} (specified in
+	 * {@link #get(Object, CacheLoader, CacheRemover)}), is notified for each
 	 * removed entry.
 	 */
 	public void cleanUp()

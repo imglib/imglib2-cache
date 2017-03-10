@@ -50,8 +50,8 @@ import net.imglib2.Dirty;
 import net.imglib2.RandomAccessible;
 import net.imglib2.cache.CacheLoader;
 import net.imglib2.cache.IoSync;
-import net.imglib2.cache.ListenableCache;
-import net.imglib2.cache.UncheckedLoadingCache;
+import net.imglib2.cache.LoaderRemoverCache;
+import net.imglib2.cache.UncheckedCache;
 import net.imglib2.cache.ref.GuardedStrongRefListenableCache;
 import net.imglib2.cache.ref.SoftRefListenableCache;
 import net.imglib2.exception.IncompatibleTypeException;
@@ -262,7 +262,7 @@ public class DiskCachedCellImgFactory< T extends NativeType< T > > extends Nativ
 				options.numIoThreads(),
 				options.maxIoQueueSize() );
 
-		ListenableCache< Long, Cell< A > > listenableCache;
+		LoaderRemoverCache< Long, Cell< A > > listenableCache;
 		switch ( options.cacheType() )
 		{
 		case BOUNDED:
@@ -274,7 +274,7 @@ public class DiskCachedCellImgFactory< T extends NativeType< T > > extends Nativ
 			break;
 		}
 
-		final UncheckedLoadingCache< Long, Cell< A > > cache = listenableCache
+		final UncheckedCache< Long, Cell< A > > cache = listenableCache
 				.withRemovalListener( iosync )
 				.withLoader( iosync )
 				.unchecked();
