@@ -275,7 +275,7 @@ public class DiskCachedCellImgFactory< T extends NativeType< T > > extends Nativ
 		}
 
 		final UncheckedCache< Long, Cell< A > > cache = listenableCache
-				.withRemovalListener( iosync )
+				.withRemover( iosync )
 				.withLoader( iosync )
 				.unchecked();
 

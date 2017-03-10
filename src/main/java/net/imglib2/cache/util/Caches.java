@@ -51,7 +51,7 @@ public class Caches
 	}
 
 	public static < K, V > LoaderCache< K, V >
-			withRemovalListener( final LoaderRemoverCache< K, V > cache, final CacheRemover< K, V > removalListener )
+			withRemover( final LoaderRemoverCache< K, V > cache, final CacheRemover< K, V > removalListener )
 	{
 		return new LoaderRemoverCacheAsLoaderCacheAdapter<>( cache, removalListener );
 	}
