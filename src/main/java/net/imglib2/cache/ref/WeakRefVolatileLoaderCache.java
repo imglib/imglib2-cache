@@ -13,8 +13,8 @@ import net.imglib2.cache.iotiming.IoTimeBudget;
 import net.imglib2.cache.queue.BlockingFetchQueues;
 import net.imglib2.cache.queue.FetcherThreads;
 import net.imglib2.cache.volatiles.CacheHints;
-import net.imglib2.cache.volatiles.VolatileLoaderCache;
 import net.imglib2.cache.volatiles.VolatileCacheLoader;
+import net.imglib2.cache.volatiles.VolatileLoaderCache;
 
 public class WeakRefVolatileLoaderCache< K, V > implements VolatileLoaderCache< K, V >
 {
@@ -75,11 +75,6 @@ public class WeakRefVolatileLoaderCache< K, V > implements VolatileLoaderCache< 
 			this.loader = loader;
 			this.ref = new CacheWeakReference( null );
 			this.enqueueFrame = -1;
-		}
-
-		public V getValue()
-		{
-			return ref.get();
 		}
 
 		public void setInvalid( final V value )
@@ -221,15 +216,16 @@ public class WeakRefVolatileLoaderCache< K, V > implements VolatileLoaderCache< 
 	{
 		synchronized( entry )
 		{
-			V v = entry.getValue();
-			if ( v != null )
-				return v;
-
-			if ( entry.ref.loaded != NOTLOADED )
+			final CacheWeakReference ref = entry.ref;
+			V v = ref.get();
+			if ( v == null && ref.loaded != NOTLOADED )
 			{
 				map.remove( entry.key, entry );
 				return null;
 			}
+
+			if ( ref.loaded == VALID )
+				return v;
 
 			final V vl = backingCache.getIfPresent( entry.key );
 			if ( vl != null )
@@ -238,8 +234,12 @@ public class WeakRefVolatileLoaderCache< K, V > implements VolatileLoaderCache< 
 				return vl;
 			}
 
-			v = entry.tryCreateInvalid();
-			entry.setInvalid( v );
+			if ( ref.loaded == NOTLOADED )
+			{
+				v = entry.tryCreateInvalid();
+				entry.setInvalid( v );
+			}
+
 			return v;
 		}
 	}
