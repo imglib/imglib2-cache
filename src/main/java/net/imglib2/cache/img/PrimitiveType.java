@@ -34,7 +34,8 @@ public enum PrimitiveType
 	INT,
 	LONG,
 	FLOAT,
-	DOUBLE;
+	DOUBLE,
+	UNDEFINED;
 
 	/**
 	 * Get the {@link PrimitiveType} that backs the given type.
@@ -45,7 +46,7 @@ public enum PrimitiveType
 	 */
 	public static < T extends NativeType< T > > PrimitiveType forNativeType( final T type )
 	{
-		final AtomicReference< PrimitiveType > primitiveType = new AtomicReference<>();
+		final AtomicReference< PrimitiveType > primitiveType = new AtomicReference<>( UNDEFINED );
 		try
 		{
 			type.createSuitableNativeImg( new NativeImgFactory< T >()
