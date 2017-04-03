@@ -91,59 +91,59 @@ public interface AccessIo< A >
 		case BYTE:
 			return dirty
 					? ( volatil
-							? (net.imglib2.cache.img.AccessIo< A > ) dirtyVolatileByteArrayIo
-							: (net.imglib2.cache.img.AccessIo< A > ) dirtyByteArrayIo )
+							? ( AccessIo< A > ) dirtyVolatileByteArrayIo
+							: ( AccessIo< A > ) dirtyByteArrayIo )
 					: ( volatil
-							? (net.imglib2.cache.img.AccessIo< A > ) volatileByteArrayIo
-							: (net.imglib2.cache.img.AccessIo< A > ) byteArrayIo );
+							? ( AccessIo< A > ) volatileByteArrayIo
+							: ( AccessIo< A > ) byteArrayIo );
 		case CHAR:
 			return dirty
 					? ( volatil
-							? (net.imglib2.cache.img.AccessIo< A > ) dirtyVolatileCharArrayIo
-							: (net.imglib2.cache.img.AccessIo< A > ) dirtyCharArrayIo )
+							? ( AccessIo< A > ) dirtyVolatileCharArrayIo
+							: ( AccessIo< A > ) dirtyCharArrayIo )
 					: ( volatil
-							? (net.imglib2.cache.img.AccessIo< A > ) volatileCharArrayIo
-							: (net.imglib2.cache.img.AccessIo< A > ) charArrayIo );
+							? ( AccessIo< A > ) volatileCharArrayIo
+							: ( AccessIo< A > ) charArrayIo );
 		case DOUBLE:
 			return dirty
 					? ( volatil
-							? (net.imglib2.cache.img.AccessIo< A > ) dirtyVolatileDoubleArrayIo
-							: (net.imglib2.cache.img.AccessIo< A > ) dirtyDoubleArrayIo )
+							? ( AccessIo< A > ) dirtyVolatileDoubleArrayIo
+							: ( AccessIo< A > ) dirtyDoubleArrayIo )
 					: ( volatil
-							? (net.imglib2.cache.img.AccessIo< A > ) volatileDoubleArrayIo
-							: (net.imglib2.cache.img.AccessIo< A > ) doubleArrayIo );
+							? ( AccessIo< A > ) volatileDoubleArrayIo
+							: ( AccessIo< A > ) doubleArrayIo );
 		case FLOAT:
 			return dirty
 					? ( volatil
-							? (net.imglib2.cache.img.AccessIo< A > ) dirtyVolatileFloatArrayIo
-							: (net.imglib2.cache.img.AccessIo< A > ) dirtyFloatArrayIo )
+							? ( AccessIo< A > ) dirtyVolatileFloatArrayIo
+							: ( AccessIo< A > ) dirtyFloatArrayIo )
 					: ( volatil
-							? (net.imglib2.cache.img.AccessIo< A > ) volatileFloatArrayIo
-							: (net.imglib2.cache.img.AccessIo< A > ) floatArrayIo );
+							? ( AccessIo< A > ) volatileFloatArrayIo
+							: ( AccessIo< A > ) floatArrayIo );
 		case INT:
 			return dirty
 					? ( volatil
-							? (net.imglib2.cache.img.AccessIo< A > ) dirtyVolatileIntArrayIo
-							: (net.imglib2.cache.img.AccessIo< A > ) dirtyIntArrayIo )
+							? ( AccessIo< A > ) dirtyVolatileIntArrayIo
+							: ( AccessIo< A > ) dirtyIntArrayIo )
 					: ( volatil
-							? (net.imglib2.cache.img.AccessIo< A > ) volatileIntArrayIo
-							: (net.imglib2.cache.img.AccessIo< A > ) intArrayIo );
+							? ( AccessIo< A > ) volatileIntArrayIo
+							: ( AccessIo< A > ) intArrayIo );
 		case LONG:
 			return dirty
 					? ( volatil
-							? (net.imglib2.cache.img.AccessIo< A > ) dirtyVolatileLongArrayIo
-							: (net.imglib2.cache.img.AccessIo< A > ) dirtyLongArrayIo )
+							? ( AccessIo< A > ) dirtyVolatileLongArrayIo
+							: ( AccessIo< A > ) dirtyLongArrayIo )
 					: ( volatil
-							? (net.imglib2.cache.img.AccessIo< A > ) volatileLongArrayIo
-							: (net.imglib2.cache.img.AccessIo< A > ) longArrayIo );
+							? ( AccessIo< A > ) volatileLongArrayIo
+							: ( AccessIo< A > ) longArrayIo );
 		case SHORT:
 			return dirty
 					? ( volatil
-							? (net.imglib2.cache.img.AccessIo< A > ) dirtyVolatileShortArrayIo
-							: (net.imglib2.cache.img.AccessIo< A > ) dirtyShortArrayIo )
+							? ( AccessIo< A > ) dirtyVolatileShortArrayIo
+							: ( AccessIo< A > ) dirtyShortArrayIo )
 					: ( volatil
-							? (net.imglib2.cache.img.AccessIo< A > ) volatileShortArrayIo
-							: (net.imglib2.cache.img.AccessIo< A > ) shortArrayIo );
+							? ( AccessIo< A > ) volatileShortArrayIo
+							: ( AccessIo< A > ) shortArrayIo );
 		default:
 			return null;
 		}
