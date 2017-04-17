@@ -8,20 +8,14 @@ import net.imglib2.cache.CacheLoader;
 import net.imglib2.img.cell.Cell;
 import net.imglib2.img.cell.CellGrid;
 
-public class FunctorLoader< A > implements CacheLoader< Long, Cell< A > >
+public class IntervalKeyLoaderAsLongKeyLoader< A > implements CacheLoader< Long, Cell< A > >
 {
-
-	public interface Functor< T, R > {
-
-		public R call( T t ) throws Exception;
-
-	}
 
 	private final CellGrid grid;
 
-	private final Functor< Interval, A > functor;
+	private final CacheLoader< Interval, A > functor;
 
-	public FunctorLoader( final CellGrid grid, final Functor< Interval, A > functor )
+	public IntervalKeyLoaderAsLongKeyLoader( final CellGrid grid, final CacheLoader< Interval, A > functor )
 	{
 		this.grid = grid;
 		this.functor = functor;
@@ -37,7 +31,7 @@ public class FunctorLoader< A > implements CacheLoader< Long, Cell< A > >
 		final int[] cellDims = new int[ n ];
 		grid.getCellDimensions( index, cellMin, cellDims );
 		final long[] cellMax = IntStream.range( 0, n ).mapToLong( d -> cellMin[ d ] + cellDims[ d ] - 1 ).toArray();
-		final A result = functor.call( new FinalInterval( cellMin, cellMax ) );
+		final A result = functor.get( new FinalInterval( cellMin, cellMax ) );
 		return new Cell<>( cellDims, cellMin, result );
 	}
 
