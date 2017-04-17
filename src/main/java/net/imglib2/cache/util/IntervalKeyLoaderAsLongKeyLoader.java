@@ -66,12 +66,12 @@ public class IntervalKeyLoaderAsLongKeyLoader< A > implements CacheLoader< Long,
 
 	private final CellGrid grid;
 
-	private final CacheLoader< Interval, A > functor;
+	private final CacheLoader< Interval, A > intervalKeyLoader;
 
-	public IntervalKeyLoaderAsLongKeyLoader( final CellGrid grid, final CacheLoader< Interval, A > functor )
+	public IntervalKeyLoaderAsLongKeyLoader( final CellGrid grid, final CacheLoader< Interval, A > intervalKeyLoader )
 	{
 		this.grid = grid;
-		this.functor = functor;
+		this.intervalKeyLoader = intervalKeyLoader;
 	}
 
 	@Override
@@ -84,7 +84,7 @@ public class IntervalKeyLoaderAsLongKeyLoader< A > implements CacheLoader< Long,
 		final int[] cellDims = new int[ n ];
 		grid.getCellDimensions( index, cellMin, cellDims );
 		final long[] cellMax = IntStream.range( 0, n ).mapToLong( d -> cellMin[ d ] + cellDims[ d ] - 1 ).toArray();
-		final A result = functor.get( new FinalInterval( cellMin, cellMax ) );
+		final A result = intervalKeyLoader.get( new FinalInterval( cellMin, cellMax ) );
 		return new Cell<>( cellDims, cellMin, result );
 	}
 
