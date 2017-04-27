@@ -42,11 +42,10 @@ import java.util.function.IntFunction;
  * A set of threads that load data. Each thread does the following in a loop:
  * <ol>
  * <li>Take the next {@code key} from a queue.</li>
- * <li>Try {@link Callable< ? >#load(Object) loading} the key's data (retry until that
- * succeeds).</li>
+ * <li>Try loading the key's data (retry until that succeeds).</li>
  * </ol>
- * {@link FetcherThreads} are employed by {@link LoadingVolatileCache} to
- * asynchronously load {@link VolatileCacheValue}s.
+ * {@link FetcherThreads} are employed by the cache to
+ * asynchronously load values.
  *
  * <p>
  * TODO Add shutdown() method.
@@ -63,7 +62,6 @@ public class FetcherThreads
 	 * Fetcher threads are named {@code Fetcher-0} ... {@code Fetcher-n}.
 	 *
 	 * @param queue the queue from which request keys are taken.
-	 * @param loader loads data associated with keys.
 	 * @param numFetcherThreads how many parallel fetcher threads to start.
 	 */
 	public FetcherThreads(
@@ -77,7 +75,6 @@ public class FetcherThreads
 	 * Create (and start) a set of fetcher threads.
 	 *
 	 * @param queue the queue from which request keys are taken.
-	 * @param loader loads data associated with keys.
 	 * @param numFetcherThreads how many parallel fetcher threads to start.
 	 * @param threadIndexToName a function for naming fetcher threads (takes an index and returns a name).
 	 */

@@ -29,6 +29,8 @@
  */
 package net.imglib2.cache.volatiles;
 
+import net.imglib2.cache.iotiming.IoTimeBudget;
+
 // import bdv.cache.iotiming.IoTimeBudget;
 
 /**

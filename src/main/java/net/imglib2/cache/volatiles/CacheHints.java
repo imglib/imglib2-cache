@@ -29,10 +29,12 @@
  */
 package net.imglib2.cache.volatiles;
 
+import net.imglib2.cache.queue.BlockingFetchQueues;
+
 // import bdv.cache.util.BlockingFetchQueues;
 
 /**
- * Hints to a {@link LoadingVolatileCache} on how to handle data requests.
+ * Hints to a cache on how to handle data requests.
  * Consists of the {@link LoadingStrategy} for entries, the priority with which
  * to enqueue entries to the {@link BlockingFetchQueues} (if they are enqueued)
  * and whether they should be enqueued to the front (most recent requests are
@@ -40,7 +42,7 @@ package net.imglib2.cache.volatiles;
  * priority level.
  * <p>
  * The number of priority levels <em>n</em> is fixed when the
- * {@link LoadingVolatileCache} is constructed. Priorities are consecutive
+ * cache is constructed. Priorities are consecutive
  * integers <em>0 ... n-1</em>, where 0 is the highest priority.
  * <p>
  * In BigDataViewer, priorities usually correspond to resolution levels in some

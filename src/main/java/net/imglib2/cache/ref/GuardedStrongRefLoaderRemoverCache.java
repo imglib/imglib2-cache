@@ -28,7 +28,7 @@ import net.imglib2.cache.CacheRemover;
  * conceptually by the application, not by the cache map).
  * </p>
  * <p>
- * TODO: Consider running periodically calling {@link #processRemovalQueue()}
+ * TODO: Consider running periodically processing the removal queue
  * from a background thread. Otherwise, freeing memory depends on the cache
  * being regularly used. (This is different for PhantomRefs than for
  * Weak/SoftRefs. PhantomRefs must be explicitly clear()ed before the referent
