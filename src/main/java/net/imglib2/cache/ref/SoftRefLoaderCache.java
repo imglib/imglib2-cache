@@ -5,8 +5,8 @@ import java.lang.ref.SoftReference;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 
-import net.imglib2.cache.LoaderCache;
 import net.imglib2.cache.CacheLoader;
+import net.imglib2.cache.LoaderCache;
 
 public class SoftRefLoaderCache< K, V > implements LoaderCache< K, V >
 {
@@ -119,8 +119,7 @@ public class SoftRefLoaderCache< K, V > implements LoaderCache< K, V >
 	@Override
 	public void invalidateAll()
 	{
-		// TODO
-		throw new UnsupportedOperationException( "not implemented yet" );
+		map.clear();
 	}
 
 	/**
