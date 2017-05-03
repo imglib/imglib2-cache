@@ -44,27 +44,24 @@ import net.imglib2.img.cell.Cell;
 import net.imglib2.img.cell.CellGrid;
 
 /**
+ * This {@link CacheLoader} maps a {@link Long} key into an {@link Interval}
+ * based on a {@link CellGrid}. The creation of an appropriate <code>A</code> is
+ * then delegated to a {@link CacheLoader} that generates an <code>A</code> from
+ * an interval.
  *
- * @author Philipp Hanslovsky
- *
- *         This {@link CacheLoader} maps a {@link Long} key into an
- *         {@link Interval} based on a {@link CellGrid}. The creation of an
- *         appropriate <code>A</code> is then delegated to a {@link CacheLoader}
- *         that generates an <code>A</code> from an interval.
- *
- *         Implementing a {@link CacheLoader} that fills {@link Cell}s of an
- *         {@link AbstractCellImg} requires a lot of boilerplate code for
- *         mapping the {@link Long} index of a {@link Cell} into the
- *         {@link Interval} that is backed by the {@link Cell}. The
- *         {@link IntervalKeyLoaderAsLongKeyLoader} generates this mapping and
- *         reduces the amount of boilerplate code for the caller.
+ * Implementing a {@link CacheLoader} that fills {@link Cell}s of an
+ * {@link AbstractCellImg} requires a lot of boilerplate code for mapping the
+ * {@link Long} index of a {@link Cell} into the {@link Interval} that is backed
+ * by the {@link Cell}. The {@link IntervalKeyLoaderAsLongKeyLoader} generates
+ * this mapping and reduces the amount of boilerplate code for the caller.
  *
  * @param <A>
  *            Type of pixel store for {@link Cell}.
+ *
+ * @author Philipp Hanslovsky
  */
 public class IntervalKeyLoaderAsLongKeyLoader< A > implements CacheLoader< Long, Cell< A > >
 {
-
 	private final CellGrid grid;
 
 	private final Function< Interval, A > intervalKeyLoader;
@@ -88,5 +85,4 @@ public class IntervalKeyLoaderAsLongKeyLoader< A > implements CacheLoader< Long,
 		final A result = intervalKeyLoader.apply( new FinalInterval( cellMin, cellMax ) );
 		return new Cell<>( cellDims, cellMin, result );
 	}
-
 }
