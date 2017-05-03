@@ -13,11 +13,10 @@ import net.imglib2.cache.LoaderRemoverCache;
 import net.imglib2.cache.CacheRemover;
 
 /**
- * TODO: Consider running periodically processing the removal queue
- * from a background thread. Otherwise, freeing memory depends on the cache
- * being regularly used. (This is different for PhantomRefs than for
- * Weak/SoftRefs. PhantomRefs must be explicitly clear()ed before the referent
- * is freed.)
+ * TODO: Consider periodically calling {@link #cleanUp()} from a background
+ * thread. Otherwise, freeing memory depends on the cache being regularly used.
+ * (This is different for PhantomRefs than for Weak/SoftRefs. PhantomRefs must
+ * be explicitly clear()ed before the referent is freed.)
  *
  * @param <K>
  * @param <V>
