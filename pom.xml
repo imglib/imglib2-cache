@@ -9,7 +9,7 @@
 	</parent>
 
 	<artifactId>imglib2-cache</artifactId>
-	<version>1.0.0-beta-5-SNAPSHOT</version>
+	<version>1.0.0-beta-5</version>
 
 	<name>ImgLib2 Cache Library</name>
 	<description>Cache interfaces and java.lang.ref based implementation.</description>
@@ -83,7 +83,7 @@
 	<scm>
 		<connection>scm:git:git://github.com/imglib/imglib2-cache</connection>
 		<developerConnection>scm:git:git@github.com:imglib/imglib2-cache</developerConnection>
-		<tag>HEAD</tag>
+		<tag>imglib2-cache-1.0.0-beta-5</tag>
 		<url>https://github.com/imglib/imglib2-cache</url>
 	</scm>
 	<issueManagement>
