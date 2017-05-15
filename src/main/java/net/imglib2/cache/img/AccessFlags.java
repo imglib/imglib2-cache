@@ -13,6 +13,44 @@ import net.imglib2.img.basictypeaccess.volatiles.VolatileAccess;
  */
 public enum AccessFlags
 {
-	DIRTY,
-	VOLATILE
+	DIRTY, VOLATILE;
+
+	public static AccessFlags[] of( final Object access )
+	{
+		final boolean dirtyAccesses = ( access instanceof Dirty );
+		final boolean volatileAccesses = ( access instanceof VolatileAccess );
+		return fromBooleansDirtyVolatile( dirtyAccesses, volatileAccesses );
+	}
+
+	public static AccessFlags[] fromBooleansDirtyVolatile( final boolean dirtyAccesses, final boolean volatileAccesses )
+	{
+		return dirtyAccesses
+				? ( volatileAccesses
+						? flags_DIRTY_VOLATILE
+						: flags_DIRTY )
+				: ( volatileAccesses
+						? flags_VOLATILE
+						: flags_NONE );
+	}
+
+	public static boolean isDirty( final AccessFlags[] flags )
+	{
+		for ( final AccessFlags flag : flags )
+			if ( flag == DIRTY )
+				return true;
+		return false;
+	}
+
+	public static boolean isVolatile( final AccessFlags[] flags )
+	{
+		for ( final AccessFlags flag : flags )
+			if ( flag == VOLATILE )
+				return true;
+		return false;
+	}
+
+	static AccessFlags[] flags_DIRTY_VOLATILE = new AccessFlags[] { DIRTY, VOLATILE };
+	static AccessFlags[] flags_DIRTY = new AccessFlags[] { DIRTY };
+	static AccessFlags[] flags_VOLATILE = new AccessFlags[] { VOLATILE };
+	static AccessFlags[] flags_NONE = new AccessFlags[] {};
 }

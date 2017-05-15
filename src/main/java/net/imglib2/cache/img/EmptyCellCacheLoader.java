@@ -1,7 +1,5 @@
 package net.imglib2.cache.img;
 
-import java.util.Arrays;
-
 import net.imglib2.cache.CacheLoader;
 import net.imglib2.img.basictypeaccess.array.ArrayDataAccess;
 import net.imglib2.img.basictypeaccess.array.ByteArray;
@@ -97,8 +95,8 @@ public class EmptyCellCacheLoader< A extends ArrayDataAccess< A > > implements C
 			final PrimitiveType primitiveType,
 			final AccessFlags ... flags )
 	{
-		final boolean dirty = Arrays.asList( flags ).contains( AccessFlags.DIRTY );
-		final boolean volatil = Arrays.asList( flags ).contains( AccessFlags.VOLATILE );
+		final boolean dirty = AccessFlags.isDirty( flags );
+		final boolean volatil = AccessFlags.isDirty( flags );
 		switch ( primitiveType )
 		{
 		case BYTE:
