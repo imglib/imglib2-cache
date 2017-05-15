@@ -69,6 +69,12 @@ public class DiskCachedCellImgOptions
 		return this;
 	}
 
+	public DiskCachedCellImgOptions volatileAccesses( final boolean volatil )
+	{
+		values.volatileAccesses = volatil;
+		return this;
+	}
+
 	/**
 	 * The specified number of threads is started to handle asynchronous writing
 	 * of values that are evicted from the memory cache.
@@ -204,6 +210,7 @@ public class DiskCachedCellImgOptions
 		{
 			return options()
 					.dirtyAccesses( dirtyAccesses )
+					.volatileAccesses( volatileAccesses )
 					.numIoThreads( numIoThreads )
 					.maxIoQueueSize( maxIoQueueSize )
 					.cacheType( cacheType )
@@ -211,6 +218,8 @@ public class DiskCachedCellImgOptions
 		}
 
 		private boolean dirtyAccesses = true;
+
+		private boolean volatileAccesses = true;
 
 		private int numIoThreads = 1;
 
@@ -225,6 +234,16 @@ public class DiskCachedCellImgOptions
 		public boolean dirtyAccesses()
 		{
 			return dirtyAccesses;
+		}
+
+		public boolean volatileAccesses()
+		{
+			return volatileAccesses;
+		}
+
+		public AccessFlags[] accessFlags()
+		{
+			return AccessFlags.fromBooleansDirtyVolatile( dirtyAccesses, volatileAccesses );
 		}
 
 		public int numIoThreads()
