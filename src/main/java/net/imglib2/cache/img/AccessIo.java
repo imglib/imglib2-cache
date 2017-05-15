@@ -7,7 +7,6 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 import java.nio.ShortBuffer;
-import java.util.Arrays;
 
 import net.imglib2.img.basictypeaccess.array.AbstractByteArray;
 import net.imglib2.img.basictypeaccess.array.AbstractCharArray;
@@ -84,8 +83,8 @@ public interface AccessIo< A >
 	@SuppressWarnings( "unchecked" )
 	public static < A > AccessIo< A > get( final PrimitiveType primitiveType, final AccessFlags ... flags )
 	{
-		final boolean dirty = Arrays.asList( flags ).contains( AccessFlags.DIRTY );
-		final boolean volatil = Arrays.asList( flags ).contains( AccessFlags.VOLATILE );
+		final boolean dirty = AccessFlags.isDirty( flags );
+		final boolean volatil = AccessFlags.isVolatile( flags );
 		switch ( primitiveType )
 		{
 		case BYTE:

@@ -1,7 +1,6 @@
 package net.imglib2.cache.img;
 
 import net.imglib2.cache.Cache;
-import net.imglib2.img.ImgFactory;
 import net.imglib2.img.cell.Cell;
 import net.imglib2.img.cell.CellGrid;
 import net.imglib2.img.cell.LazyCellImg;
@@ -19,24 +18,30 @@ import net.imglib2.util.Fraction;
  *
  * @author Tobias Pietzsch
  */
-public class DiskCachedCellImg< T extends NativeType< T >, A > extends CachedCellImg< T, A >
+public class CachedCellImg< T extends NativeType< T >, A > extends LazyCellImg< T, A >
 {
-	private final DiskCachedCellImgFactory< T > factory;
+	private final Cache< Long, Cell< A > > cache;
 
-	public DiskCachedCellImg(
-			final DiskCachedCellImgFactory< T > factory,
+	private final A accessType;
+
+	public CachedCellImg(
 			final CellGrid grid,
 			final Fraction entitiesPerPixel,
 			final Cache< Long, Cell< A > > cache,
 			final A accessType )
 	{
-		super( grid, entitiesPerPixel, cache, accessType );
-		this.factory = factory;
+		super( grid, entitiesPerPixel, cache.unchecked()::get );
+		this.cache = cache;
+		this.accessType = accessType;
 	}
 
-	@Override
-	public ImgFactory< T > factory()
+	public Cache< Long, Cell< A > > getCache()
 	{
-		return factory;
+		return cache;
+	}
+
+	public A getAccessType()
+	{
+		return accessType;
 	}
 }

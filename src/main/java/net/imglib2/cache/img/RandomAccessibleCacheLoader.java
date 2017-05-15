@@ -1,6 +1,5 @@
 package net.imglib2.cache.img;
 
-import java.util.Arrays;
 import java.util.function.Function;
 
 import net.imglib2.Cursor;
@@ -165,8 +164,8 @@ public class RandomAccessibleCacheLoader<
 			final AccessFlags... flags )
 	{
 		final PrimitiveType primitiveType = PrimitiveType.forNativeType( type );
-		final boolean dirty = Arrays.asList( flags ).contains( AccessFlags.DIRTY );
-		final boolean volatil = Arrays.asList( flags ).contains( AccessFlags.VOLATILE );
+		final boolean dirty = AccessFlags.isDirty( flags );
+		final boolean volatil = AccessFlags.isVolatile( flags );
 		switch ( primitiveType )
 		{
 		case BYTE:
