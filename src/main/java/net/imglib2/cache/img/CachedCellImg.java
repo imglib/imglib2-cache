@@ -35,6 +35,17 @@ public class CachedCellImg< T extends NativeType< T >, A > extends LazyCellImg< 
 		this.accessType = accessType;
 	}
 
+	public CachedCellImg(
+			final CellGrid grid,
+			final T type,
+			final Cache< Long, Cell< A > > cache,
+			final A accessType )
+	{
+		super( grid, type, cache.unchecked()::get );
+		this.cache = cache;
+		this.accessType = accessType;
+	}
+
 	public Cache< Long, Cell< A > > getCache()
 	{
 		return cache;
