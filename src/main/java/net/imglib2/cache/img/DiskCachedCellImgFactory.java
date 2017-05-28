@@ -116,7 +116,7 @@ public class DiskCachedCellImgFactory< T extends NativeType< T > > extends Nativ
 	private final ThreadLocal< CreateData > tlData = new ThreadLocal<>();
 
 	@SuppressWarnings( "unchecked" )
-	public < A > DiskCachedCellImg< T, A > create( final long[] dim, final T type, final CacheLoader< Long, Cell< A > > backingLoader )
+	public < A > DiskCachedCellImg< T, A > createWithCacheLoader( final long[] dim, final T type, final CacheLoader< Long, Cell< A > > backingLoader )
 	{
 		final CellGrid grid = createCellGrid( dim, type.getEntitiesPerPixel() );
 		try {
