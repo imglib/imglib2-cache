@@ -32,6 +32,7 @@ import java.lang.ref.SoftReference;
 
 import net.imglib2.Dirty;
 import net.imglib2.img.cell.CellImgFactory;
+import net.imglib2.util.Util;
 
 /**
  * Optional parameters for constructing a {@link DiskCachedCellImgFactory}.
@@ -40,7 +41,17 @@ import net.imglib2.img.cell.CellImgFactory;
  */
 public class DiskCachedCellImgOptions
 {
-	public final Values values = new Values();
+	public final Values values;
+
+	DiskCachedCellImgOptions( final Values values )
+	{
+		this.values = values;
+	}
+
+	public DiskCachedCellImgOptions()
+	{
+		this( new Values() );
+	}
 
 	/**
 	 * Create default {@link DiskCachedCellImgOptions}.
@@ -65,14 +76,12 @@ public class DiskCachedCellImgOptions
 	 */
 	public DiskCachedCellImgOptions dirtyAccesses( final boolean dirty )
 	{
-		values.dirtyAccesses = dirty;
-		return this;
+		return new DiskCachedCellImgOptions( values.copy().setDirtyAccesses( dirty ) );
 	}
 
 	public DiskCachedCellImgOptions volatileAccesses( final boolean volatil )
 	{
-		values.volatileAccesses = volatil;
-		return this;
+		return new DiskCachedCellImgOptions( values.copy().setVolatileAccesses( volatil ) );
 	}
 
 	/**
@@ -84,8 +93,7 @@ public class DiskCachedCellImgOptions
 	 */
 	public DiskCachedCellImgOptions numIoThreads( final int numIoThreads )
 	{
-		values.numIoThreads = numIoThreads;
-		return this;
+		return new DiskCachedCellImgOptions( values.copy().setNumIoThreads( numIoThreads ) );
 	}
 
 	/**
@@ -104,8 +112,7 @@ public class DiskCachedCellImgOptions
 	 */
 	public DiskCachedCellImgOptions maxIoQueueSize( final int maxIoQueueSize )
 	{
-		values.maxIoQueueSize = maxIoQueueSize;
-		return this;
+		return new DiskCachedCellImgOptions( values.copy().setMaxIoQueueSize( maxIoQueueSize ) );
 	}
 
 	/**
@@ -168,8 +175,7 @@ public class DiskCachedCellImgOptions
 	 */
 	public DiskCachedCellImgOptions cacheType( final CacheType cacheType )
 	{
-		values.cacheType = cacheType;
-		return this;
+		return new DiskCachedCellImgOptions( values.copy().setCacheType( cacheType ) );
 	}
 
 	/**
@@ -181,8 +187,7 @@ public class DiskCachedCellImgOptions
 	 */
 	public DiskCachedCellImgOptions maxCacheSize( final long maxCacheSize )
 	{
-		values.maxCacheSize = maxCacheSize;
-		return this;
+		return new DiskCachedCellImgOptions( values.copy().setMaxCacheSize( maxCacheSize ) );
 	}
 
 	/**
@@ -197,8 +202,7 @@ public class DiskCachedCellImgOptions
 	public DiskCachedCellImgOptions cellDimensions( final int... cellDimensions )
 	{
 		CellImgFactory.verifyDimensions( cellDimensions );
-		values.cellDimensions = cellDimensions;
-		return this;
+		return new DiskCachedCellImgOptions( values.copy().setCellDimensions( cellDimensions ) );
 	}
 
 	/**
@@ -206,15 +210,59 @@ public class DiskCachedCellImgOptions
 	 */
 	public static class Values
 	{
+		/**
+		 * Copy constructor.
+		 */
+		Values( final Values that )
+		{
+			this.dirtyAccesses = that.dirtyAccesses;
+			this.dirtyAccessesModified = that.dirtyAccessesModified;
+			this.volatileAccesses = that.volatileAccesses;
+			this.volatileAccessesModified = that.volatileAccessesModified;
+			this.numIoThreads = that.numIoThreads;
+			this.numIoThreadsModified = that.numIoThreadsModified;
+			this.maxIoQueueSize = that.maxIoQueueSize;
+			this.maxIoQueueSizeModified = that.maxIoQueueSizeModified;
+			this.cacheType = that.cacheType;
+			this.cacheTypeModified = that.cacheTypeModified;
+			this.maxCacheSize = that.maxCacheSize;
+			this.maxCacheSizeModified = that.maxCacheSizeModified;
+			this.cellDimensions = that.cellDimensions;
+			this.cellDimensionsModified = that.cellDimensionsModified;
+		}
+
+		Values()
+		{}
+
+		Values( final Values base, final Values aug )
+		{
+			dirtyAccesses = aug.dirtyAccessesModified
+					? aug.dirtyAccesses
+					: base.dirtyAccesses;
+			volatileAccesses = aug.volatileAccessesModified
+					? aug.volatileAccesses
+					: base.volatileAccesses;
+			numIoThreads = aug.numIoThreadsModified
+					? aug.numIoThreads
+					: base.numIoThreads;
+			maxIoQueueSize = aug.maxIoQueueSizeModified
+					? aug.maxIoQueueSize
+					: base.maxIoQueueSize;
+			cacheType = aug.cacheTypeModified
+					? aug.cacheType
+					: base.cacheType;
+			maxCacheSize = aug.maxCacheSizeModified
+					? aug.maxCacheSize
+					: base.maxCacheSize;
+			cellDimensions = aug.cellDimensionsModified
+					? aug.cellDimensions
+					: base.cellDimensions;
+
+		}
+
 		public DiskCachedCellImgOptions optionsFromValues()
 		{
-			return options()
-					.dirtyAccesses( dirtyAccesses )
-					.volatileAccesses( volatileAccesses )
-					.numIoThreads( numIoThreads )
-					.maxIoQueueSize( maxIoQueueSize )
-					.cacheType( cacheType )
-					.cellDimensions( cellDimensions );
+			return new DiskCachedCellImgOptions( new Values( this ) );
 		}
 
 		private boolean dirtyAccesses = true;
@@ -270,5 +318,136 @@ public class DiskCachedCellImgOptions
 		{
 			return cellDimensions;
 		}
+
+		private boolean dirtyAccessesModified = false;
+
+		private boolean volatileAccessesModified = false;
+
+		private boolean numIoThreadsModified = false;
+
+		private boolean maxIoQueueSizeModified = false;
+
+		private boolean cacheTypeModified = false;
+
+		private boolean maxCacheSizeModified = false;
+
+		private boolean cellDimensionsModified = false;
+
+		Values setDirtyAccesses( final boolean b )
+		{
+			dirtyAccesses = b;
+			dirtyAccessesModified = true;
+			return this;
+		}
+
+		Values setVolatileAccesses( final boolean b )
+		{
+			volatileAccesses = b;
+			volatileAccessesModified = true;
+			return this;
+		}
+
+		Values setNumIoThreads( final int n )
+		{
+			numIoThreads = n;
+			numIoThreadsModified = true;
+			return this;
+		}
+
+		Values setMaxIoQueueSize( final int n )
+		{
+			maxIoQueueSize = n;
+			maxIoQueueSizeModified = true;
+			return this;
+		}
+
+		Values setCacheType( final CacheType t )
+		{
+			cacheType = t;
+			cacheTypeModified = true;
+			return this;
+		}
+
+		Values setMaxCacheSize( final long n )
+		{
+			maxCacheSize = n;
+			maxCacheSizeModified = true;
+			return this;
+		}
+
+		Values setCellDimensions( final int[] dims )
+		{
+			cellDimensions = dims;
+			cellDimensionsModified = true;
+			return this;
+		}
+
+		Values copy()
+		{
+			return new Values( this );
+		}
+
+		@Override
+		public String toString()
+		{
+			final StringBuilder sb = new StringBuilder();
+
+			sb.append( "{" );
+			sb.append( "\n " );
+
+			sb.append( "dirtyAccesses = " );
+			sb.append( Boolean.toString( dirtyAccesses ) );
+			if ( dirtyAccessesModified )
+				sb.append( " [m]" );
+			sb.append( ", " );
+			sb.append( "\n " );
+
+			sb.append( "volatileAccesses = " );
+			sb.append( Boolean.toString( volatileAccesses ) );
+			if ( volatileAccessesModified )
+				sb.append( " [m]" );
+			sb.append( ", " );
+			sb.append( "\n " );
+
+			sb.append( "numIoThreads = " );
+			sb.append( numIoThreads );
+			if ( numIoThreadsModified )
+				sb.append( " [m]" );
+			sb.append( ", " );
+			sb.append( "\n " );
+
+			sb.append( "maxIoQueueSize = " );
+			sb.append( maxIoQueueSize );
+			if ( maxIoQueueSizeModified )
+				sb.append( " [m]" );
+			sb.append( ", " );
+			sb.append( "\n " );
+
+			sb.append( "cacheType = " );
+			sb.append( cacheType );
+			if ( cacheTypeModified )
+				sb.append( " [m]" );
+			sb.append( ", " );
+			sb.append( "\n " );
+
+			sb.append( "maxCacheSize = " );
+			sb.append( maxCacheSize );
+			if ( maxCacheSizeModified )
+				sb.append( " [m]" );
+			sb.append( ", " );
+			sb.append( "\n " );
+
+			sb.append( "cellDimensions = " );
+			sb.append( Util.printCoordinates( cellDimensions ) );
+			if ( cellDimensionsModified )
+				sb.append( " [m]" );
+
+			sb.append( "\n" );
+			sb.append( "}" );
+
+			return sb.toString();
+		}
+
+
 	}
 }
