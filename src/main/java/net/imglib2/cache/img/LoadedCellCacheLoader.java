@@ -51,7 +51,7 @@ public class LoadedCellCacheLoader< T extends NativeType< T >, A extends ArrayDa
 
 	private final A creator;
 
-	private final ArrayDataAccessWrapper< A > wrapper;
+	private final ArrayDataAccessWrapper< A, ? > wrapper;
 
 	private final CellLoader< T > loader;
 
@@ -59,7 +59,7 @@ public class LoadedCellCacheLoader< T extends NativeType< T >, A extends ArrayDa
 			final CellGrid grid,
 			final T type,
 			final A creator,
-			final ArrayDataAccessWrapper< A > wrapper,
+			final ArrayDataAccessWrapper< A, ? > wrapper,
 			final CellLoader< T > loader )
 	{
 		this.grid = grid;
@@ -79,7 +79,9 @@ public class LoadedCellCacheLoader< T extends NativeType< T >, A extends ArrayDa
 		grid.getCellDimensions( index, cellMin, cellDims );
 		final long numEntities = entitiesPerPixel.mulCeil( Intervals.numElements( cellDims ) );
 		final A array = creator.createArray( ( int ) numEntities );
-		loader.load( new SingleCellArrayImg<>( cellDims, cellMin, wrapper.wrap( array ), type ) );
+		@SuppressWarnings( { "rawtypes", "unchecked" } )
+		final SingleCellArrayImg< T, ? > img = new SingleCellArrayImg( cellDims, cellMin, wrapper.wrap( array ), type );
+		loader.load( img );
 		return new Cell<>( cellDims, cellMin, array );
 	}
 
@@ -100,75 +102,46 @@ public class LoadedCellCacheLoader< T extends NativeType< T >, A extends ArrayDa
 			final AccessFlags ... flags )
 	{
 		final A creator = ArrayDataAccessFactory.get( primitiveType, flags );
-		final ArrayDataAccessWrapper< A > wrapper = getWrapper( primitiveType, flags );
+		final ArrayDataAccessWrapper< A, ? > wrapper = getWrapper( primitiveType, flags );
 		return creator == null ? null : new LoadedCellCacheLoader<>( grid, type, creator, wrapper, loader );
 	}
 
 	@SuppressWarnings( "unchecked" )
-	static < A extends ArrayDataAccess< A > > ArrayDataAccessWrapper< A > getWrapper(
+	static < A extends ArrayDataAccess< A > > ArrayDataAccessWrapper< A, ? > getWrapper(
 			final PrimitiveType primitiveType,
 			final AccessFlags ... flags )
 	{
 		final boolean dirty = AccessFlags.isDirty( flags );
-		final boolean volatil = AccessFlags.isVolatile( flags );
 		switch ( primitiveType )
 		{
 		case BYTE:
 			return dirty
-					? ( volatil
-							? ( ArrayDataAccessWrapper< A > ) new ByteAccessWrapper<>()
-							: ( ArrayDataAccessWrapper< A > ) new ByteAccessWrapper<>() )
-					: ( volatil
-							? ( ArrayDataAccessWrapper< A > ) new ByteAccessPassThrough<>()
-							: ( ArrayDataAccessWrapper< A > ) new ByteAccessPassThrough<>() );
+					? ( ArrayDataAccessWrapper< A, ? > ) new ByteAccessWrapper<>()
+					: ( ArrayDataAccessWrapper< A, ? > ) new PassThrough<>();
 		case CHAR:
 			return dirty
-					? ( volatil
-							? ( ArrayDataAccessWrapper< A > ) new CharAccessWrapper<>()
-							: ( ArrayDataAccessWrapper< A > ) new CharAccessWrapper<>() )
-					: ( volatil
-							? ( ArrayDataAccessWrapper< A > ) new CharAccessPassThrough<>()
-							: ( ArrayDataAccessWrapper< A > ) new CharAccessPassThrough<>() );
+					? ( ArrayDataAccessWrapper< A, ? > ) new CharAccessWrapper<>()
+					: ( ArrayDataAccessWrapper< A, ? > ) new PassThrough<>();
 		case DOUBLE:
 			return dirty
-					? ( volatil
-							? ( ArrayDataAccessWrapper< A > ) new DoubleAccessWrapper<>()
-							: ( ArrayDataAccessWrapper< A > ) new DoubleAccessWrapper<>() )
-					: ( volatil
-							? ( ArrayDataAccessWrapper< A > ) new DoubleAccessPassThrough<>()
-							: ( ArrayDataAccessWrapper< A > ) new DoubleAccessPassThrough<>() );
+					? ( ArrayDataAccessWrapper< A, ? > ) new DoubleAccessWrapper<>()
+					: ( ArrayDataAccessWrapper< A, ? > ) new PassThrough<>();
 		case FLOAT:
 			return dirty
-					? ( volatil
-							? ( ArrayDataAccessWrapper< A > ) new FloatAccessWrapper<>()
-							: ( ArrayDataAccessWrapper< A > ) new FloatAccessWrapper<>() )
-					: ( volatil
-							? ( ArrayDataAccessWrapper< A > ) new FloatAccessPassThrough<>()
-							: ( ArrayDataAccessWrapper< A > ) new FloatAccessPassThrough<>() );
+					? ( ArrayDataAccessWrapper< A, ? > ) new FloatAccessWrapper<>()
+					: ( ArrayDataAccessWrapper< A, ? > ) new PassThrough<>();
 		case INT:
 			return dirty
-					? ( volatil
-							? ( ArrayDataAccessWrapper< A > ) new IntAccessWrapper<>()
-							: ( ArrayDataAccessWrapper< A > ) new IntAccessWrapper<>() )
-					: ( volatil
-							? ( ArrayDataAccessWrapper< A > ) new IntAccessPassThrough<>()
-							: ( ArrayDataAccessWrapper< A > ) new IntAccessPassThrough<>() );
+					? ( ArrayDataAccessWrapper< A, ? > ) new IntAccessWrapper<>()
+					: ( ArrayDataAccessWrapper< A, ? > ) new PassThrough<>();
 		case LONG:
 			return dirty
-					? ( volatil
-							? ( ArrayDataAccessWrapper< A > ) new LongAccessWrapper<>()
-							: ( ArrayDataAccessWrapper< A > ) new LongAccessWrapper<>() )
-					: ( volatil
-							? ( ArrayDataAccessWrapper< A > ) new LongAccessPassThrough<>()
-							: ( ArrayDataAccessWrapper< A > ) new LongAccessPassThrough<>() );
+					? ( ArrayDataAccessWrapper< A, ? > ) new LongAccessWrapper<>()
+					: ( ArrayDataAccessWrapper< A, ? > ) new PassThrough<>();
 		case SHORT:
 			return dirty
-					? ( volatil
-							? ( ArrayDataAccessWrapper< A > ) new ShortAccessWrapper<>()
-							: ( ArrayDataAccessWrapper< A > ) new ShortAccessWrapper<>() )
-					: ( volatil
-							? ( ArrayDataAccessWrapper< A > ) new ShortAccessPassThrough<>()
-							: ( ArrayDataAccessWrapper< A > ) new ShortAccessPassThrough<>() );
+					? ( ArrayDataAccessWrapper< A, ? > ) new ShortAccessWrapper<>()
+					: ( ArrayDataAccessWrapper< A, ? > ) new PassThrough<>();
 		default:
 			return null;
 		}
@@ -178,12 +151,21 @@ public class LoadedCellCacheLoader< T extends NativeType< T >, A extends ArrayDa
 	 * Wraps an {@link ArrayDataAccess} of type {@code A} as another {@link ArrayDataAccess}.
 	 * This is used to strip the dirty flag off {@link Dirty} accesses for initially populating a cell with data (otherwise the cell would immediately be marked dirty).
 	 */
-	public static interface ArrayDataAccessWrapper< A extends ArrayDataAccess< A > >
+	public static interface ArrayDataAccessWrapper< A extends ArrayDataAccess< A >, W extends ArrayDataAccess< W > >
 	{
-		Object wrap( A access );
+		W wrap( A access );
 	}
 
-	static class ByteAccessWrapper< A extends ArrayDataAccess< A > & ByteAccess > implements ArrayDataAccessWrapper< A >
+	static class PassThrough< A extends ArrayDataAccess< A > > implements ArrayDataAccessWrapper< A, A >
+	{
+		@Override
+		public A wrap( final A access )
+		{
+			return access;
+		}
+	}
+
+	static class ByteAccessWrapper< A extends ArrayDataAccess< A > & ByteAccess > implements ArrayDataAccessWrapper< A, ByteArray >
 	{
 		@Override
 		public ByteArray wrap( final A access )
@@ -192,16 +174,7 @@ public class LoadedCellCacheLoader< T extends NativeType< T >, A extends ArrayDa
 		}
 	}
 
-	static class ByteAccessPassThrough< A extends ArrayDataAccess< A > & ByteAccess > implements ArrayDataAccessWrapper< A >
-	{
-		@Override
-		public ByteAccess wrap( final A access )
-		{
-			return access;
-		}
-	}
-
-	static class CharAccessWrapper< A extends ArrayDataAccess< A > & CharAccess > implements ArrayDataAccessWrapper< A >
+	static class CharAccessWrapper< A extends ArrayDataAccess< A > & CharAccess > implements ArrayDataAccessWrapper< A, CharArray >
 	{
 		@Override
 		public CharArray wrap( final A access )
@@ -210,16 +183,7 @@ public class LoadedCellCacheLoader< T extends NativeType< T >, A extends ArrayDa
 		}
 	}
 
-	static class CharAccessPassThrough< A extends ArrayDataAccess< A > & CharAccess > implements ArrayDataAccessWrapper< A >
-	{
-		@Override
-		public CharAccess wrap( final A access )
-		{
-			return access;
-		}
-	}
-
-	static class DoubleAccessWrapper< A extends ArrayDataAccess< A > & DoubleAccess > implements ArrayDataAccessWrapper< A >
+	static class DoubleAccessWrapper< A extends ArrayDataAccess< A > & DoubleAccess > implements ArrayDataAccessWrapper< A, DoubleArray >
 	{
 		@Override
 		public DoubleArray wrap( final A access )
@@ -228,16 +192,7 @@ public class LoadedCellCacheLoader< T extends NativeType< T >, A extends ArrayDa
 		}
 	}
 
-	static class DoubleAccessPassThrough< A extends ArrayDataAccess< A > & DoubleAccess > implements ArrayDataAccessWrapper< A >
-	{
-		@Override
-		public DoubleAccess wrap( final A access )
-		{
-			return access;
-		}
-	}
-
-	static class FloatAccessWrapper< A extends ArrayDataAccess< A > & FloatAccess > implements ArrayDataAccessWrapper< A >
+	static class FloatAccessWrapper< A extends ArrayDataAccess< A > & FloatAccess > implements ArrayDataAccessWrapper< A, FloatArray >
 	{
 		@Override
 		public FloatArray wrap( final A access )
@@ -246,16 +201,7 @@ public class LoadedCellCacheLoader< T extends NativeType< T >, A extends ArrayDa
 		}
 	}
 
-	static class FloatAccessPassThrough< A extends ArrayDataAccess< A > & FloatAccess > implements ArrayDataAccessWrapper< A >
-	{
-		@Override
-		public FloatAccess wrap( final A access )
-		{
-			return access;
-		}
-	}
-
-	static class IntAccessWrapper< A extends ArrayDataAccess< A > & IntAccess > implements ArrayDataAccessWrapper< A >
+	static class IntAccessWrapper< A extends ArrayDataAccess< A > & IntAccess > implements ArrayDataAccessWrapper< A, IntArray >
 	{
 		@Override
 		public IntArray wrap( final A access )
@@ -264,16 +210,7 @@ public class LoadedCellCacheLoader< T extends NativeType< T >, A extends ArrayDa
 		}
 	}
 
-	static class IntAccessPassThrough< A extends ArrayDataAccess< A > & IntAccess > implements ArrayDataAccessWrapper< A >
-	{
-		@Override
-		public IntAccess wrap( final A access )
-		{
-			return access;
-		}
-	}
-
-	static class ShortAccessWrapper< A extends ArrayDataAccess< A > & ShortAccess > implements ArrayDataAccessWrapper< A >
+	static class ShortAccessWrapper< A extends ArrayDataAccess< A > & ShortAccess > implements ArrayDataAccessWrapper< A, ShortArray >
 	{
 		@Override
 		public ShortArray wrap( final A access )
@@ -282,30 +219,12 @@ public class LoadedCellCacheLoader< T extends NativeType< T >, A extends ArrayDa
 		}
 	}
 
-	static class ShortAccessPassThrough< A extends ArrayDataAccess< A > & ShortAccess > implements ArrayDataAccessWrapper< A >
-	{
-		@Override
-		public ShortAccess wrap( final A access )
-		{
-			return access;
-		}
-	}
-
-	static class LongAccessWrapper< A extends ArrayDataAccess< A > & LongAccess > implements ArrayDataAccessWrapper< A >
+	static class LongAccessWrapper< A extends ArrayDataAccess< A > & LongAccess > implements ArrayDataAccessWrapper< A, LongArray >
 	{
 		@Override
 		public LongArray wrap( final A access )
 		{
 			return new LongArray( ( long[] ) access.getCurrentStorageArray() );
-		}
-	}
-
-	static class LongAccessPassThrough< A extends ArrayDataAccess< A > & LongAccess > implements ArrayDataAccessWrapper< A >
-	{
-		@Override
-		public LongAccess wrap( final A access )
-		{
-			return access;
 		}
 	}
 }

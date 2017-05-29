@@ -2,6 +2,7 @@ package net.imglib2.cache.img;
 
 import net.imglib2.img.Img;
 import net.imglib2.img.cell.AbstractCellImg;
+import net.imglib2.type.NativeType;
 
 /**
  * Populates cells with data.
@@ -11,7 +12,7 @@ import net.imglib2.img.cell.AbstractCellImg;
  *
  * @author Tobias Pietzsch
  */
-public interface CellLoader< T >
+public interface CellLoader< T extends NativeType< T > >
 {
 	/**
 	 * Fill the specified cell with data.
@@ -22,5 +23,5 @@ public interface CellLoader< T >
 	 *            {@link AbstractCellImg} that is covered.
 	 * @throws Exception
 	 */
-	void load( Img< T > cell ) throws Exception;
+	public void load( SingleCellArrayImg< T, ? > cell ) throws Exception;
 }

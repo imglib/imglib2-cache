@@ -8,6 +8,7 @@ import net.imglib2.AbstractInterval;
 import net.imglib2.AbstractLocalizable;
 import net.imglib2.AbstractLocalizingCursor;
 import net.imglib2.Cursor;
+import net.imglib2.Dirty;
 import net.imglib2.FlatIterationOrder;
 import net.imglib2.Interval;
 import net.imglib2.Localizable;
@@ -16,6 +17,7 @@ import net.imglib2.img.Img;
 import net.imglib2.img.ImgFactory;
 import net.imglib2.img.NativeImg;
 import net.imglib2.img.array.ArrayImg;
+import net.imglib2.img.basictypeaccess.array.ArrayDataAccess;
 import net.imglib2.img.cell.AbstractCellImg;
 import net.imglib2.img.cell.LazyCellImg;
 import net.imglib2.type.NativeType;
@@ -33,7 +35,7 @@ import net.imglib2.util.IntervalIndexer;
  *
  * @author Tobias Pietzsch
  */
-public class SingleCellArrayImg< T extends NativeType< T >, A >
+public class SingleCellArrayImg< T extends NativeType< T >, A extends ArrayDataAccess< A > >
 	extends AbstractInterval
 	implements NativeImg< T, A >
 {
@@ -83,6 +85,19 @@ public class SingleCellArrayImg< T extends NativeType< T >, A >
 	{
 		this( cellDims.length );
 		reset( cellDims, cellMin, cellData );
+	}
+
+	/**
+	 * Get the single primitive array containing the data of this cell.
+	 *
+	 * @return primitive array with the cell data. Actual type will be
+	 *         {@code char[]}, {@code byte[]}, {@code short[]}, {@code int[]},
+	 *         {@code long[]}, {@code double[]}, or {@code float[]}, depending
+	 *         on the pixel type.
+	 */
+	public Object getStorageArray()
+	{
+		return data.getCurrentStorageArray();
 	}
 
 	SingleCellArrayImg( final int[] cellDims, final long[] cellMin, final A cellData, final T type )
