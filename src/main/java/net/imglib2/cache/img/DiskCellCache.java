@@ -13,8 +13,8 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 
 import net.imglib2.cache.CacheLoader;
-import net.imglib2.cache.IoSync;
 import net.imglib2.cache.CacheRemover;
+import net.imglib2.cache.IoSync;
 import net.imglib2.img.cell.Cell;
 import net.imglib2.img.cell.CellGrid;
 import net.imglib2.util.Fraction;
@@ -176,20 +176,65 @@ public class DiskCellCache< A > implements CacheRemover< Long, Cell< A > >, Cach
 
 	static DeleteTempFilesHook deleteTempFilesHook = null;
 
+	/**
+	 * Register a path for deletion when the virtual machine shuts down. If the
+	 * specified {@code path} is a directory, it is deleted recursively.
+	 *
+	 * @param path
+	 *            path to delete on virtual machine shutdown.
+	 */
+	public static void addDeleteHook( final Path path )
+	{
+		if ( deleteTempFilesHook == null )
+		{
+			deleteTempFilesHook = new DeleteTempFilesHook();
+			Runtime.getRuntime().addShutdownHook( deleteTempFilesHook );
+		}
+		deleteTempFilesHook.add( path );
+	}
+
+	/**
+	 * Creates a new directory in the specified directory, using the given
+	 * prefix to generate its name.
+	 *
+	 * @param dir
+	 *            the path to directory in which to create the directory
+	 * @param prefix
+	 *            the prefix string to be used in generating the directory's
+	 *            name; may be {@code null}
+	 * @param deleteOnExit
+	 *            whether the created directory should be automatically deleted
+	 *            when the virtual machine shuts down.
+	 */
+	public static Path createTempDirectory( final Path dir, final String prefix, final boolean deleteOnExit ) throws IOException
+	{
+		final Path tmp = Files.createTempDirectory( dir, prefix );
+		System.out.println( tmp );
+
+		if ( deleteOnExit )
+			addDeleteHook( tmp );
+
+		return tmp;
+	}
+
+	/**
+	 * Creates a new directory in the default temporary-file directory, using
+	 * the given prefix to generate its name.
+	 *
+	 * @param prefix
+	 *            the prefix string to be used in generating the directory's
+	 *            name; may be {@code null}
+	 * @param deleteOnExit
+	 *            whether the created directory should be automatically deleted
+	 *            when the virtual machine shuts down.
+	 */
 	public static Path createTempDirectory( final String prefix, final boolean deleteOnExit ) throws IOException
 	{
 		final Path tmp = Files.createTempDirectory( prefix );
 		System.out.println( tmp );
 
 		if ( deleteOnExit )
-		{
-			if ( deleteTempFilesHook == null )
-			{
-				deleteTempFilesHook = new DeleteTempFilesHook();
-				Runtime.getRuntime().addShutdownHook( deleteTempFilesHook );
-			}
-			deleteTempFilesHook.add( tmp );
-		}
+			addDeleteHook( tmp );
 
 		return tmp;
 	}

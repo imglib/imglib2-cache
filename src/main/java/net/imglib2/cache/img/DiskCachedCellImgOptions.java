@@ -29,6 +29,7 @@
 package net.imglib2.cache.img;
 
 import java.lang.ref.SoftReference;
+import java.nio.file.Path;
 
 import net.imglib2.Dirty;
 import net.imglib2.img.cell.CellImgFactory;
@@ -206,6 +207,85 @@ public class DiskCachedCellImgOptions
 	}
 
 	/**
+	 * Set the path of the cell cache directory.
+	 * <p>
+	 * This is {@code null} by default, which means that a temporary directory
+	 * will be created.
+	 * </p>
+	 * <p>
+	 * Do not use the same cell cache directory for two images at the same time.
+	 * Set {@code deleteCacheDirectoryOnExit(false)} if you do not want the cell
+	 * cache directory to be deleted when the virtual machine shuts down.
+	 * </p>
+	 *
+	 * @param dir
+	 *            the path to the cell cache directory.
+	 */
+	public DiskCachedCellImgOptions cacheDirectory( final Path dir )
+	{
+		return new DiskCachedCellImgOptions( values.copy().setCacheDirectory( dir ) );
+	}
+
+	/**
+	 * Set the path to the directory in which to create the temporary cell cache
+	 * directory. This has no effect, if {@link #cacheDirectory(Path)} is
+	 * specified.
+	 * <p>
+	 * This is {@code null} by default, which means that the default system
+	 * temporary-file directory is used.
+	 * </p>
+	 *
+	 * @param dir
+	 *            the path to directory in which to create the temporary cell
+	 *            cache directory.
+	 */
+	public DiskCachedCellImgOptions tempDirectory( final Path dir )
+	{
+		return new DiskCachedCellImgOptions( values.copy().setTempDirectory( dir ) );
+	}
+
+	/**
+	 * Set the prefix string to be used in generating the name of the temporary
+	 * cell cache directory. Note, that this is not the path in which the
+	 * directory is created but a prefix to the name (e.g. "MyImg"). This has no
+	 * effect, if {@link #cacheDirectory(Path)} is specified.
+	 * <p>
+	 * This is {@code "imglib2"} by default.
+	 * </p>
+	 *
+	 * @param prefix
+	 *            the prefix string to be used in generating the name of the
+	 *            temporary cell cache directory.
+	 */
+	public DiskCachedCellImgOptions tempDirectoryPrefix( final String prefix )
+	{
+		return new DiskCachedCellImgOptions( values.copy().setTempDirectoryPrefix( prefix ) );
+	}
+
+	/**
+	 * Specify whether the cell cache directory should be automatically deleted
+	 * when the virtual machine shuts down.
+	 * <p>
+	 * This is {@code true} by default.
+	 * </p>
+	 * <p>
+	 * For safety reasons, only cell cache directories that are created by the
+	 * {@link DiskCachedCellImgFactory} are actually marked for deletion. This
+	 * means that either no {@link #cacheDirectory(Path)} is specified (a
+	 * temporary directory is created), or the specified
+	 * {@link #cacheDirectory(Path)} does not exist yet.
+	 * </p>
+	 *
+	 * @param deleteOnExit
+	 *            whether the cell cache directory directory should be
+	 *            automatically deleted when the virtual machine shuts down.
+	 */
+	public DiskCachedCellImgOptions deleteCacheDirectoryOnExit( final boolean deleteOnExit )
+	{
+		return new DiskCachedCellImgOptions( values.copy().setDeleteCacheDirectoryOnExit( deleteOnExit ) );
+	}
+
+	/**
 	 * Read-only {@link DiskCachedCellImgOptions} values.
 	 */
 	public static class Values
@@ -229,6 +309,14 @@ public class DiskCachedCellImgOptions
 			this.maxCacheSizeModified = that.maxCacheSizeModified;
 			this.cellDimensions = that.cellDimensions;
 			this.cellDimensionsModified = that.cellDimensionsModified;
+			this.cacheDirectory = that.cacheDirectory;
+			this.cacheDirectoryModified = that.cacheDirectoryModified;
+			this.tempDirectory = that.tempDirectory;
+			this.tempDirectoryModified = that.tempDirectoryModified;
+			this.tempDirectoryPrefix = that.tempDirectoryPrefix;
+			this.tempDirectoryPrefixModified = that.tempDirectoryPrefixModified;
+			this.deleteCacheDirectoryOnExit = that.deleteCacheDirectoryOnExit;
+			this.deleteCacheDirectoryOnExitModified = that.deleteCacheDirectoryOnExitModified;
 		}
 
 		Values()
@@ -257,7 +345,18 @@ public class DiskCachedCellImgOptions
 			cellDimensions = aug.cellDimensionsModified
 					? aug.cellDimensions
 					: base.cellDimensions;
-
+			cacheDirectory = aug.cacheDirectoryModified
+					? aug.cacheDirectory
+					: base.cacheDirectory;
+			tempDirectory = aug.tempDirectoryModified
+					? aug.tempDirectory
+					: base.tempDirectory;
+			tempDirectoryPrefix = aug.tempDirectoryPrefixModified
+					? aug.tempDirectoryPrefix
+					: base.tempDirectoryPrefix;
+			deleteCacheDirectoryOnExit = aug.deleteCacheDirectoryOnExitModified
+					? aug.deleteCacheDirectoryOnExit
+					: base.deleteCacheDirectoryOnExit;
 		}
 
 		public DiskCachedCellImgOptions optionsFromValues()
@@ -278,6 +377,14 @@ public class DiskCachedCellImgOptions
 		private long maxCacheSize = 1000;
 
 		private int[] cellDimensions = new int[] { 10 };
+
+		private Path cacheDirectory = null;
+
+		private Path tempDirectory = null;
+
+		private String tempDirectoryPrefix = "imglib2";
+
+		private boolean deleteCacheDirectoryOnExit = true;
 
 		public boolean dirtyAccesses()
 		{
@@ -319,6 +426,26 @@ public class DiskCachedCellImgOptions
 			return cellDimensions;
 		}
 
+		public Path cacheDirectory()
+		{
+			return cacheDirectory;
+		}
+
+		public Path tempDirectory()
+		{
+			return tempDirectory;
+		}
+
+		public String tempDirectoryPrefix()
+		{
+			return tempDirectoryPrefix;
+		}
+
+		public boolean deleteCacheDirectoryOnExit()
+		{
+			return deleteCacheDirectoryOnExit;
+		}
+
 		private boolean dirtyAccessesModified = false;
 
 		private boolean volatileAccessesModified = false;
@@ -332,6 +459,14 @@ public class DiskCachedCellImgOptions
 		private boolean maxCacheSizeModified = false;
 
 		private boolean cellDimensionsModified = false;
+
+		private boolean cacheDirectoryModified = false;
+
+		private boolean tempDirectoryModified = false;
+
+		private boolean tempDirectoryPrefixModified = false;
+
+		private boolean deleteCacheDirectoryOnExitModified = false;
 
 		Values setDirtyAccesses( final boolean b )
 		{
@@ -382,6 +517,34 @@ public class DiskCachedCellImgOptions
 			return this;
 		}
 
+		Values setCacheDirectory( final Path dir )
+		{
+			cacheDirectory = dir;
+			cacheDirectoryModified = true;
+			return this;
+		}
+
+		Values setTempDirectory( final Path dir )
+		{
+			tempDirectory = dir;
+			tempDirectoryModified = true;
+			return this;
+		}
+
+		Values setTempDirectoryPrefix( final String prefix )
+		{
+			tempDirectoryPrefix = prefix;
+			tempDirectoryPrefixModified = true;
+			return this;
+		}
+
+		Values setDeleteCacheDirectoryOnExit( final boolean b )
+		{
+			deleteCacheDirectoryOnExit = b;
+			deleteCacheDirectoryOnExitModified = true;
+			return this;
+		}
+
 		Values copy()
 		{
 			return new Values( this );
@@ -393,61 +556,75 @@ public class DiskCachedCellImgOptions
 			final StringBuilder sb = new StringBuilder();
 
 			sb.append( "{" );
-			sb.append( "\n " );
 
 			sb.append( "dirtyAccesses = " );
 			sb.append( Boolean.toString( dirtyAccesses ) );
 			if ( dirtyAccessesModified )
 				sb.append( " [m]" );
 			sb.append( ", " );
-			sb.append( "\n " );
 
 			sb.append( "volatileAccesses = " );
 			sb.append( Boolean.toString( volatileAccesses ) );
 			if ( volatileAccessesModified )
 				sb.append( " [m]" );
 			sb.append( ", " );
-			sb.append( "\n " );
 
 			sb.append( "numIoThreads = " );
 			sb.append( numIoThreads );
 			if ( numIoThreadsModified )
 				sb.append( " [m]" );
 			sb.append( ", " );
-			sb.append( "\n " );
 
 			sb.append( "maxIoQueueSize = " );
 			sb.append( maxIoQueueSize );
 			if ( maxIoQueueSizeModified )
 				sb.append( " [m]" );
 			sb.append( ", " );
-			sb.append( "\n " );
 
 			sb.append( "cacheType = " );
 			sb.append( cacheType );
 			if ( cacheTypeModified )
 				sb.append( " [m]" );
 			sb.append( ", " );
-			sb.append( "\n " );
 
 			sb.append( "maxCacheSize = " );
 			sb.append( maxCacheSize );
 			if ( maxCacheSizeModified )
 				sb.append( " [m]" );
 			sb.append( ", " );
-			sb.append( "\n " );
 
 			sb.append( "cellDimensions = " );
 			sb.append( Util.printCoordinates( cellDimensions ) );
 			if ( cellDimensionsModified )
 				sb.append( " [m]" );
+			sb.append( ", " );
 
-			sb.append( "\n" );
+			sb.append( "cacheDirectory = " );
+			sb.append( cacheDirectory );
+			if ( cacheDirectoryModified )
+				sb.append( " [m]" );
+			sb.append( ", " );
+
+			sb.append( "tempDirectory = " );
+			sb.append( tempDirectory );
+			if ( tempDirectoryModified )
+				sb.append( " [m]" );
+			sb.append( ", " );
+
+			sb.append( "tempDirectoryPrefix = " );
+			sb.append( tempDirectoryPrefix );
+			if ( tempDirectoryPrefixModified )
+				sb.append( " [m]" );
+			sb.append( ", " );
+
+			sb.append( "deleteCacheDirectoryOnExit = " );
+			sb.append( Boolean.toString( deleteCacheDirectoryOnExit ) );
+			if ( deleteCacheDirectoryOnExitModified )
+				sb.append( " [m]" );
+
 			sb.append( "}" );
 
 			return sb.toString();
 		}
-
-
 	}
 }

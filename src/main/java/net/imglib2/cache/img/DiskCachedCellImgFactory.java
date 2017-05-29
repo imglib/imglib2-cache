@@ -43,14 +43,13 @@ import static net.imglib2.cache.img.PrimitiveType.LONG;
 import static net.imglib2.cache.img.PrimitiveType.SHORT;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import net.imglib2.cache.Cache;
 import net.imglib2.cache.CacheLoader;
 import net.imglib2.cache.IoSync;
 import net.imglib2.cache.LoaderRemoverCache;
-import net.imglib2.cache.img.DiskCachedCellImgOptions.CacheType;
-import net.imglib2.cache.img.DiskCachedCellImgOptions.Values;
 import net.imglib2.cache.ref.GuardedStrongRefLoaderRemoverCache;
 import net.imglib2.cache.ref.SoftRefLoaderRemoverCache;
 import net.imglib2.exception.IncompatibleTypeException;
@@ -266,7 +265,7 @@ public class DiskCachedCellImgFactory< T extends NativeType< T > > extends Nativ
 				backingLoader = EmptyCellCacheLoader.get( grid, data.type, options.accessFlags() );
 		}
 
-		final Path blockcache = createBlockCachePath();
+		final Path blockcache = createBlockCachePath( options );
 		final A accessType = ArrayDataAccessFactory.get( primitiveType, options.accessFlags() );
 
 		@SuppressWarnings( { "rawtypes", "unchecked" } )
@@ -312,11 +311,28 @@ public class DiskCachedCellImgFactory< T extends NativeType< T > > extends Nativ
 		return new CellGrid( dimensions, cellDimensions );
 	}
 
-	private Path createBlockCachePath()
+	private Path createBlockCachePath( final DiskCachedCellImgOptions.Values options )
 	{
 		try
 		{
-			return DiskCellCache.createTempDirectory( "CellImg", true );
+			final Path cache = options.cacheDirectory();
+			final Path dir = options.tempDirectory();
+			final String prefix = options.tempDirectoryPrefix();
+			final boolean deleteOnExit = options.deleteCacheDirectoryOnExit();
+			if ( cache != null )
+			{
+				if ( !Files.isDirectory( cache ) )
+				{
+					Files.createDirectories( cache );
+					if ( deleteOnExit )
+						DiskCellCache.addDeleteHook( cache );
+				}
+				return cache;
+			}
+			else if ( dir != null )
+				return DiskCellCache.createTempDirectory( dir, prefix, deleteOnExit );
+			else
+				return DiskCellCache.createTempDirectory( prefix, deleteOnExit );
 		}
 		catch ( final IOException e )
 		{
