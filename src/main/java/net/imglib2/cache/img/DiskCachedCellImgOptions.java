@@ -286,6 +286,30 @@ public class DiskCachedCellImgOptions
 	}
 
 	/**
+	 * Specify whether cells initialized by a {@link CellLoader} should be
+	 * marked as dirty. It is useful to set this to {@code true} if
+	 * initialization is a costly operation. By this, it is made sure that cells
+	 * are initialized only once, and then written and retrieve from the disk
+	 * cache when they are next required.
+	 * <p>
+	 * This is {@code false} by default.
+	 * </p>
+	 * <p>
+	 * This option only has an effect for {@link DiskCachedCellImg} that are
+	 * created with a {@link CellLoader}
+	 * ({@link DiskCachedCellImgFactory#create(long[], net.imglib2.type.NativeType, CellLoader)}).
+	 * </p>
+	 *
+	 * @param initializeAsDirty
+	 *            whether cells initialized by a {@link CellLoader} should be
+	 *            marked as dirty.
+	 */
+	public DiskCachedCellImgOptions initializeCellsAsDirty( final boolean initializeAsDirty )
+	{
+		return new DiskCachedCellImgOptions( values.copy().setInitializeCellsAsDirty( initializeAsDirty ) );
+	}
+
+	/**
 	 * Read-only {@link DiskCachedCellImgOptions} values.
 	 */
 	public static class Values
@@ -317,6 +341,8 @@ public class DiskCachedCellImgOptions
 			this.tempDirectoryPrefixModified = that.tempDirectoryPrefixModified;
 			this.deleteCacheDirectoryOnExit = that.deleteCacheDirectoryOnExit;
 			this.deleteCacheDirectoryOnExitModified = that.deleteCacheDirectoryOnExitModified;
+			this.initializeCellsAsDirty = that.initializeCellsAsDirty;
+			this.initializeCellsAsDirtyModified = that.initializeCellsAsDirtyModified;
 		}
 
 		Values()
@@ -357,6 +383,9 @@ public class DiskCachedCellImgOptions
 			deleteCacheDirectoryOnExit = aug.deleteCacheDirectoryOnExitModified
 					? aug.deleteCacheDirectoryOnExit
 					: base.deleteCacheDirectoryOnExit;
+			initializeCellsAsDirty = aug.initializeCellsAsDirtyModified
+					? aug.initializeCellsAsDirty
+					: base.initializeCellsAsDirty;
 		}
 
 		public DiskCachedCellImgOptions optionsFromValues()
@@ -385,6 +414,8 @@ public class DiskCachedCellImgOptions
 		private String tempDirectoryPrefix = "imglib2";
 
 		private boolean deleteCacheDirectoryOnExit = true;
+
+		private boolean initializeCellsAsDirty = false;
 
 		public boolean dirtyAccesses()
 		{
@@ -446,6 +477,11 @@ public class DiskCachedCellImgOptions
 			return deleteCacheDirectoryOnExit;
 		}
 
+		public boolean initializeCellsAsDirty()
+		{
+			return initializeCellsAsDirty;
+		}
+
 		private boolean dirtyAccessesModified = false;
 
 		private boolean volatileAccessesModified = false;
@@ -467,6 +503,8 @@ public class DiskCachedCellImgOptions
 		private boolean tempDirectoryPrefixModified = false;
 
 		private boolean deleteCacheDirectoryOnExitModified = false;
+
+		private boolean initializeCellsAsDirtyModified = false;
 
 		Values setDirtyAccesses( final boolean b )
 		{
@@ -545,6 +583,13 @@ public class DiskCachedCellImgOptions
 			return this;
 		}
 
+		Values setInitializeCellsAsDirty( final boolean b )
+		{
+			initializeCellsAsDirty = b;
+			initializeCellsAsDirtyModified = true;
+			return this;
+		}
+
 		Values copy()
 		{
 			return new Values( this );
@@ -620,6 +665,11 @@ public class DiskCachedCellImgOptions
 			sb.append( "deleteCacheDirectoryOnExit = " );
 			sb.append( Boolean.toString( deleteCacheDirectoryOnExit ) );
 			if ( deleteCacheDirectoryOnExitModified )
+				sb.append( " [m]" );
+
+			sb.append( "initializeCellsAsDirty = " );
+			sb.append( Boolean.toString( initializeCellsAsDirty ) );
+			if ( initializeCellsAsDirtyModified )
 				sb.append( " [m]" );
 
 			sb.append( "}" );

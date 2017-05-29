@@ -260,7 +260,16 @@ public class DiskCachedCellImgFactory< T extends NativeType< T > > extends Nativ
 		if ( backingLoader == null )
 		{
 			if ( data.cellLoader != null )
-				backingLoader = LoadedCellCacheLoader.get( grid, data.cellLoader, data.type, options.accessFlags() );
+			{
+				final CellLoader< T > originalCellLoader = data.cellLoader;
+				final CellLoader< T > cellLoader = options.initializeCellsAsDirty()
+						? cell -> {
+							originalCellLoader.load( cell );
+							cell.setDirty();
+						}
+						: originalCellLoader;
+				backingLoader = LoadedCellCacheLoader.get( grid, cellLoader, data.type, options.accessFlags() );
+			}
 			else
 				backingLoader = EmptyCellCacheLoader.get( grid, data.type, options.accessFlags() );
 		}
