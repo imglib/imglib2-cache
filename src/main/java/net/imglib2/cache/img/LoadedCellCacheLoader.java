@@ -80,7 +80,7 @@ public class LoadedCellCacheLoader< T extends NativeType< T >, A extends ArrayDa
 		final long numEntities = entitiesPerPixel.mulCeil( Intervals.numElements( cellDims ) );
 		final A array = creator.createArray( ( int ) numEntities );
 		@SuppressWarnings( { "rawtypes", "unchecked" } )
-		final SingleCellArrayImg< T, ? > img = new SingleCellArrayImg( cellDims, cellMin, wrapper.wrap( array ), type );
+		final SingleCellArrayImg< T, ? > img = new SingleCellArrayImg( cellDims, cellMin, wrapper.wrap( array ), wrapper.wrapDirty( array ), type );
 		loader.load( img );
 		return new Cell<>( cellDims, cellMin, array );
 	}
@@ -148,12 +148,21 @@ public class LoadedCellCacheLoader< T extends NativeType< T >, A extends ArrayDa
 	}
 
 	/**
-	 * Wraps an {@link ArrayDataAccess} of type {@code A} as another {@link ArrayDataAccess}.
-	 * This is used to strip the dirty flag off {@link Dirty} accesses for initially populating a cell with data (otherwise the cell would immediately be marked dirty).
+	 * Wraps an {@link ArrayDataAccess} of type {@code A} as another
+	 * {@link ArrayDataAccess}. This is used to strip the dirty flag off
+	 * {@link Dirty} accesses for initially populating a cell with data
+	 * (otherwise the cell would immediately be marked dirty).
+	 * <p>
+	 * Additionally, {@link #wrapDirty(ArrayDataAccess)} provides access to the
+	 * dirty flag (if any) to be able to selectively mark cells as dirty from a
+	 * {@link CellLoader}.
+	 * </p>
 	 */
 	public static interface ArrayDataAccessWrapper< A extends ArrayDataAccess< A >, W extends ArrayDataAccess< W > >
 	{
 		W wrap( A access );
+
+		Dirty wrapDirty( A access );
 	}
 
 	static class PassThrough< A extends ArrayDataAccess< A > > implements ArrayDataAccessWrapper< A, A >
@@ -163,68 +172,127 @@ public class LoadedCellCacheLoader< T extends NativeType< T >, A extends ArrayDa
 		{
 			return access;
 		}
-	}
 
-	static class ByteAccessWrapper< A extends ArrayDataAccess< A > & ByteAccess > implements ArrayDataAccessWrapper< A, ByteArray >
+		@Override
+		public Dirty wrapDirty( final A access )
+		{
+			return new Dirty()
+			{
+				@Override
+				public boolean isDirty()
+				{
+					return false;
+				}
+
+				@Override
+				public void setDirty()
+				{}
+			};
+		}
+	};
+
+	static class ByteAccessWrapper< A extends ArrayDataAccess< A > & ByteAccess & Dirty > implements ArrayDataAccessWrapper< A, ByteArray >
 	{
 		@Override
 		public ByteArray wrap( final A access )
 		{
 			return new ByteArray( ( byte[] ) access.getCurrentStorageArray() );
 		}
+
+		@Override
+		public Dirty wrapDirty( final A access )
+		{
+			return access;
+		}
 	}
 
-	static class CharAccessWrapper< A extends ArrayDataAccess< A > & CharAccess > implements ArrayDataAccessWrapper< A, CharArray >
+	static class CharAccessWrapper< A extends ArrayDataAccess< A > & CharAccess & Dirty > implements ArrayDataAccessWrapper< A, CharArray >
 	{
 		@Override
 		public CharArray wrap( final A access )
 		{
 			return new CharArray( ( char[] ) access.getCurrentStorageArray() );
 		}
+
+		@Override
+		public Dirty wrapDirty( final A access )
+		{
+			return access;
+		}
 	}
 
-	static class DoubleAccessWrapper< A extends ArrayDataAccess< A > & DoubleAccess > implements ArrayDataAccessWrapper< A, DoubleArray >
+	static class DoubleAccessWrapper< A extends ArrayDataAccess< A > & DoubleAccess & Dirty > implements ArrayDataAccessWrapper< A, DoubleArray >
 	{
 		@Override
 		public DoubleArray wrap( final A access )
 		{
 			return new DoubleArray( ( double[] ) access.getCurrentStorageArray() );
 		}
+
+		@Override
+		public Dirty wrapDirty( final A access )
+		{
+			return access;
+		}
 	}
 
-	static class FloatAccessWrapper< A extends ArrayDataAccess< A > & FloatAccess > implements ArrayDataAccessWrapper< A, FloatArray >
+	static class FloatAccessWrapper< A extends ArrayDataAccess< A > & FloatAccess & Dirty > implements ArrayDataAccessWrapper< A, FloatArray >
 	{
 		@Override
 		public FloatArray wrap( final A access )
 		{
 			return new FloatArray( ( float[] ) access.getCurrentStorageArray() );
 		}
+
+		@Override
+		public Dirty wrapDirty( final A access )
+		{
+			return access;
+		}
 	}
 
-	static class IntAccessWrapper< A extends ArrayDataAccess< A > & IntAccess > implements ArrayDataAccessWrapper< A, IntArray >
+	static class IntAccessWrapper< A extends ArrayDataAccess< A > & IntAccess & Dirty > implements ArrayDataAccessWrapper< A, IntArray >
 	{
 		@Override
 		public IntArray wrap( final A access )
 		{
 			return new IntArray( ( int[] ) access.getCurrentStorageArray() );
 		}
+
+		@Override
+		public Dirty wrapDirty( final A access )
+		{
+			return access;
+		}
 	}
 
-	static class ShortAccessWrapper< A extends ArrayDataAccess< A > & ShortAccess > implements ArrayDataAccessWrapper< A, ShortArray >
+	static class ShortAccessWrapper< A extends ArrayDataAccess< A > & ShortAccess & Dirty > implements ArrayDataAccessWrapper< A, ShortArray >
 	{
 		@Override
 		public ShortArray wrap( final A access )
 		{
 			return new ShortArray( ( short[] ) access.getCurrentStorageArray() );
 		}
+
+		@Override
+		public Dirty wrapDirty( final A access )
+		{
+			return access;
+		}
 	}
 
-	static class LongAccessWrapper< A extends ArrayDataAccess< A > & LongAccess > implements ArrayDataAccessWrapper< A, LongArray >
+	static class LongAccessWrapper< A extends ArrayDataAccess< A > & LongAccess & Dirty > implements ArrayDataAccessWrapper< A, LongArray >
 	{
 		@Override
 		public LongArray wrap( final A access )
 		{
 			return new LongArray( ( long[] ) access.getCurrentStorageArray() );
+		}
+
+		@Override
+		public Dirty wrapDirty( final A access )
+		{
+			return access;
 		}
 	}
 }

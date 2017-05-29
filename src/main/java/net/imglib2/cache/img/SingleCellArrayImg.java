@@ -47,6 +47,8 @@ public class SingleCellArrayImg< T extends NativeType< T >, A extends ArrayDataA
 
 	private A data;
 
+	private Dirty dirty;
+
 	private T linkedType;
 
 	@Override
@@ -81,10 +83,10 @@ public class SingleCellArrayImg< T extends NativeType< T >, A extends ArrayDataA
 		dimensions = new int[ n ];
 	}
 
-	public SingleCellArrayImg( final int[] cellDims, final long[] cellMin, final A cellData )
+	public SingleCellArrayImg( final int[] cellDims, final long[] cellMin, final A cellData, final Dirty dirtyFlag )
 	{
 		this( cellDims.length );
-		reset( cellDims, cellMin, cellData );
+		reset( cellDims, cellMin, cellData, dirtyFlag );
 	}
 
 	/**
@@ -100,9 +102,18 @@ public class SingleCellArrayImg< T extends NativeType< T >, A extends ArrayDataA
 		return data.getCurrentStorageArray();
 	}
 
-	SingleCellArrayImg( final int[] cellDims, final long[] cellMin, final A cellData, final T type )
+	/**
+	 * If the cell is backed by a {@link Dirty}-capable access, flag it as
+	 * dirty. (Otherwise, do nothing.)
+	 */
+	public void setDirty()
 	{
-		this( cellDims, cellMin, cellData );
+		dirty.setDirty();
+	}
+
+	SingleCellArrayImg( final int[] cellDims, final long[] cellMin, final A cellData, final Dirty dirtyFlag, final T type )
+	{
+		this( cellDims, cellMin, cellData, dirtyFlag );
 		try
 		{
 			LazyCellImg.linkType( type, this );
@@ -113,7 +124,7 @@ public class SingleCellArrayImg< T extends NativeType< T >, A extends ArrayDataA
 		}
 	}
 
-	void reset(	final int[] cellDims, final long[] cellMin, final A cellData )
+	void reset(	final int[] cellDims, final long[] cellMin, final A cellData, final Dirty dirtyFlag )
 	{
 		for ( int d = 0; d < n; ++d )
 		{
@@ -124,6 +135,7 @@ public class SingleCellArrayImg< T extends NativeType< T >, A extends ArrayDataA
 		IntervalIndexer.createAllocationSteps( cellDims, steps );
 		size = steps[ n - 1 ] * cellDims[ n - 1 ];
 		data = cellData;
+		dirty = dirtyFlag;
 	}
 
 	@Override
