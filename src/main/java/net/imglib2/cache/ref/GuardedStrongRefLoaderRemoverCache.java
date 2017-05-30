@@ -12,8 +12,8 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 
 import net.imglib2.cache.CacheLoader;
-import net.imglib2.cache.LoaderRemoverCache;
 import net.imglib2.cache.CacheRemover;
+import net.imglib2.cache.LoaderRemoverCache;
 
 /**
  * A {@link LoaderRemoverCache} that is backed by a cache with strong references to
@@ -111,12 +111,6 @@ public class GuardedStrongRefLoaderRemoverCache< K, V > implements LoaderRemover
 		public V getValue()
 		{
 			return ref.get();
-		}
-
-		public void setValue( final V value )
-		{
-			this.loaded = true;
-			this.ref = new WeakReference<>( value );
 		}
 
 		public void setValue( final V value, final CacheRemover< ? super K, ? super V > remover )
