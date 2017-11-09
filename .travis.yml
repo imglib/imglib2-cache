@@ -4,8 +4,6 @@ branches:
   only: master
 install: true
 script: ".travis/build.sh"
-after_success: ".travis/notify.sh Travis-Success"
-after_failure: ".travis/notify.sh Travis-Failure"
 env:
   global:
   - secure: un16PBsvkbfpcBI0NPwjayg7c/HcXqWVSn/35F2pNmYsFQxvxB//wDv+FZ6bZ97V4hCpiQsPdkgQn8z3bWdwsGE7H/QagxpD33cPqZtbIE+3fcIPF2M6otbqQzkt9Ni32SgUPr61Y0RmwcXNkP1ENX0By13gAahWK9Al52BTN19xZedF+p7bUmUq6iqi6UERc30J1MKMj7IbpGNKDLowWOyMWmtW+eNT2fIe90U4bQu8UYczaYnzoRMvu31gskQ5Dt6Y0VHbn9Mdn59XITuYdgYBQr0e63Ea9ZTUCSWl5JZukDX7nTQMELL+++Qwo3/OuSVAZakklmHzu8KG8k2m2/bukMb49bX1VGqX1tHFfm17QGrBJQCDwI57MTB8k9xiiKNQP8CV3d6Jbt2r+t2D/iVRe6kNPyyOq0o+2Kfsq9ujfo7LjaE+cOQxKBairBLEeOhI/ltBkg7FHuWfomyXxs3LmgJWV2BbmMbXpxibfVkDhb87k4w4bOKkxVRFqM2QHj5SroCUfvgH99IG2viejyCdcIIgTGIcq3wW3p7V7T4PlKmAAiE5OzF/yBq1oOPQxZda+O7Ua1wfaPFuPqbuXbgaSFCCoVRv5yelp9hvisT9X5qBPcIzUkk6mmihrQ1C7FO+UaLfEMCfxqAQlOM9QHguF3MVG5enmU9ICO2r1DY=
