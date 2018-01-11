@@ -100,7 +100,7 @@ public class ReadOnlyCachedCellImgFactory
 	/**
 	 * Create {@link CachedCellImg} backed n=by either a {@link CellLoader} or a {@link CacheLoader}.
 	 *
-	 * @param dim
+	 * @param dimensions
 	 *            dimensions of the image to create.
 	 * @param cacheLoader
 	 *            user-specified backing loader or {@code null}.
