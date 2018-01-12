@@ -1,10 +1,15 @@
 package net.imglib2.cache.img;
 
+import java.util.Set;
+
 import net.imglib2.cache.CacheLoader;
+import net.imglib2.img.basictypeaccess.AccessFlags;
+import net.imglib2.img.basictypeaccess.ArrayDataAccessFactory;
 import net.imglib2.img.basictypeaccess.array.ArrayDataAccess;
 import net.imglib2.img.cell.Cell;
 import net.imglib2.img.cell.CellGrid;
 import net.imglib2.type.NativeType;
+import net.imglib2.type.PrimitiveType;
 import net.imglib2.util.Fraction;
 import net.imglib2.util.Intervals;
 
@@ -13,8 +18,8 @@ import net.imglib2.util.Intervals;
  * type {@code A}, with the correct dimensions, etc.
  * <p>
  * Usually, it should be created through static helper methods
- * {@link #get(CellGrid, Fraction, PrimitiveType, AccessFlags...)} or
- * {@link #get(CellGrid, NativeType, AccessFlags...)} to get the desired
+ * {@link #get(CellGrid, Fraction, PrimitiveType, Set)} or
+ * {@link #get(CellGrid, NativeType, Set)} to get the desired
  * primitive type and dirty/volatile variant.
  * </p>
  *
@@ -55,16 +60,16 @@ public class EmptyCellCacheLoader< A extends ArrayDataAccess< A > > implements C
 	public static < T extends NativeType< T >, A extends ArrayDataAccess< A > > EmptyCellCacheLoader< A > get(
 			final CellGrid grid,
 			final T type,
-			final AccessFlags ... flags )
+			final Set< AccessFlags > flags )
 	{
-		return get( grid, type.getEntitiesPerPixel(), PrimitiveType.forNativeType( type ), flags );
+		return get( grid, type.getEntitiesPerPixel(), type.getNativeTypeFactory().getPrimitiveType(), flags );
 	}
 
 	public static < A extends ArrayDataAccess< A > > EmptyCellCacheLoader< A > get(
 			final CellGrid grid,
 			final Fraction entitiesPerPixel,
 			final PrimitiveType primitiveType,
-			final AccessFlags ... flags )
+			final Set< AccessFlags > flags )
 	{
 		final A creator = ArrayDataAccessFactory.get( primitiveType, flags );
 		return creator == null ? null : new EmptyCellCacheLoader<>( grid, entitiesPerPixel, creator );

@@ -1,23 +1,19 @@
 package net.imglib2.cache.img;
 
+import static net.imglib2.img.basictypeaccess.AccessFlags.DIRTY;
+import static net.imglib2.img.basictypeaccess.AccessFlags.VOLATILE;
+
+import java.util.Set;
 import java.util.function.Function;
 
 import net.imglib2.Cursor;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessible;
 import net.imglib2.cache.CacheLoader;
-import net.imglib2.exception.IncompatibleTypeException;
 import net.imglib2.img.AbstractNativeImg;
 import net.imglib2.img.Img;
 import net.imglib2.img.ImgFactory;
-import net.imglib2.img.NativeImgFactory;
-import net.imglib2.img.basictypeaccess.ByteAccess;
-import net.imglib2.img.basictypeaccess.CharAccess;
-import net.imglib2.img.basictypeaccess.DoubleAccess;
-import net.imglib2.img.basictypeaccess.FloatAccess;
-import net.imglib2.img.basictypeaccess.IntAccess;
-import net.imglib2.img.basictypeaccess.LongAccess;
-import net.imglib2.img.basictypeaccess.ShortAccess;
+import net.imglib2.img.basictypeaccess.AccessFlags;
 import net.imglib2.img.basictypeaccess.array.ArrayDataAccess;
 import net.imglib2.img.basictypeaccess.array.ByteArray;
 import net.imglib2.img.basictypeaccess.array.CharArray;
@@ -50,6 +46,8 @@ import net.imglib2.img.basictypeaccess.volatiles.array.VolatileShortArray;
 import net.imglib2.img.cell.Cell;
 import net.imglib2.img.cell.CellGrid;
 import net.imglib2.type.NativeType;
+import net.imglib2.type.PrimitiveType;
+import net.imglib2.type.NativeTypeFactory;
 import net.imglib2.util.Fraction;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
@@ -60,8 +58,8 @@ import net.imglib2.view.Views;
  * type {@code CA}, with the correct dimensions, etc.
  * <p>
  * Usually, it should be created through static helper methods
- * {@link #get(CellGrid, RandomAccessible, AccessFlags...)} or
- * {@link #get(CellGrid, RandomAccessible, NativeType, AccessFlags...)} to get
+ * {@link #get(CellGrid, RandomAccessible, Set)} or
+ * {@link #get(CellGrid, RandomAccessible, NativeType, Set)} to get
  * the desired primitive type and dirty/volatile variant.
  * </p>
  * <p>
@@ -113,16 +111,6 @@ public class RandomAccessibleCacheLoader<
 		entitiesPerPixel = type.getEntitiesPerPixel();
 	}
 
-	protected T createType( final A access )
-	{
-		@SuppressWarnings( "unchecked" )
-		final NoImg< T, A > noimg = ( NoImg< T, A > ) type.createSuitableNativeImg( new NoImgFactory<>(), null );
-		final T createLinkedType = noimg.createLinkedType();
-		noimg.data = access;
-		createLinkedType.updateContainer( null );
-		return createLinkedType;
-	}
-
 	@Override
 	public Cell< CA > get( final Long key ) throws Exception
 	{
@@ -151,7 +139,7 @@ public class RandomAccessibleCacheLoader<
 	public static < T extends NativeType< T >, A extends ArrayDataAccess< A >, CA extends ArrayDataAccess< CA > > RandomAccessibleCacheLoader< T, A, CA > get(
 			final CellGrid grid,
 			final RandomAccessible< T > source,
-			final AccessFlags... flags )
+			final Set< AccessFlags > flags )
 	{
 		return get( grid, source, source.randomAccess().get(), flags );
 	}
@@ -161,11 +149,11 @@ public class RandomAccessibleCacheLoader<
 			final CellGrid grid,
 			final RandomAccessible< T > source,
 			final T type,
-			final AccessFlags... flags )
+			final Set< AccessFlags > flags )
 	{
-		final PrimitiveType primitiveType = PrimitiveType.forNativeType( type );
-		final boolean dirty = AccessFlags.isDirty( flags );
-		final boolean volatil = AccessFlags.isVolatile( flags );
+		final PrimitiveType primitiveType = type.getNativeTypeFactory().getPrimitiveType();
+		final boolean dirty = flags.contains( DIRTY );
+		final boolean volatil = flags.contains( VOLATILE );
 		switch ( primitiveType )
 		{
 		case BYTE:
@@ -229,14 +217,23 @@ public class RandomAccessibleCacheLoader<
 		}
 	}
 
+	@SuppressWarnings( "unchecked" )
+	private T createType( final A access )
+	{
+		T t = ( ( NativeTypeFactory< T, ? super A > ) type.getNativeTypeFactory() ).createLinkedType( new NoImg<>( access ) );
+		t.updateContainer( null );
+		return t;
+	}
+
 	static class NoImg< T extends NativeType< T >, A > extends AbstractNativeImg< T, A >
 	{
-		public NoImg()
+		public NoImg( final A data)
 		{
 			super( new long[] { 1 }, new Fraction() );
+			this.data = data;
 		}
 
-		A data;
+		private final A data;
 
 		@Override
 		public A update( final Object updater )
@@ -276,57 +273,6 @@ public class RandomAccessibleCacheLoader<
 
 		@Override
 		public Object iterationOrder()
-		{
-			throw new UnsupportedOperationException();
-		}
-	}
-
-	static class NoImgFactory< T extends NativeType< T > > extends NativeImgFactory< T >
-	{
-		@Override
-		public NoImg< T, ? extends ByteAccess > createByteInstance( final long[] dimensions, final Fraction entitiesPerPixel )
-		{
-			return new NoImg<>();
-		}
-
-		@Override
-		public NoImg< T, ? extends CharAccess > createCharInstance( final long[] dimensions, final Fraction entitiesPerPixel )
-		{
-			return new NoImg<>();
-		}
-
-		@Override
-		public NoImg< T, ? extends ShortAccess > createShortInstance( final long[] dimensions, final Fraction entitiesPerPixel )
-		{
-			return new NoImg<>();
-		}
-
-		@Override
-		public NoImg< T, ? extends IntAccess > createIntInstance( final long[] dimensions, final Fraction entitiesPerPixel )
-		{
-			return new NoImg<>();
-		}
-
-		@Override
-		public NoImg< T, ? extends LongAccess > createLongInstance( final long[] dimensions, final Fraction entitiesPerPixel )
-		{
-			return new NoImg<>();
-		}
-
-		@Override
-		public NoImg< T, ? extends FloatAccess > createFloatInstance( final long[] dimensions, final Fraction entitiesPerPixel )
-		{
-			return new NoImg<>();
-		}
-
-		@Override
-		public NoImg< T, ? extends DoubleAccess > createDoubleInstance( final long[] dimensions, final Fraction entitiesPerPixel )
-		{
-			return new NoImg<>();
-		}
-
-		@Override
-		public < S > ImgFactory< S > imgFactory( final S type ) throws IncompatibleTypeException
 		{
 			throw new UnsupportedOperationException();
 		}

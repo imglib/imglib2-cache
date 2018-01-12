@@ -1,5 +1,8 @@
 package net.imglib2.cache.img;
 
+import static net.imglib2.img.basictypeaccess.AccessFlags.DIRTY;
+import static net.imglib2.img.basictypeaccess.AccessFlags.VOLATILE;
+
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.DoubleBuffer;
@@ -7,7 +10,9 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 import java.nio.ShortBuffer;
+import java.util.Set;
 
+import net.imglib2.img.basictypeaccess.AccessFlags;
 import net.imglib2.img.basictypeaccess.array.AbstractByteArray;
 import net.imglib2.img.basictypeaccess.array.AbstractCharArray;
 import net.imglib2.img.basictypeaccess.array.AbstractDoubleArray;
@@ -45,6 +50,7 @@ import net.imglib2.img.basictypeaccess.volatiles.array.VolatileIntArray;
 import net.imglib2.img.basictypeaccess.volatiles.array.VolatileLongArray;
 import net.imglib2.img.basictypeaccess.volatiles.array.VolatileShortArray;
 import net.imglib2.type.NativeType;
+import net.imglib2.type.PrimitiveType;
 
 /**
  * Serialize/deserialize an access to/from a {@link ByteBuffer}.
@@ -53,7 +59,7 @@ import net.imglib2.type.NativeType;
  * volatile and dirty variants are implemented as static inner classes.
  * </p>
  * <p>
- * Use {@link #get(PrimitiveType, AccessFlags...)} to obtain the correct
+ * Use {@link #get(PrimitiveType, Set)} to obtain the correct
  * {@link AccessIo} implementation for a given {@link PrimitiveType},
  * {@link AccessFlags} combination.
  * </p>
@@ -75,16 +81,16 @@ public interface AccessIo< A >
 	 * Implementations, singleton instances, and get() methods
 	 */
 
-	public static < T extends NativeType< T >, A > AccessIo< A > get( final T type, final AccessFlags ... flags )
+	public static < T extends NativeType< T >, A > AccessIo< A > get( final T type, final Set< AccessFlags > flags )
 	{
-		return get( PrimitiveType.forNativeType( type ), flags );
+		return get( type.getNativeTypeFactory().getPrimitiveType(), flags );
 	}
 
 	@SuppressWarnings( "unchecked" )
-	public static < A > AccessIo< A > get( final PrimitiveType primitiveType, final AccessFlags ... flags )
+	public static < A > AccessIo< A > get( final PrimitiveType primitiveType, final Set< AccessFlags > flags )
 	{
-		final boolean dirty = AccessFlags.isDirty( flags );
-		final boolean volatil = AccessFlags.isVolatile( flags );
+		final boolean dirty = flags.contains( DIRTY );
+		final boolean volatil = flags.contains( VOLATILE );
 		switch ( primitiveType )
 		{
 		case BYTE:
