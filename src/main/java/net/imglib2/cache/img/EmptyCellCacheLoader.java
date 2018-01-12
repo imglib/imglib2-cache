@@ -1,10 +1,13 @@
 package net.imglib2.cache.img;
 
 import net.imglib2.cache.CacheLoader;
+import net.imglib2.img.basictypeaccess.AccessFlags;
+import net.imglib2.img.basictypeaccess.ArrayDataAccessFactory;
 import net.imglib2.img.basictypeaccess.array.ArrayDataAccess;
 import net.imglib2.img.cell.Cell;
 import net.imglib2.img.cell.CellGrid;
 import net.imglib2.type.NativeType;
+import net.imglib2.type.PrimitiveType;
 import net.imglib2.util.Fraction;
 import net.imglib2.util.Intervals;
 
@@ -57,7 +60,7 @@ public class EmptyCellCacheLoader< A extends ArrayDataAccess< A > > implements C
 			final T type,
 			final AccessFlags ... flags )
 	{
-		return get( grid, type.getEntitiesPerPixel(), PrimitiveType.forNativeType( type ), flags );
+		return get( grid, type.getEntitiesPerPixel(), type.getPrimitiveTypeInfo().getPrimitiveType(), flags );
 	}
 
 	public static < A extends ArrayDataAccess< A > > EmptyCellCacheLoader< A > get(

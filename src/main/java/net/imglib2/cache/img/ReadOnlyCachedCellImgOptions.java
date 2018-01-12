@@ -32,6 +32,7 @@ import java.lang.ref.SoftReference;
 
 import net.imglib2.Dirty;
 import net.imglib2.cache.img.DiskCachedCellImgOptions.CacheType;
+import net.imglib2.img.basictypeaccess.AccessFlags;
 import net.imglib2.img.cell.CellImgFactory;
 import net.imglib2.util.Util;
 

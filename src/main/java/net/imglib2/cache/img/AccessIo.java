@@ -8,6 +8,7 @@ import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 import java.nio.ShortBuffer;
 
+import net.imglib2.img.basictypeaccess.AccessFlags;
 import net.imglib2.img.basictypeaccess.array.AbstractByteArray;
 import net.imglib2.img.basictypeaccess.array.AbstractCharArray;
 import net.imglib2.img.basictypeaccess.array.AbstractDoubleArray;
@@ -45,6 +46,7 @@ import net.imglib2.img.basictypeaccess.volatiles.array.VolatileIntArray;
 import net.imglib2.img.basictypeaccess.volatiles.array.VolatileLongArray;
 import net.imglib2.img.basictypeaccess.volatiles.array.VolatileShortArray;
 import net.imglib2.type.NativeType;
+import net.imglib2.type.PrimitiveType;
 
 /**
  * Serialize/deserialize an access to/from a {@link ByteBuffer}.
@@ -77,7 +79,7 @@ public interface AccessIo< A >
 
 	public static < T extends NativeType< T >, A > AccessIo< A > get( final T type, final AccessFlags ... flags )
 	{
-		return get( PrimitiveType.forNativeType( type ), flags );
+		return get( type.getPrimitiveTypeInfo().getPrimitiveType(), flags );
 	}
 
 	@SuppressWarnings( "unchecked" )

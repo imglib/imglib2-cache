@@ -6,18 +6,10 @@ import net.imglib2.Cursor;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessible;
 import net.imglib2.cache.CacheLoader;
-import net.imglib2.exception.IncompatibleTypeException;
 import net.imglib2.img.AbstractNativeImg;
 import net.imglib2.img.Img;
 import net.imglib2.img.ImgFactory;
-import net.imglib2.img.NativeImgFactory;
-import net.imglib2.img.basictypeaccess.ByteAccess;
-import net.imglib2.img.basictypeaccess.CharAccess;
-import net.imglib2.img.basictypeaccess.DoubleAccess;
-import net.imglib2.img.basictypeaccess.FloatAccess;
-import net.imglib2.img.basictypeaccess.IntAccess;
-import net.imglib2.img.basictypeaccess.LongAccess;
-import net.imglib2.img.basictypeaccess.ShortAccess;
+import net.imglib2.img.basictypeaccess.AccessFlags;
 import net.imglib2.img.basictypeaccess.array.ArrayDataAccess;
 import net.imglib2.img.basictypeaccess.array.ByteArray;
 import net.imglib2.img.basictypeaccess.array.CharArray;
@@ -50,6 +42,8 @@ import net.imglib2.img.basictypeaccess.volatiles.array.VolatileShortArray;
 import net.imglib2.img.cell.Cell;
 import net.imglib2.img.cell.CellGrid;
 import net.imglib2.type.NativeType;
+import net.imglib2.type.PrimitiveType;
+import net.imglib2.type.PrimitiveTypeInfo;
 import net.imglib2.util.Fraction;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
@@ -113,16 +107,6 @@ public class RandomAccessibleCacheLoader<
 		entitiesPerPixel = type.getEntitiesPerPixel();
 	}
 
-	protected T createType( final A access )
-	{
-		@SuppressWarnings( "unchecked" )
-		final NoImg< T, A > noimg = ( NoImg< T, A > ) type.createSuitableNativeImg( new NoImgFactory<>(), null );
-		final T createLinkedType = noimg.createLinkedType();
-		noimg.data = access;
-		createLinkedType.updateContainer( null );
-		return createLinkedType;
-	}
-
 	@Override
 	public Cell< CA > get( final Long key ) throws Exception
 	{
@@ -163,7 +147,7 @@ public class RandomAccessibleCacheLoader<
 			final T type,
 			final AccessFlags... flags )
 	{
-		final PrimitiveType primitiveType = PrimitiveType.forNativeType( type );
+		final PrimitiveType primitiveType = type.getPrimitiveTypeInfo().getPrimitiveType();
 		final boolean dirty = AccessFlags.isDirty( flags );
 		final boolean volatil = AccessFlags.isVolatile( flags );
 		switch ( primitiveType )
@@ -229,14 +213,21 @@ public class RandomAccessibleCacheLoader<
 		}
 	}
 
+	@SuppressWarnings( "unchecked" )
+	private T createType( final A access )
+	{
+		return ( ( PrimitiveTypeInfo< T, ? super A > ) type.getPrimitiveTypeInfo() ).createLinkedType( new NoImg<>( access ) );
+	}
+
 	static class NoImg< T extends NativeType< T >, A > extends AbstractNativeImg< T, A >
 	{
-		public NoImg()
+		public NoImg( final A data)
 		{
 			super( new long[] { 1 }, new Fraction() );
+			this.data = data;
 		}
 
-		A data;
+		private final A data;
 
 		@Override
 		public A update( final Object updater )
@@ -276,57 +267,6 @@ public class RandomAccessibleCacheLoader<
 
 		@Override
 		public Object iterationOrder()
-		{
-			throw new UnsupportedOperationException();
-		}
-	}
-
-	static class NoImgFactory< T extends NativeType< T > > extends NativeImgFactory< T >
-	{
-		@Override
-		public NoImg< T, ? extends ByteAccess > createByteInstance( final long[] dimensions, final Fraction entitiesPerPixel )
-		{
-			return new NoImg<>();
-		}
-
-		@Override
-		public NoImg< T, ? extends CharAccess > createCharInstance( final long[] dimensions, final Fraction entitiesPerPixel )
-		{
-			return new NoImg<>();
-		}
-
-		@Override
-		public NoImg< T, ? extends ShortAccess > createShortInstance( final long[] dimensions, final Fraction entitiesPerPixel )
-		{
-			return new NoImg<>();
-		}
-
-		@Override
-		public NoImg< T, ? extends IntAccess > createIntInstance( final long[] dimensions, final Fraction entitiesPerPixel )
-		{
-			return new NoImg<>();
-		}
-
-		@Override
-		public NoImg< T, ? extends LongAccess > createLongInstance( final long[] dimensions, final Fraction entitiesPerPixel )
-		{
-			return new NoImg<>();
-		}
-
-		@Override
-		public NoImg< T, ? extends FloatAccess > createFloatInstance( final long[] dimensions, final Fraction entitiesPerPixel )
-		{
-			return new NoImg<>();
-		}
-
-		@Override
-		public NoImg< T, ? extends DoubleAccess > createDoubleInstance( final long[] dimensions, final Fraction entitiesPerPixel )
-		{
-			return new NoImg<>();
-		}
-
-		@Override
-		public < S > ImgFactory< S > imgFactory( final S type ) throws IncompatibleTypeException
 		{
 			throw new UnsupportedOperationException();
 		}

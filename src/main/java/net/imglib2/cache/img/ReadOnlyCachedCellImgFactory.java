@@ -39,11 +39,13 @@ import net.imglib2.cache.CacheLoader;
 import net.imglib2.cache.LoaderCache;
 import net.imglib2.cache.ref.GuardedStrongRefLoaderCache;
 import net.imglib2.cache.ref.SoftRefLoaderCache;
+import net.imglib2.img.basictypeaccess.ArrayDataAccessFactory;
 import net.imglib2.img.basictypeaccess.array.ArrayDataAccess;
 import net.imglib2.img.cell.Cell;
 import net.imglib2.img.cell.CellGrid;
 import net.imglib2.img.cell.CellImgFactory;
 import net.imglib2.type.NativeType;
+import net.imglib2.type.PrimitiveType;
 import net.imglib2.util.Fraction;
 
 /**
@@ -124,7 +126,7 @@ public class ReadOnlyCachedCellImgFactory
 				? factoryOptions.values
 				: new ReadOnlyCachedCellImgOptions.Values( factoryOptions.values, additionalOptions.values );
 
-		final PrimitiveType primitiveType = PrimitiveType.forNativeType( type );
+		final PrimitiveType primitiveType = type.getPrimitiveTypeInfo().getPrimitiveType();
 		final Fraction entitiesPerPixel = type.getEntitiesPerPixel();
 		final CellGrid grid = createCellGrid( dimensions, entitiesPerPixel, options );
 		final A accessType = ArrayDataAccessFactory.get( primitiveType, options.accessFlags() );
