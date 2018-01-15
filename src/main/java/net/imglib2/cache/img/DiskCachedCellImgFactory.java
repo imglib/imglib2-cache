@@ -37,7 +37,9 @@ package net.imglib2.cache.img;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.function.Supplier;
 
+import net.imglib2.Dimensions;
 import net.imglib2.cache.Cache;
 import net.imglib2.cache.CacheLoader;
 import net.imglib2.cache.IoSync;
@@ -55,6 +57,8 @@ import net.imglib2.img.cell.CellImgFactory;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.PrimitiveTypeInfo;
 import net.imglib2.util.Fraction;
+import net.imglib2.util.Intervals;
+import net.imglib2.util.Util;
 
 /**
  * Factory for creating {@link DiskCachedCellImg}s. See
@@ -70,9 +74,9 @@ public class DiskCachedCellImgFactory< T extends NativeType< T > > extends Nativ
 	/**
 	 * Create a new {@link DiskCachedCellImgFactory} with default configuration.
 	 */
-	public DiskCachedCellImgFactory()
+	public DiskCachedCellImgFactory( final T type )
 	{
-		this( DiskCachedCellImgOptions.options() );
+		this( type, DiskCachedCellImgOptions.options() );
 	}
 
 	/**
@@ -82,42 +86,103 @@ public class DiskCachedCellImgFactory< T extends NativeType< T > > extends Nativ
 	 * @param optional
 	 *            configuration options.
 	 */
-	public DiskCachedCellImgFactory( final DiskCachedCellImgOptions optional )
+	public DiskCachedCellImgFactory( final T type, final DiskCachedCellImgOptions optional )
 	{
+		super( type );
+		this.factoryOptions = optional;
+	}
+
+	/**
+	 * Create a new {@link DiskCachedCellImgFactory} with default configuration.
+	 */
+	public DiskCachedCellImgFactory( final Supplier< T > type )
+	{
+		this( type, DiskCachedCellImgOptions.options() );
+	}
+
+	/**
+	 * Create a new {@link DiskCachedCellImgFactory} with the specified
+	 * configuration.
+	 *
+	 * @param optional
+	 *            configuration options.
+	 */
+	public DiskCachedCellImgFactory( final Supplier< T > type, final DiskCachedCellImgOptions optional )
+	{
+		super( type );
 		this.factoryOptions = optional;
 	}
 
 	@Override
-	public DiskCachedCellImg< T, ? > create( final long[] dim, final T type )
+	public DiskCachedCellImg< T, ? > create( final long... dimensions )
 	{
-		return create( dim, null, null, type, type.getPrimitiveTypeInfo(), null );
+		return create( dimensions, null, null, type(), type().getPrimitiveTypeInfo(), null );
 	}
 
-	public DiskCachedCellImg< T, ? > create( final long[] dim, final T type, final DiskCachedCellImgOptions additionalOptions )
+	@Override
+	public DiskCachedCellImg< T, ? > create( final Dimensions dimensions )
 	{
-		return create( dim, null, null, type, type.getPrimitiveTypeInfo(), additionalOptions );
+		return create( Intervals.dimensionsAsLongArray( dimensions ) );
 	}
 
-	public DiskCachedCellImg< T, ? > create( final long[] dim, final T type, final CellLoader< T > loader )
+	@Override
+	public DiskCachedCellImg< T, ? > create( final int[] dimensions )
 	{
-		return create( dim, null, loader, type, type.getPrimitiveTypeInfo(), null );
+		return create( Util.int2long( dimensions ) );
 	}
 
-	public DiskCachedCellImg< T, ? > create( final long[] dim, final T type, final CellLoader< T > loader, final DiskCachedCellImgOptions additionalOptions )
+	public DiskCachedCellImg< T, ? > create( final long[] dimensions, final DiskCachedCellImgOptions additionalOptions )
 	{
-		return create( dim, null, loader, type, type.getPrimitiveTypeInfo(), additionalOptions );
+		return create( dimensions, null, null, type(), type().getPrimitiveTypeInfo(), additionalOptions );
+	}
+
+	public DiskCachedCellImg< T, ? > create( final Dimensions dimensions, final DiskCachedCellImgOptions additionalOptions )
+	{
+		return create( Intervals.dimensionsAsLongArray( dimensions ), additionalOptions );
+	}
+
+	public DiskCachedCellImg< T, ? > create( final long[] dimensions, final CellLoader< T > loader )
+	{
+		return create( dimensions, null, loader, type(), type().getPrimitiveTypeInfo(), null );
+	}
+
+	public DiskCachedCellImg< T, ? > create( final Dimensions dimensions, final CellLoader< T > loader )
+	{
+		return create( Intervals.dimensionsAsLongArray( dimensions ), null, loader, type(), type().getPrimitiveTypeInfo(), null );
+	}
+
+	public DiskCachedCellImg< T, ? > create( final long[] dimensions, final CellLoader< T > loader, final DiskCachedCellImgOptions additionalOptions )
+	{
+		return create( dimensions, null, loader, type(), type().getPrimitiveTypeInfo(), additionalOptions );
+	}
+
+	public DiskCachedCellImg< T, ? > create( final Dimensions dimensions, final CellLoader< T > loader, final DiskCachedCellImgOptions additionalOptions )
+	{
+		return create( Intervals.dimensionsAsLongArray( dimensions ), null, loader, type(), type().getPrimitiveTypeInfo(), additionalOptions );
 	}
 
 	@SuppressWarnings( "unchecked" )
-	public < A > DiskCachedCellImg< T, A > createWithCacheLoader( final long[] dim, final T type, final CacheLoader< Long, Cell< A > > backingLoader )
+	public < A > DiskCachedCellImg< T, A > createWithCacheLoader( final long[] dimensions, final CacheLoader< Long, Cell< A > > backingLoader )
 	{
-		return ( DiskCachedCellImg< T, A > ) create( dim, backingLoader, null, type, type.getPrimitiveTypeInfo(), null );
+		return ( DiskCachedCellImg< T, A > ) create( dimensions, backingLoader, null, type(), type().getPrimitiveTypeInfo(), null );
 	}
 
 	@SuppressWarnings( "unchecked" )
-	public < A > DiskCachedCellImg< T, A > createWithCacheLoader( final long[] dim, final T type, final CacheLoader< Long, Cell< A > > backingLoader, final DiskCachedCellImgOptions additionalOptions )
+	public < A > DiskCachedCellImg< T, A > createWithCacheLoader( final Dimensions dimensions, final CacheLoader< Long, Cell< A > > backingLoader )
 	{
-		return ( DiskCachedCellImg< T, A > ) create( dim, backingLoader, null, type, type.getPrimitiveTypeInfo(), additionalOptions );
+		return ( DiskCachedCellImg< T, A > ) create( Intervals.dimensionsAsLongArray( dimensions ), backingLoader, null, type(), type().getPrimitiveTypeInfo(), null );
+	}
+
+	@SuppressWarnings( "unchecked" )
+	public < A > DiskCachedCellImg< T, A > createWithCacheLoader( final long[] dimensions, final CacheLoader< Long, Cell< A > > backingLoader, final DiskCachedCellImgOptions additionalOptions )
+	{
+		return ( DiskCachedCellImg< T, A > ) create( dimensions, backingLoader, null, type(), type().getPrimitiveTypeInfo(), additionalOptions );
+	}
+
+	@SuppressWarnings( "unchecked" )
+	public < A > DiskCachedCellImg< T, A > createWithCacheLoader( final Dimensions dimensions, final CacheLoader< Long, Cell< A > > backingLoader, final DiskCachedCellImgOptions additionalOptions )
+	{
+		return ( DiskCachedCellImg< T, A > ) create( Intervals.dimensionsAsLongArray( dimensions ), backingLoader, null, type(), type().getPrimitiveTypeInfo(), additionalOptions );
 	}
 
 	/**
@@ -267,5 +332,74 @@ public class DiskCachedCellImgFactory< T extends NativeType< T > > extends Nativ
 		{
 			throw new RuntimeException( e );
 		}
+	}
+
+
+	/*
+	 * -----------------------------------------------------------------------
+	 *
+	 * Deprecated API.
+	 *
+	 * Supports backwards compatibility with ImgFactories that are constructed
+	 * without a type instance or supplier.
+	 *
+	 * -----------------------------------------------------------------------
+	 */
+
+	@Deprecated
+	public DiskCachedCellImgFactory()
+	{
+		this( DiskCachedCellImgOptions.options() );
+	}
+
+	@Deprecated
+	public DiskCachedCellImgFactory( final DiskCachedCellImgOptions optional )
+	{
+		this.factoryOptions = optional;
+	}
+
+	@Deprecated
+	@Override
+	public DiskCachedCellImg< T, ? > create( final long[] dim, final T type )
+	{
+		final T cachedType = cache( type );
+		return create( dim, null, null, cachedType, cachedType.getPrimitiveTypeInfo(), null );
+	}
+
+	@Deprecated
+	public DiskCachedCellImg< T, ? > create( final long[] dim, final T type, final DiskCachedCellImgOptions additionalOptions )
+	{
+		final T cachedType = cache( type );
+		return create( dim, null, null, cachedType, cachedType.getPrimitiveTypeInfo(), additionalOptions );
+	}
+
+	@Deprecated
+	public DiskCachedCellImg< T, ? > create( final long[] dim, final T type, final CellLoader< T > loader )
+	{
+		final T cachedType = cache( type );
+		return create( dim, null, loader, cachedType, cachedType.getPrimitiveTypeInfo(), null );
+	}
+
+	@Deprecated
+	public DiskCachedCellImg< T, ? > create( final long[] dim, final T type, final CellLoader< T > loader, final DiskCachedCellImgOptions additionalOptions )
+	{
+		final T cachedType = cache( type );
+		return create( dim, null, loader, cachedType, cachedType.getPrimitiveTypeInfo(), additionalOptions );
+	}
+
+	@Deprecated
+	@SuppressWarnings( "unchecked" )
+	public < A > DiskCachedCellImg< T, A > createWithCacheLoader( final long[] dim, final T type, final CacheLoader< Long, Cell< A > > backingLoader )
+	{
+		final T cachedType = cache( type );
+		return ( DiskCachedCellImg< T, A > ) create( dim, backingLoader, null, cachedType, cachedType.getPrimitiveTypeInfo(), null );
+	}
+
+	@Deprecated
+	@SuppressWarnings( "unchecked" )
+	public < A > DiskCachedCellImg< T, A > createWithCacheLoader( final long[] dim, final T type, final CacheLoader< Long, Cell< A > > backingLoader, final DiskCachedCellImgOptions additionalOptions )
+	{
+		final T cachedType = cache( type );
+		return ( DiskCachedCellImg< T, A > ) create( dim, backingLoader, null, cachedType, cachedType.getPrimitiveTypeInfo(), additionalOptions );
 	}
 }
