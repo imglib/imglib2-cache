@@ -362,44 +362,44 @@ public class DiskCachedCellImgFactory< T extends NativeType< T > > extends Nativ
 	@Override
 	public DiskCachedCellImg< T, ? > create( final long[] dim, final T type )
 	{
-		final T cachedType = cache( type );
-		return create( dim, null, null, cachedType, cachedType.getPrimitiveTypeInfo(), null );
+		cache( type );
+		return create( dim, null, null, type, type.getPrimitiveTypeInfo(), null );
 	}
 
 	@Deprecated
 	public DiskCachedCellImg< T, ? > create( final long[] dim, final T type, final DiskCachedCellImgOptions additionalOptions )
 	{
-		final T cachedType = cache( type );
-		return create( dim, null, null, cachedType, cachedType.getPrimitiveTypeInfo(), additionalOptions );
+		cache( type );
+		return create( dim, null, null, type, type.getPrimitiveTypeInfo(), additionalOptions );
 	}
 
 	@Deprecated
 	public DiskCachedCellImg< T, ? > create( final long[] dim, final T type, final CellLoader< T > loader )
 	{
-		final T cachedType = cache( type );
-		return create( dim, null, loader, cachedType, cachedType.getPrimitiveTypeInfo(), null );
+		cache( type );
+		return create( dim, null, loader, type, type.getPrimitiveTypeInfo(), null );
 	}
 
 	@Deprecated
 	public DiskCachedCellImg< T, ? > create( final long[] dim, final T type, final CellLoader< T > loader, final DiskCachedCellImgOptions additionalOptions )
 	{
-		final T cachedType = cache( type );
-		return create( dim, null, loader, cachedType, cachedType.getPrimitiveTypeInfo(), additionalOptions );
+		cache( type );
+		return create( dim, null, loader, type, type.getPrimitiveTypeInfo(), additionalOptions );
 	}
 
 	@Deprecated
 	@SuppressWarnings( "unchecked" )
 	public < A > DiskCachedCellImg< T, A > createWithCacheLoader( final long[] dim, final T type, final CacheLoader< Long, Cell< A > > backingLoader )
 	{
-		final T cachedType = cache( type );
-		return ( DiskCachedCellImg< T, A > ) create( dim, backingLoader, null, cachedType, cachedType.getPrimitiveTypeInfo(), null );
+		cache( type );
+		return ( DiskCachedCellImg< T, A > ) create( dim, backingLoader, null, type, type.getPrimitiveTypeInfo(), null );
 	}
 
 	@Deprecated
 	@SuppressWarnings( "unchecked" )
 	public < A > DiskCachedCellImg< T, A > createWithCacheLoader( final long[] dim, final T type, final CacheLoader< Long, Cell< A > > backingLoader, final DiskCachedCellImgOptions additionalOptions )
 	{
-		final T cachedType = cache( type );
-		return ( DiskCachedCellImg< T, A > ) create( dim, backingLoader, null, cachedType, cachedType.getPrimitiveTypeInfo(), additionalOptions );
+		cache( type );
+		return ( DiskCachedCellImg< T, A > ) create( dim, backingLoader, null, type, type.getPrimitiveTypeInfo(), additionalOptions );
 	}
 }
