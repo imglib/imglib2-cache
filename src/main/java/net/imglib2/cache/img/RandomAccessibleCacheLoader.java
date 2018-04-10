@@ -1,5 +1,9 @@
 package net.imglib2.cache.img;
 
+import static net.imglib2.img.basictypeaccess.AccessFlags.DIRTY;
+import static net.imglib2.img.basictypeaccess.AccessFlags.VOLATILE;
+
+import java.util.Set;
 import java.util.function.Function;
 
 import net.imglib2.Cursor;
@@ -54,8 +58,8 @@ import net.imglib2.view.Views;
  * type {@code CA}, with the correct dimensions, etc.
  * <p>
  * Usually, it should be created through static helper methods
- * {@link #get(CellGrid, RandomAccessible, AccessFlags...)} or
- * {@link #get(CellGrid, RandomAccessible, NativeType, AccessFlags...)} to get
+ * {@link #get(CellGrid, RandomAccessible, Set)} or
+ * {@link #get(CellGrid, RandomAccessible, NativeType, Set)} to get
  * the desired primitive type and dirty/volatile variant.
  * </p>
  * <p>
@@ -135,7 +139,7 @@ public class RandomAccessibleCacheLoader<
 	public static < T extends NativeType< T >, A extends ArrayDataAccess< A >, CA extends ArrayDataAccess< CA > > RandomAccessibleCacheLoader< T, A, CA > get(
 			final CellGrid grid,
 			final RandomAccessible< T > source,
-			final AccessFlags... flags )
+			final Set< AccessFlags > flags )
 	{
 		return get( grid, source, source.randomAccess().get(), flags );
 	}
@@ -145,11 +149,11 @@ public class RandomAccessibleCacheLoader<
 			final CellGrid grid,
 			final RandomAccessible< T > source,
 			final T type,
-			final AccessFlags... flags )
+			final Set< AccessFlags > flags )
 	{
 		final PrimitiveType primitiveType = type.getPrimitiveTypeInfo().getPrimitiveType();
-		final boolean dirty = AccessFlags.isDirty( flags );
-		final boolean volatil = AccessFlags.isVolatile( flags );
+		final boolean dirty = flags.contains( DIRTY );
+		final boolean volatil = flags.contains( VOLATILE );
 		switch ( primitiveType )
 		{
 		case BYTE:

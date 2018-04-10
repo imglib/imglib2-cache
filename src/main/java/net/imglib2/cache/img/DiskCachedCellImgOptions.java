@@ -30,6 +30,7 @@ package net.imglib2.cache.img;
 
 import java.lang.ref.SoftReference;
 import java.nio.file.Path;
+import java.util.Set;
 
 import net.imglib2.Dirty;
 import net.imglib2.img.basictypeaccess.AccessFlags;
@@ -428,7 +429,7 @@ public class DiskCachedCellImgOptions
 			return volatileAccesses;
 		}
 
-		public AccessFlags[] accessFlags()
+		public Set< AccessFlags > accessFlags()
 		{
 			return AccessFlags.fromBooleansDirtyVolatile( dirtyAccesses, volatileAccesses );
 		}
