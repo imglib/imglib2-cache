@@ -217,7 +217,7 @@ public class DiskCachedCellImgFactory< T extends NativeType< T > > extends Nativ
 				ArrayDataAccessFactory.get( info, options.accessFlags() ).createArray( 0 ), options );
 		// calling createArray( 0 ) is necessary here, because otherwise javac
 		// will not infer the ArrayDataAccess type
-		info.createLinkedType( img );
+		img.setLinkedType( info.createLinkedType( img ) );
 		return img;
 	}
 
