@@ -213,10 +213,37 @@ public class DiskCachedCellImgFactory< T extends NativeType< T > > extends Nativ
 		final DiskCachedCellImgOptions.Values options = ( additionalOptions == null )
 				? factoryOptions.values
 				: new DiskCachedCellImgOptions.Values( factoryOptions.values, additionalOptions.values );
-		final DiskCachedCellImg< T, ? extends A > img = createInstance( dimensions, cacheLoader, cellLoader, type,
-				ArrayDataAccessFactory.get( info, options.accessFlags() ).createArray( 0 ), options );
-		// calling createArray( 0 ) is necessary here, because otherwise javac
-		// will not infer the ArrayDataAccess type
+
+		/*
+		 * This should work.
+		 */
+//		final DiskCachedCellImg< T, ? extends A > img = createInstance( dimensions, cacheLoader, cellLoader, type,
+//				ArrayDataAccessFactory.get( info, options.accessFlags() ), options );
+
+		/*
+		 * This does work with javac.
+		 * Calling createArray( 0 ) is necessary here, because otherwise javac will not infer the ArrayDataAccess type.
+		 */
+//		final DiskCachedCellImg< T, ? extends A > img = createInstance( dimensions, cacheLoader, cellLoader, type,
+//				ArrayDataAccessFactory.get( info, options.accessFlags() ).createArray( 0 ), options );
+
+		/*
+		 * Workaround.
+		 *
+		 * The above is compiled correctly by javac. It seems to compile
+		 * with eclipse, but results in a runtime exception:
+		 * java.lang.NoSuchMethodError:
+		 * java.lang.Object.createArray(I)Ljava/lang/Object;
+		 */
+		final Object a = ArrayDataAccessFactory.get( info, options.accessFlags() );
+		@SuppressWarnings( { "unchecked", "rawtypes" } )
+		final Object i = createInstance( dimensions, cacheLoader, cellLoader, type, ( ArrayDataAccess ) a, options );
+		@SuppressWarnings( "unchecked" )
+		final DiskCachedCellImg< T, ? extends A > img = ( DiskCachedCellImg< T, ? extends A > ) i;
+		/*
+		 * TODO Revisit with newer eclipse and javac versions.
+		 */
+
 		img.setLinkedType( info.createLinkedType( img ) );
 		return img;
 	}
