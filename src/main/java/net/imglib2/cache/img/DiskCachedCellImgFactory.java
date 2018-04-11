@@ -55,7 +55,7 @@ import net.imglib2.img.cell.Cell;
 import net.imglib2.img.cell.CellGrid;
 import net.imglib2.img.cell.CellImgFactory;
 import net.imglib2.type.NativeType;
-import net.imglib2.type.PrimitiveTypeInfo;
+import net.imglib2.type.NativeTypeFactory;
 import net.imglib2.util.Fraction;
 import net.imglib2.util.Intervals;
 import net.imglib2.util.Util;
@@ -205,7 +205,7 @@ public class DiskCachedCellImgFactory< T extends NativeType< T > > extends Nativ
 			final DiskCachedCellImgOptions additionalOptions )
 	{
 		@SuppressWarnings( { "unchecked", "rawtypes" } )
-		final DiskCachedCellImg< T, A > img = create( dimensions, cacheLoader, cellLoader, type, ( PrimitiveTypeInfo ) type.getPrimitiveTypeInfo(), additionalOptions );
+		final DiskCachedCellImg< T, A > img = create( dimensions, cacheLoader, cellLoader, type, ( NativeTypeFactory ) type.getNativeTypeFactory(), additionalOptions );
 		return img;
 	}
 
@@ -214,7 +214,7 @@ public class DiskCachedCellImgFactory< T extends NativeType< T > > extends Nativ
 			final CacheLoader< Long, ? extends Cell< ? > > cacheLoader,
 			final CellLoader< T > cellLoader,
 			final T type,
-			final PrimitiveTypeInfo< T, A > info,
+			final NativeTypeFactory< T, A > typeFactory,
 			final DiskCachedCellImgOptions additionalOptions )
 	{
 		final DiskCachedCellImgOptions.Values options = ( additionalOptions == null )
@@ -278,9 +278,9 @@ public class DiskCachedCellImgFactory< T extends NativeType< T > > extends Nativ
 				.withRemover( iosync )
 				.withLoader( iosync );
 
-		final A accessType = ArrayDataAccessFactory.get( info, options.accessFlags() );
+		final A accessType = ArrayDataAccessFactory.get( typeFactory, options.accessFlags() );
 		final DiskCachedCellImg< T, ? extends A > img = new DiskCachedCellImg<>( this, grid, entitiesPerPixel, cache, accessType );
-		img.setLinkedType( info.createLinkedType( img ) );
+		img.setLinkedType( typeFactory.createLinkedType( img ) );
 		return img;
 	}
 

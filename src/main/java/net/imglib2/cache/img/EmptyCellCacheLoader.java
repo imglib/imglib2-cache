@@ -62,7 +62,7 @@ public class EmptyCellCacheLoader< A extends ArrayDataAccess< A > > implements C
 			final T type,
 			final Set< AccessFlags > flags )
 	{
-		return get( grid, type.getEntitiesPerPixel(), type.getPrimitiveTypeInfo().getPrimitiveType(), flags );
+		return get( grid, type.getEntitiesPerPixel(), type.getNativeTypeFactory().getPrimitiveType(), flags );
 	}
 
 	public static < A extends ArrayDataAccess< A > > EmptyCellCacheLoader< A > get(

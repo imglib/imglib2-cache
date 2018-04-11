@@ -98,7 +98,7 @@ public class LoadedCellCacheLoader< T extends NativeType< T >, A extends ArrayDa
 			final T type,
 			final Set< AccessFlags > flags )
 	{
-		return get( grid, loader, type, type.getPrimitiveTypeInfo().getPrimitiveType(), flags );
+		return get( grid, loader, type, type.getNativeTypeFactory().getPrimitiveType(), flags );
 	}
 
 	public static < T extends NativeType< T >, A extends ArrayDataAccess< A > > LoadedCellCacheLoader< T, A > get(

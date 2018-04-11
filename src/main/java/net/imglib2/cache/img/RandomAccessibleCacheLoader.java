@@ -47,7 +47,7 @@ import net.imglib2.img.cell.Cell;
 import net.imglib2.img.cell.CellGrid;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.PrimitiveType;
-import net.imglib2.type.PrimitiveTypeInfo;
+import net.imglib2.type.NativeTypeFactory;
 import net.imglib2.util.Fraction;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
@@ -151,7 +151,7 @@ public class RandomAccessibleCacheLoader<
 			final T type,
 			final Set< AccessFlags > flags )
 	{
-		final PrimitiveType primitiveType = type.getPrimitiveTypeInfo().getPrimitiveType();
+		final PrimitiveType primitiveType = type.getNativeTypeFactory().getPrimitiveType();
 		final boolean dirty = flags.contains( DIRTY );
 		final boolean volatil = flags.contains( VOLATILE );
 		switch ( primitiveType )
@@ -220,7 +220,7 @@ public class RandomAccessibleCacheLoader<
 	@SuppressWarnings( "unchecked" )
 	private T createType( final A access )
 	{
-		return ( ( PrimitiveTypeInfo< T, ? super A > ) type.getPrimitiveTypeInfo() ).createLinkedType( new NoImg<>( access ) );
+		return ( ( NativeTypeFactory< T, ? super A > ) type.getNativeTypeFactory() ).createLinkedType( new NoImg<>( access ) );
 	}
 
 	static class NoImg< T extends NativeType< T >, A > extends AbstractNativeImg< T, A >

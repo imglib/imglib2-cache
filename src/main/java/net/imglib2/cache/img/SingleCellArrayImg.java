@@ -19,7 +19,7 @@ import net.imglib2.img.array.ArrayImg;
 import net.imglib2.img.basictypeaccess.array.ArrayDataAccess;
 import net.imglib2.img.cell.AbstractCellImg;
 import net.imglib2.type.NativeType;
-import net.imglib2.type.PrimitiveTypeInfo;
+import net.imglib2.type.NativeTypeFactory;
 import net.imglib2.util.IntervalIndexer;
 
 /**
@@ -115,7 +115,7 @@ public class SingleCellArrayImg< T extends NativeType< T >, A extends ArrayDataA
 		this( cellDims, cellMin, cellData, dirtyFlag );
 
 		@SuppressWarnings( "unchecked" )
-		final PrimitiveTypeInfo< T, ? super A > info = ( PrimitiveTypeInfo< T, ? super A > ) type.getPrimitiveTypeInfo();
+		final NativeTypeFactory< T, ? super A > info = ( NativeTypeFactory< T, ? super A > ) type.getNativeTypeFactory();
 		setLinkedType( info.createLinkedType( this ) );
 	}
 

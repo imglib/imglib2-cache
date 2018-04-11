@@ -126,7 +126,7 @@ public class ReadOnlyCachedCellImgFactory
 				? factoryOptions.values
 				: new ReadOnlyCachedCellImgOptions.Values( factoryOptions.values, additionalOptions.values );
 
-		final PrimitiveType primitiveType = type.getPrimitiveTypeInfo().getPrimitiveType();
+		final PrimitiveType primitiveType = type.getNativeTypeFactory().getPrimitiveType();
 		final Fraction entitiesPerPixel = type.getEntitiesPerPixel();
 		final CellGrid grid = createCellGrid( dimensions, entitiesPerPixel, options );
 		final A accessType = ArrayDataAccessFactory.get( primitiveType, options.accessFlags() );

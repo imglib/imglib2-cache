@@ -83,7 +83,7 @@ public interface AccessIo< A >
 
 	public static < T extends NativeType< T >, A > AccessIo< A > get( final T type, final Set< AccessFlags > flags )
 	{
-		return get( type.getPrimitiveTypeInfo().getPrimitiveType(), flags );
+		return get( type.getNativeTypeFactory().getPrimitiveType(), flags );
 	}
 
 	@SuppressWarnings( "unchecked" )
