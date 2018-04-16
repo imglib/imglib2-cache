@@ -37,7 +37,6 @@ package net.imglib2.cache.img;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.function.Supplier;
 
 import net.imglib2.Dimensions;
 import net.imglib2.cache.Cache;
@@ -87,27 +86,6 @@ public class DiskCachedCellImgFactory< T extends NativeType< T > > extends Nativ
 	 *            configuration options.
 	 */
 	public DiskCachedCellImgFactory( final T type, final DiskCachedCellImgOptions optional )
-	{
-		super( type );
-		this.factoryOptions = optional;
-	}
-
-	/**
-	 * Create a new {@link DiskCachedCellImgFactory} with default configuration.
-	 */
-	public DiskCachedCellImgFactory( final Supplier< T > type )
-	{
-		this( type, DiskCachedCellImgOptions.options() );
-	}
-
-	/**
-	 * Create a new {@link DiskCachedCellImgFactory} with the specified
-	 * configuration.
-	 *
-	 * @param optional
-	 *            configuration options.
-	 */
-	public DiskCachedCellImgFactory( final Supplier< T > type, final DiskCachedCellImgOptions optional )
 	{
 		super( type );
 		this.factoryOptions = optional;
