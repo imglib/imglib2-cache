@@ -1,7 +1,13 @@
 package net.imglib2.cache.img;
 
+import static net.imglib2.img.basictypeaccess.AccessFlags.DIRTY;
+
+import java.util.Set;
+
 import net.imglib2.Dirty;
 import net.imglib2.cache.CacheLoader;
+import net.imglib2.img.basictypeaccess.AccessFlags;
+import net.imglib2.img.basictypeaccess.ArrayDataAccessFactory;
 import net.imglib2.img.basictypeaccess.ByteAccess;
 import net.imglib2.img.basictypeaccess.CharAccess;
 import net.imglib2.img.basictypeaccess.DoubleAccess;
@@ -20,6 +26,7 @@ import net.imglib2.img.basictypeaccess.array.ShortArray;
 import net.imglib2.img.cell.Cell;
 import net.imglib2.img.cell.CellGrid;
 import net.imglib2.type.NativeType;
+import net.imglib2.type.PrimitiveType;
 import net.imglib2.util.Fraction;
 import net.imglib2.util.Intervals;
 
@@ -28,9 +35,9 @@ import net.imglib2.util.Intervals;
  * {@code A} and uses a {@link CellLoader} to populate them with data.
  * <p>
  * Usually, {@link LoadedCellCacheLoader} should be created through static
- * helper methods {@link #get(CellGrid, CellLoader, NativeType, AccessFlags...)}
+ * helper methods {@link #get(CellGrid, CellLoader, NativeType, Set)}
  * or
- * {@link #get(CellGrid, CellLoader, NativeType, PrimitiveType, AccessFlags...)}
+ * {@link #get(CellGrid, CellLoader, NativeType, PrimitiveType, Set)}
  * to get the desired primitive type and dirty/volatile variant.
  * </p>
  *
@@ -89,9 +96,9 @@ public class LoadedCellCacheLoader< T extends NativeType< T >, A extends ArrayDa
 			final CellGrid grid,
 			final CellLoader< T > loader,
 			final T type,
-			final AccessFlags ... flags )
+			final Set< AccessFlags > flags )
 	{
-		return get( grid, loader, type, PrimitiveType.forNativeType( type ), flags );
+		return get( grid, loader, type, type.getNativeTypeFactory().getPrimitiveType(), flags );
 	}
 
 	public static < T extends NativeType< T >, A extends ArrayDataAccess< A > > LoadedCellCacheLoader< T, A > get(
@@ -99,7 +106,7 @@ public class LoadedCellCacheLoader< T extends NativeType< T >, A extends ArrayDa
 			final CellLoader< T > loader,
 			final T type,
 			final PrimitiveType primitiveType,
-			final AccessFlags ... flags )
+			final Set< AccessFlags > flags )
 	{
 		final A creator = ArrayDataAccessFactory.get( primitiveType, flags );
 		final ArrayDataAccessWrapper< A, ? > wrapper = getWrapper( primitiveType, flags );
@@ -109,9 +116,9 @@ public class LoadedCellCacheLoader< T extends NativeType< T >, A extends ArrayDa
 	@SuppressWarnings( "unchecked" )
 	static < A extends ArrayDataAccess< A > > ArrayDataAccessWrapper< A, ? > getWrapper(
 			final PrimitiveType primitiveType,
-			final AccessFlags ... flags )
+			final Set< AccessFlags > flags )
 	{
-		final boolean dirty = AccessFlags.isDirty( flags );
+		final boolean dirty = flags.contains( DIRTY );
 		switch ( primitiveType )
 		{
 		case BYTE:

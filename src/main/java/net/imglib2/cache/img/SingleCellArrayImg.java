@@ -1,6 +1,5 @@
 package net.imglib2.cache.img;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 
 import net.imglib2.AbstractCursor;
@@ -19,8 +18,8 @@ import net.imglib2.img.NativeImg;
 import net.imglib2.img.array.ArrayImg;
 import net.imglib2.img.basictypeaccess.array.ArrayDataAccess;
 import net.imglib2.img.cell.AbstractCellImg;
-import net.imglib2.img.cell.LazyCellImg;
 import net.imglib2.type.NativeType;
+import net.imglib2.type.NativeTypeFactory;
 import net.imglib2.util.IntervalIndexer;
 
 /**
@@ -114,14 +113,10 @@ public class SingleCellArrayImg< T extends NativeType< T >, A extends ArrayDataA
 	SingleCellArrayImg( final int[] cellDims, final long[] cellMin, final A cellData, final Dirty dirtyFlag, final T type )
 	{
 		this( cellDims, cellMin, cellData, dirtyFlag );
-		try
-		{
-			LazyCellImg.linkType( type, this );
-		}
-		catch ( NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e )
-		{
-			throw new RuntimeException( e );
-		}
+
+		@SuppressWarnings( "unchecked" )
+		final NativeTypeFactory< T, ? super A > info = ( NativeTypeFactory< T, ? super A > ) type.getNativeTypeFactory();
+		setLinkedType( info.createLinkedType( this ) );
 	}
 
 	void reset(	final int[] cellDims, final long[] cellMin, final A cellData, final Dirty dirtyFlag )
