@@ -220,7 +220,9 @@ public class RandomAccessibleCacheLoader<
 	@SuppressWarnings( "unchecked" )
 	private T createType( final A access )
 	{
-		return ( ( NativeTypeFactory< T, ? super A > ) type.getNativeTypeFactory() ).createLinkedType( new NoImg<>( access ) );
+		T t = ( ( NativeTypeFactory< T, ? super A > ) type.getNativeTypeFactory() ).createLinkedType( new NoImg<>( access ) );
+		t.updateContainer( null );
+		return t;
 	}
 
 	static class NoImg< T extends NativeType< T >, A > extends AbstractNativeImg< T, A >
