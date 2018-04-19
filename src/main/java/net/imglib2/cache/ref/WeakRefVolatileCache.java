@@ -28,11 +28,15 @@ public class WeakRefVolatileCache< K, V > implements VolatileCache< K, V >
 
 	final CreateInvalid< ? super K, ? extends V > createInvalid;
 
+	private final boolean invalidateBackingCache;
+
 	/*
 	 * Possible states of CacheWeakReference.loaded
 	 */
 	static final int NOTLOADED = 0;
+
 	static final int INVALID = 1;
+
 	static final int VALID = 2;
 
 	final class CacheWeakReference extends WeakReference< V >
@@ -118,9 +122,19 @@ public class WeakRefVolatileCache< K, V > implements VolatileCache< K, V >
 			final BlockingFetchQueues< Callable< ? > > fetchQueue,
 			final CreateInvalid< ? super K, ? extends V > createInvalid )
 	{
+		this( backingCache, fetchQueue, createInvalid, false );
+	}
+
+	public WeakRefVolatileCache(
+			final Cache< K, V > backingCache,
+			final BlockingFetchQueues< Callable< ? > > fetchQueue,
+			final CreateInvalid< ? super K, ? extends V > createInvalid,
+			final boolean invalidateBackingCache )
+	{
 		this.backingCache = backingCache;
 		this.fetchQueue = fetchQueue;
 		this.createInvalid = createInvalid;
+		this.invalidateBackingCache = invalidateBackingCache;
 	}
 
 	@Override
@@ -207,8 +221,9 @@ public class WeakRefVolatileCache< K, V > implements VolatileCache< K, V >
 	@Override
 	public void invalidateAll()
 	{
-		// TODO
-		throw new UnsupportedOperationException( "not implemented yet" );
+		if ( this.invalidateBackingCache )
+			this.backingCache.invalidateAll();
+		this.map.clear();
 	}
 
 	// ================ private methods =====================
