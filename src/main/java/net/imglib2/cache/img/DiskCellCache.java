@@ -209,7 +209,6 @@ public class DiskCellCache< A > implements CacheRemover< Long, Cell< A > >, Cach
 	public static Path createTempDirectory( final Path dir, final String prefix, final boolean deleteOnExit ) throws IOException
 	{
 		final Path tmp = Files.createTempDirectory( dir, prefix );
-		System.out.println( tmp );
 
 		if ( deleteOnExit )
 			addDeleteHook( tmp );
@@ -231,7 +230,6 @@ public class DiskCellCache< A > implements CacheRemover< Long, Cell< A > >, Cach
 	public static Path createTempDirectory( final String prefix, final boolean deleteOnExit ) throws IOException
 	{
 		final Path tmp = Files.createTempDirectory( prefix );
-		System.out.println( tmp );
 
 		if ( deleteOnExit )
 			addDeleteHook( tmp );
