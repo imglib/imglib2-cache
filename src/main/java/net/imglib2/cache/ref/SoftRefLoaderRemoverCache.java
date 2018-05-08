@@ -93,12 +93,6 @@ public class SoftRefLoaderRemoverCache< K, V > implements LoaderRemoverCache< K,
 			return ref.get();
 		}
 
-		public void setValue( final V value )
-		{
-			this.loaded = true;
-			this.ref = new SoftReference<>( value );
-		}
-
 		public void setValue( final V value, final CacheRemover< ? super K, ? super V > remover )
 		{
 			this.loaded = true;
