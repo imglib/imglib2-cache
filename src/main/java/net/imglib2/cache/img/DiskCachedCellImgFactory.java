@@ -267,7 +267,7 @@ public class DiskCachedCellImgFactory< T extends NativeType< T > > extends Nativ
 	public < S > ImgFactory< S > imgFactory( final S type ) throws IncompatibleTypeException
 	{
 		if ( NativeType.class.isInstance( type ) )
-			return new DiskCachedCellImgFactory( factoryOptions );
+			return new DiskCachedCellImgFactory( ( NativeType ) type, factoryOptions );
 		throw new IncompatibleTypeException( this, type.getClass().getCanonicalName() + " does not implement NativeType." );
 	}
 
