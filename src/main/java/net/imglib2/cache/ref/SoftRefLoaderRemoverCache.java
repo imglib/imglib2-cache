@@ -7,10 +7,11 @@ import java.lang.ref.SoftReference;
 import java.lang.reflect.Field;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Predicate;
 
 import net.imglib2.cache.CacheLoader;
-import net.imglib2.cache.LoaderRemoverCache;
 import net.imglib2.cache.CacheRemover;
+import net.imglib2.cache.LoaderRemoverCache;
 
 /**
  * TODO: Consider periodically calling {@link #cleanUp()} from a background
@@ -171,11 +172,73 @@ public class SoftRefLoaderRemoverCache< K, V > implements LoaderRemoverCache< K,
 		return value;
 	}
 
+	/**
+	 * Remove the {@code key} and discard the corresponding cached value.
+	 * <p>
+	 * This will <em>not</em> call
+	 * {@link CacheRemover#onRemoval(Object, Object)} for the discarded entry.
+	 */
+	// TODO: add to AbstractCache interface
+	public void invalidate( final K key )
+	{
+		final Entry entry = map.remove( key );
+		if ( entry != null )
+		{
+			synchronized ( entry )
+			{
+				entry.phantomRef.clear();
+				entry.phantomRef = null;
+				entry.remover = null;
+			}
+		}
+	}
+
+	// TODO: make parameter to invalidateAll(), invalidateIf()
+	static int parallelismThreshold = 1000;
+
+	/**
+	 * Remove and discard all cached values with keys matching {@code condition}.
+	 * <p>
+	 * This will <em>not</em> call
+	 * {@link CacheRemover#onRemoval(Object, Object)} for the discarded entries.
+	 */
+	// TODO: add to AbstractCache interface
+	public void invalidateIf( final Predicate< K > condition )
+	{
+		map.forEachValue( parallelismThreshold, entry ->
+		{
+			if ( condition.test( entry.key ) )
+			{
+				synchronized ( entry )
+				{
+					map.remove( entry.key, entry );
+					entry.phantomRef.clear();
+					entry.phantomRef = null;
+					entry.remover = null;
+				}
+			}
+		} );
+	}
+
+	/**
+	 * Remove and discard all cached values.
+	 * <p>
+	 * This will <em>not</em> call
+	 * {@link CacheRemover#onRemoval(Object, Object)} for the discarded entries.
+	 */
 	@Override
 	public void invalidateAll()
 	{
-		// TODO
-		throw new UnsupportedOperationException( "not implemented yet" );
+		map.forEachValue( parallelismThreshold, entry ->
+		{
+			synchronized ( entry )
+			{
+				map.remove( entry.key, entry );
+				entry.phantomRef.clear();
+				entry.phantomRef = null;
+				entry.remover = null;
+			}
+		} );
 	}
 
 	/**
