@@ -177,6 +177,9 @@ public class SoftRefLoaderRemoverCache< K, V > implements LoaderRemoverCache< K,
 	 * <p>
 	 * This will <em>not</em> call
 	 * {@link CacheRemover#onRemoval(Object, Object)} for the discarded entry.
+	 * <p>
+	 * <em>There must be no concurrent {@code get()} operations for {@code key}.
+	 * This will result in cache corruption and/or a deadlock.</em>
 	 */
 	// TODO: add to AbstractCache interface
 	public void invalidate( final K key )
@@ -201,6 +204,9 @@ public class SoftRefLoaderRemoverCache< K, V > implements LoaderRemoverCache< K,
 	 * <p>
 	 * This will <em>not</em> call
 	 * {@link CacheRemover#onRemoval(Object, Object)} for the discarded entries.
+	 * <p>
+	 * <em>There must be no concurrent {@code get()} operations for keys matching {@code condition}.
+	 * This will result in cache corruption and/or a deadlock.</em>
 	 */
 	// TODO: add to AbstractCache interface
 	public void invalidateIf( final Predicate< K > condition )
@@ -225,6 +231,9 @@ public class SoftRefLoaderRemoverCache< K, V > implements LoaderRemoverCache< K,
 	 * <p>
 	 * This will <em>not</em> call
 	 * {@link CacheRemover#onRemoval(Object, Object)} for the discarded entries.
+	 * <p>
+	 * <em>There must be no concurrent {@code get()} operations.
+	 * This will result in cache corruption and/or a deadlock.</em>
 	 */
 	@Override
 	public void invalidateAll()

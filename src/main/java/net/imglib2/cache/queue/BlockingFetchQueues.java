@@ -70,22 +70,34 @@ public class BlockingFetchQueues< E >
 	/** Number of elements in the queue */
 	private int count;
 
+	/** Whether the queue is paused */
+	private boolean paused;
+
+	/** Number of consumer threads. */
+	private final int numConsumers;
+
+	/** Number of consumer threads waiting in {@code take()} */
+	private int waitCount;
+
 	/** Main lock guarding all accesses */
 	private final ReentrantLock lock;
 
 	/** Condition for waiting take()s */
 	private final Condition notEmpty;
 
+	/** Condition for waiting pause() */
+	private final Condition isPaused;
+
 	/** incremented with every {@link #clearToPrefetch()} call */
 	private volatile long currentFrame = 0;
 
-	public BlockingFetchQueues( final int numPriorities )
+	public BlockingFetchQueues( final int numPriorities, final int numConsumers )
 	{
-		this( numPriorities, 16384 );
+		this( numPriorities, numConsumers, 16384 );
 	}
 
 	@SuppressWarnings( "unchecked" )
-	public BlockingFetchQueues( final int numPriorities, final int prefetchCapacity )
+	public BlockingFetchQueues( final int numPriorities, final int numConsumers, final int prefetchCapacity )
 	{
 		if ( numPriorities < 1 )
 			throw new IllegalArgumentException( "expected numPriorities >= 1" );
@@ -93,10 +105,15 @@ public class BlockingFetchQueues< E >
 		maxPriority = numPriorities - 1;
 		for ( int i = 0; i < numPriorities; ++i )
 			queues[ i ] = new ArrayDeque<>();
+
+		this.numConsumers = numConsumers;
+
 		this.prefetchCapacity = prefetchCapacity;
 		prefetch = new ArrayDeque<>( prefetchCapacity );
+
 		lock = new ReentrantLock();
 		notEmpty = lock.newCondition();
+		isPaused = lock.newCondition();
 	}
 
 	/**
@@ -166,13 +183,64 @@ public class BlockingFetchQueues< E >
 		lock.lockInterruptibly();
 		try
 		{
-			while ( count == 0 )
+			if ( ++waitCount == numConsumers )
+				isPaused.signal();
+			while ( count == 0 || paused )
 				notEmpty.await();
+			--waitCount;
 			--count;
 			for ( final ArrayDeque< E > q : queues )
 				if ( !q.isEmpty() )
 					return q.remove();
 			return prefetch.poll();
+		}
+		finally
+		{
+			lock.unlock();
+		}
+	}
+
+	/**
+	 * Pause the queue. While the queue is paused, all consumer threads are held
+	 * in {@code take()}. The {@code pause()} method itself blocks until all (of
+	 * the pre-defined number of) consumer threads have arrived in
+	 * {@code take()}.
+	 * <p>
+	 * While the queue is paused, all calls to {@code take()} block. (Calls to
+	 * {@code put()} are not affected.)
+	 *
+	 * @throws InterruptedException
+	 */
+	public void pause() throws InterruptedException
+	{
+		final ReentrantLock lock = this.lock;
+		lock.lockInterruptibly();
+		try
+		{
+			if ( !paused )
+			{
+				paused = true;
+				while ( waitCount != numConsumers )
+					isPaused.await();
+			}
+		}
+		finally
+		{
+			lock.unlock();
+		}
+	}
+
+	public void resume() throws InterruptedException
+	{
+		final ReentrantLock lock = this.lock;
+		lock.lockInterruptibly();
+		try
+		{
+			if ( paused )
+			{
+				paused = false;
+				notEmpty.signalAll();
+			}
 		}
 		finally
 		{
