@@ -1,5 +1,7 @@
 package net.imglib2.cache.util;
 
+import java.util.function.Predicate;
+
 import net.imglib2.cache.AbstractCache;
 
 public class AbstractCacheKeyAdapter< K, L, V, C extends AbstractCache< L, V > >
@@ -19,6 +21,20 @@ public class AbstractCacheKeyAdapter< K, L, V, C extends AbstractCache< L, V > >
 	public V getIfPresent( final K key )
 	{
 		return cache.getIfPresent( keymap.getTarget( key ) );
+	}
+
+	@Override
+	public void invalidate( final K key )
+	{
+		// TODO
+		throw new UnsupportedOperationException( "not implemented yet" );
+	}
+
+	@Override
+	public void invalidateIf( final Predicate< K > condition )
+	{
+		// TODO
+		throw new UnsupportedOperationException( "not implemented yet" );
 	}
 
 	@Override

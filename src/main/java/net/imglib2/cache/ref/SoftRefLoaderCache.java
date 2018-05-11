@@ -4,6 +4,7 @@ import java.lang.ref.ReferenceQueue;
 import java.lang.ref.SoftReference;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Predicate;
 
 import net.imglib2.cache.CacheLoader;
 import net.imglib2.cache.LoaderCache;
@@ -114,6 +115,20 @@ public class SoftRefLoaderCache< K, V > implements LoaderCache< K, V >
 			}
 		}
 		return value;
+	}
+
+	@Override
+	public void invalidate( final K key )
+	{
+		// TODO
+		throw new UnsupportedOperationException( "not implemented yet" );
+	}
+
+	@Override
+	public void invalidateIf( final Predicate< K > condition )
+	{
+		// TODO
+		throw new UnsupportedOperationException( "not implemented yet" );
 	}
 
 	@Override

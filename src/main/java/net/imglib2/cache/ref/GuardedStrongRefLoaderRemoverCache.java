@@ -1,5 +1,8 @@
 package net.imglib2.cache.ref;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+
 import java.lang.ref.PhantomReference;
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
@@ -7,9 +10,7 @@ import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
-
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
+import java.util.function.Predicate;
 
 import net.imglib2.cache.CacheLoader;
 import net.imglib2.cache.CacheRemover;
@@ -201,6 +202,20 @@ public class GuardedStrongRefLoaderRemoverCache< K, V > implements LoaderRemover
 			value = get( key, loader, remover );
 
 		return value;
+	}
+
+	@Override
+	public void invalidate( final K key )
+	{
+		// TODO
+		throw new UnsupportedOperationException( "not implemented yet" );
+	}
+
+	@Override
+	public void invalidateIf( final Predicate< K > condition )
+	{
+		// TODO
+		throw new UnsupportedOperationException( "not implemented yet" );
 	}
 
 	@Override

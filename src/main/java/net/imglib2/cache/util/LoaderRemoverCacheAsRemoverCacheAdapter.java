@@ -1,6 +1,7 @@
 package net.imglib2.cache.util;
 
 import java.util.concurrent.ExecutionException;
+import java.util.function.Predicate;
 
 import net.imglib2.cache.CacheLoader;
 import net.imglib2.cache.CacheRemover;
@@ -23,6 +24,20 @@ public class LoaderRemoverCacheAsRemoverCacheAdapter< K, V > implements RemoverC
 	public V getIfPresent( final K key )
 	{
 		return cache.getIfPresent( key );
+	}
+
+	@Override
+	public void invalidate( final K key )
+	{
+		// TODO
+		throw new UnsupportedOperationException( "not implemented yet" );
+	}
+
+	@Override
+	public void invalidateIf( final Predicate< K > condition )
+	{
+		// TODO
+		throw new UnsupportedOperationException( "not implemented yet" );
 	}
 
 	@Override

@@ -1,6 +1,7 @@
 package net.imglib2.cache.util;
 
 import java.util.concurrent.ExecutionException;
+import java.util.function.Predicate;
 
 import net.imglib2.cache.Cache;
 import net.imglib2.cache.UncheckedCache;
@@ -31,6 +32,20 @@ public class CacheAsUncheckedCacheAdapter< K, V > implements UncheckedCache< K, 
 		{
 			throw new RuntimeException( e );
 		}
+	}
+
+	@Override
+	public void invalidate( final K key )
+	{
+		// TODO
+		throw new UnsupportedOperationException( "not implemented yet" );
+	}
+
+	@Override
+	public void invalidateIf( final Predicate< K > condition )
+	{
+		// TODO
+		throw new UnsupportedOperationException( "not implemented yet" );
 	}
 
 	@Override

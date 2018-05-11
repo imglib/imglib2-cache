@@ -4,9 +4,10 @@ import java.lang.ref.SoftReference;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Predicate;
 
-import net.imglib2.cache.LoaderCache;
 import net.imglib2.cache.CacheLoader;
+import net.imglib2.cache.LoaderCache;
 
 /**
  * A cache that forwards to some other (usually {@link WeakRefLoaderCache}) cache and
@@ -51,6 +52,20 @@ public class BoundedSoftRefLoaderCache< K, V > implements LoaderCache< K, V >
 		final V value = cache.get( key, loader );
 		softRefs.touch( key, value );
 		return value;
+	}
+
+	@Override
+	public void invalidate( final K key )
+	{
+		// TODO
+		throw new UnsupportedOperationException( "not implemented yet" );
+	}
+
+	@Override
+	public void invalidateIf( final Predicate< K > condition )
+	{
+		// TODO
+		throw new UnsupportedOperationException( "not implemented yet" );
 	}
 
 	@Override

@@ -181,7 +181,7 @@ public class SoftRefLoaderRemoverCache< K, V > implements LoaderRemoverCache< K,
 	 * <em>There must be no concurrent {@code get()} operations for {@code key}.
 	 * This will result in cache corruption and/or a deadlock.</em>
 	 */
-	// TODO: add to AbstractCache interface
+	@Override
 	public void invalidate( final K key )
 	{
 		final Entry entry = map.remove( key );
@@ -208,7 +208,7 @@ public class SoftRefLoaderRemoverCache< K, V > implements LoaderRemoverCache< K,
 	 * <em>There must be no concurrent {@code get()} operations for keys matching {@code condition}.
 	 * This will result in cache corruption and/or a deadlock.</em>
 	 */
-	// TODO: add to AbstractCache interface
+	@Override
 	public void invalidateIf( final Predicate< K > condition )
 	{
 		map.forEachValue( parallelismThreshold, entry ->
