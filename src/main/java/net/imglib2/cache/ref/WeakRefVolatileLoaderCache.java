@@ -293,6 +293,13 @@ public class WeakRefVolatileLoaderCache< K, V > implements VolatileLoaderCache< 
 			if ( ref.loaded == VALID )
 				return v;
 
+			final V vl = backingCache.getIfPresent( entry.key );
+			if ( vl != null )
+			{
+				entry.setValid( vl );
+				return vl;
+			}
+
 			enqueue( entry, hints );
 
 			final int priority = hints.getQueuePriority();

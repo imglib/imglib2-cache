@@ -151,7 +151,6 @@ public class WeakRefVolatileCache< K, V > implements VolatileCache< K, V >
 		}
 	}
 
-
 	@Override
 	public V get( final K key, final CacheHints hints ) throws ExecutionException
 	{
@@ -293,6 +292,13 @@ public class WeakRefVolatileCache< K, V > implements VolatileCache< K, V >
 
 			if ( ref.loaded == VALID )
 				return v;
+
+			final V vl = backingCache.getIfPresent( entry.key );
+			if ( vl != null )
+			{
+				entry.setValid( vl );
+				return vl;
+			}
 
 			enqueue( entry, hints );
 
