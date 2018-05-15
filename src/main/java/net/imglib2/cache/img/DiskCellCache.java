@@ -5,12 +5,16 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel.MapMode;
+import java.nio.file.FileVisitOption;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.function.Predicate;
 
 import net.imglib2.cache.CacheLoader;
 import net.imglib2.cache.CacheRemover;
@@ -120,6 +124,69 @@ public class DiskCellCache< A > implements CacheRemover< Long, Cell< A > >, Cach
 		{
 			final MappedByteBuffer out = mmFile.getChannel().map( MapMode.READ_WRITE, 0, bytesize );
 			accessIo.save( value.getData(), out, ( int ) blocksize );
+		}
+		catch ( final IOException e )
+		{
+			throw new RuntimeException( e );
+		}
+	}
+
+	@Override
+	public void invalidate( final Long key )
+	{
+		try
+		{
+			Files.deleteIfExists( Paths.get( blockname( key ) ) );
+		}
+		catch ( final IOException e )
+		{
+			throw new RuntimeException( e );
+		}
+	}
+
+	@Override
+	public void invalidateIf( final Predicate< Long > condition )
+	{
+		try
+		{
+			Files.walkFileTree( blockcache, EnumSet.noneOf( FileVisitOption.class ), 1, new SimpleFileVisitor< Path >()
+			{
+				@Override
+				public FileVisitResult visitFile( final Path file, final BasicFileAttributes attrs ) throws IOException
+				{
+					try
+					{
+						final long key = Long.parseLong( file.getFileName().toString() );
+						if ( condition.test( key ) )
+							Files.delete( file );
+					}
+					catch ( final NumberFormatException e )
+					{}
+					return FileVisitResult.CONTINUE;
+				}
+			} );
+		}
+		catch ( final IOException e )
+		{
+			throw new RuntimeException( e );
+		}
+	}
+
+	@Override
+	public void invalidateAll()
+	{
+		try
+		{
+			Files.walkFileTree( blockcache, EnumSet.noneOf( FileVisitOption.class ), 1, new SimpleFileVisitor< Path >()
+			{
+				@Override
+				public FileVisitResult visitFile( final Path file, final BasicFileAttributes attrs ) throws IOException
+				{
+					Files.delete( file );
+					return FileVisitResult.CONTINUE;
+				}
+
+			} );
 		}
 		catch ( final IOException e )
 		{

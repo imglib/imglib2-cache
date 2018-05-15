@@ -202,21 +202,11 @@ public class IoSync< K, V > implements CacheLoader< K, V >, CacheRemover< K, V >
 		}
 	}
 
-	public void pause() throws InterruptedException
-	{
-		queue.pause();
-	}
-
-	public void resume() throws InterruptedException
-	{
-		queue.resume();
-	}
-
-
 	/**
 	 * Cancel any enqueued write for {@code key}. Blocks until all in-progress
 	 * writes for {@code key} are finished.
 	 */
+	@Override
 	public void invalidate( final K key )
 	{
 		invalidateLock.lock();
@@ -225,6 +215,7 @@ public class IoSync< K, V > implements CacheLoader< K, V >, CacheRemover< K, V >
 			queue.pause();
 			queue.remove( key );
 			map.remove( key );
+			saver.invalidate( key );
 			queue.resume();
 		}
 		catch ( final InterruptedException e )
@@ -242,6 +233,7 @@ public class IoSync< K, V > implements CacheLoader< K, V >, CacheRemover< K, V >
 	 * until all in-progress writes for keys matching {@code condition} are
 	 * finished.
 	 */
+	@Override
 	public void invalidateIf( final Predicate< K > condition )
 	{
 		invalidateLock.lock();
@@ -250,6 +242,7 @@ public class IoSync< K, V > implements CacheLoader< K, V >, CacheRemover< K, V >
 			queue.pause();
 			queue.removeIf( condition );
 			map.keySet().removeIf( condition );
+			saver.invalidateIf( condition );
 			queue.resume();
 		}
 		catch ( final InterruptedException e )
@@ -265,6 +258,7 @@ public class IoSync< K, V > implements CacheLoader< K, V >, CacheRemover< K, V >
 	/**
 	 * Cancel all enqueued writes. Blocks until in-progress writes are finished.
 	 */
+	@Override
 	public void invalidateAll()
 	{
 		invalidateLock.lock();
@@ -273,6 +267,7 @@ public class IoSync< K, V > implements CacheLoader< K, V >, CacheRemover< K, V >
 			queue.pause();
 			queue.clear();
 			map.clear();
+			saver.invalidateAll();
 			queue.resume();
 		}
 		catch ( final InterruptedException e )
