@@ -10,7 +10,8 @@ public interface CacheRemover< K, V >
 	 * Make a best-effort attempt to clean up {@code key} and the
 	 * corresponding value.
 	 *
-	 * TODO
+	 * TODO: needs more explanation.
+	 * It is surprising to find this method in the CacheRemover interface.
 	 */
 	default void invalidate( final K key ) {};
 
