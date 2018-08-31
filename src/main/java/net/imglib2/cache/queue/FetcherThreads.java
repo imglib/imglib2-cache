@@ -34,8 +34,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.function.IntFunction;
 
-//import bdv.cache.VolatileCacheValue;
-
 /**
  * TODO revise javadoc
  *
@@ -123,6 +121,12 @@ public class FetcherThreads
 			f.wakeUp();
 	}
 
+	public void shutdown()
+	{
+		for ( final Fetcher f : fetchers )
+			f.shutdown();
+	}
+
 	static final class Fetcher extends Thread
 	{
 		private final BlockingFetchQueues< Callable< ? > > queue;
@@ -130,6 +134,8 @@ public class FetcherThreads
 		private final Object lock = new Object();
 
 		private volatile long pauseUntilTimeMillis = 0;
+
+		private volatile boolean shutdown = false;
 
 		public Fetcher( final BlockingFetchQueues< Callable< ? > > queue )
 		{
@@ -143,12 +149,16 @@ public class FetcherThreads
 			while ( true )
 			{
 				while ( loader == null )
+				{
 					try
 					{
 						loader = queue.take();
 					}
 					catch ( final InterruptedException e )
 					{}
+					if ( shutdown )
+						return;
+				}
 				long waitMillis = pauseUntilTimeMillis - System.currentTimeMillis();
 				while ( waitMillis > 0 )
 				{
@@ -161,6 +171,8 @@ public class FetcherThreads
 					}
 					catch ( final InterruptedException e )
 					{}
+					if ( shutdown )
+						return;
 					waitMillis = pauseUntilTimeMillis - System.currentTimeMillis();
 				}
 				try
@@ -179,6 +191,8 @@ public class FetcherThreads
 				{
 					e.printStackTrace();
 				}
+				if ( shutdown )
+					return;
 			}
 		}
 
@@ -195,6 +209,12 @@ public class FetcherThreads
 			{
 				lock.notify();
 			}
+		}
+
+		public void shutdown()
+		{
+			shutdown = true;
+			interrupt();
 		}
 	}
 }
