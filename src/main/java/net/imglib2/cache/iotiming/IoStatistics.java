@@ -18,7 +18,7 @@ public class IoStatistics
 
 	public IoStatistics()
 	{
-		stopWatch = new StopWatch();
+		stopWatch = StopWatch.createStopped() ;
 		ioBytes = 0;
 		numRunningThreads = 0;
 		ioTimeBudget = new IoTimeBudget();
@@ -68,13 +68,6 @@ public class IoStatistics
 
 	private StopWatch getThreadStopWatch()
 	{
-		final Thread thread = Thread.currentThread();
-		StopWatch w = perThreadStopWatches.get( thread );
-		if ( w == null )
-		{
-			w = new StopWatch();
-			perThreadStopWatches.put( thread, w );
-		}
-		return w;
+		return perThreadStopWatches.computeIfAbsent(Thread.currentThread(), k -> StopWatch.createStopped());
 	}
 }
