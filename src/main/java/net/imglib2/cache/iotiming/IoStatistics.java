@@ -68,13 +68,6 @@ public class IoStatistics
 
 	private StopWatch getThreadStopWatch()
 	{
-		final Thread thread = Thread.currentThread();
-		StopWatch w = perThreadStopWatches.get( thread );
-		if ( w == null )
-		{
-			w = StopWatch.createStopped();
-			perThreadStopWatches.put( thread, w );
-		}
-		return w;
+		return perThreadStopWatches.computeIfAbsent( Thread.currentThread(), k -> StopWatch.createStopped() );
 	}
 }
