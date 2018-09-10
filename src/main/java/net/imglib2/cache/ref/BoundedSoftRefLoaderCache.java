@@ -36,6 +36,16 @@ public class BoundedSoftRefLoaderCache< K, V > implements LoaderCache< K, V >
 		this.softRefs = new SoftRefs( maxSoftRefs );
 	}
 
+	public int getMaxSoftRefs()
+	{
+		return this.softRefs.getMaxSoftRefs();
+	}
+
+	public void setMaxSoftRefs(int maxSoftRefs)
+	{
+		this.softRefs.setMaxSoftRefs(maxSoftRefs);
+	}
+
 	@Override
 	public V getIfPresent( final K key )
 	{
@@ -64,11 +74,21 @@ public class BoundedSoftRefLoaderCache< K, V > implements LoaderCache< K, V >
 	{
 		private static final long serialVersionUID = 1L;
 
-		private final int maxSoftRefs;
+		private int maxSoftRefs;
 
 		public SoftRefs( final int maxSoftRefs )
 		{
 			super( maxSoftRefs, 0.75f, true );
+			this.maxSoftRefs = maxSoftRefs;
+		}
+
+		public int getMaxSoftRefs()
+		{
+			return this.maxSoftRefs;
+		}
+
+		public void setMaxSoftRefs(int maxSoftRefs)
+		{
 			this.maxSoftRefs = maxSoftRefs;
 		}
 
