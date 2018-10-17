@@ -18,7 +18,7 @@ public class IoStatistics
 
 	public IoStatistics()
 	{
-		stopWatch = new StopWatch();
+		stopWatch = StopWatch.createStopped();
 		ioBytes = 0;
 		numRunningThreads = 0;
 		ioTimeBudget = new IoTimeBudget();
@@ -72,7 +72,7 @@ public class IoStatistics
 		StopWatch w = perThreadStopWatches.get( thread );
 		if ( w == null )
 		{
-			w = new StopWatch();
+			w = StopWatch.createStopped();
 			perThreadStopWatches.put( thread, w );
 		}
 		return w;
