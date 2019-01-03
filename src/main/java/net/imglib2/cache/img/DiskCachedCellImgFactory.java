@@ -231,7 +231,7 @@ public class DiskCachedCellImgFactory<T extends NativeType<T>> extends AbstractR
 				DiskCachedCellImgOptions.Values diskCacheOptions = ((DiskCachedCellImgOptions)options).values();
 				final Path blockcache = createBlockCachePath(diskCacheOptions);
 				return diskCacheOptions.dirtyAccesses()
-						? (CellCache<A>)new DirtyDiskCellCache(blockcache, grid, backingLoader, AccessIo.get(type, diskCacheOptions.accessFlags()),
+						? (ReadWriteCellCache<A>)new DirtyDiskCellCache(blockcache, grid, backingLoader, AccessIo.get(type, diskCacheOptions.accessFlags()),
 								entitiesPerPixel)
 						: new DiskCellCache<>(blockcache, grid, backingLoader, AccessIo.get(type, diskCacheOptions.accessFlags()),
 								entitiesPerPixel);

@@ -40,7 +40,7 @@ import net.imglib2.util.Intervals;
  *
  * @author Tobias Pietzsch
  */
-public class DiskCellCache<A> implements CellCache<A> {
+public class DiskCellCache<A> implements ReadWriteCellCache<A> {
 	private final Path blockcache;
 
 	private final CellGrid grid;

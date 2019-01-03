@@ -96,7 +96,7 @@ public abstract class AbstractReadWriteCachedCellImgFactory<T extends NativeType
 				backingLoader = EmptyCellCacheLoader.get(grid, type, options.values().accessFlags());
 		}
 
-		final CellCache<A> cellCache = createCellCache(options, grid, backingLoader, type, entitiesPerPixel);
+		final ReadWriteCellCache<A> cellCache = createCellCache(options, grid, backingLoader, type, entitiesPerPixel);
 
 		final IoSync<Long, Cell<A>> iosync = new IoSync<>(cellCache, options.values().numIoThreads(), options.values().maxIoQueueSize());
 
