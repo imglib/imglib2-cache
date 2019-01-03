@@ -32,7 +32,6 @@ import java.lang.ref.SoftReference;
 import java.util.Set;
 
 import net.imglib2.Dirty;
-import net.imglib2.cache.img.DiskCachedCellImgOptions.CacheType;
 import net.imglib2.img.basictypeaccess.AccessFlags;
 import net.imglib2.img.cell.CellImgFactory;
 import net.imglib2.util.Util;
@@ -84,6 +83,39 @@ public class ReadOnlyCachedCellImgOptions
 	public ReadOnlyCachedCellImgOptions volatileAccesses( final boolean volatil )
 	{
 		return new ReadOnlyCachedCellImgOptions( values.copy().setVolatileAccesses( volatil ) );
+	}
+
+	/**
+	 * Rough in-memory cache types.
+	 *
+	 * @author Tobias Pietzsch
+	 */
+	public static enum CacheType
+	{
+		/**
+		 * The cache keeps SoftReferences to values (cells), basically relying
+		 * on GC for removal. The advantage of this is that many caches can be
+		 * created without needing to put a limit on the size of any of them. GC
+		 * will take care of balancing that. The downside is that
+		 * {@link OutOfMemoryError} may occur because {@link SoftReference}s are
+		 * cleared too slow. SoftReferences are not collected for a certain time
+		 * after they have been used. If there is heavy thrashing with cells
+		 * being constantly swapped in and out from disk then OutOfMemory may
+		 * happen because of this. This sounds worse than it is in practice and
+		 * should only happen in pathological situations. Tuning the
+		 * {@code -XX:SoftRefLRUPolicyMSPerMB} JVM flag does often help.
+		 */
+		SOFTREF,
+
+		/**
+		 * The cache keeps strong references to a limited number of values
+		 * (cells). The advantage is that there is never OutOfMemory because of
+		 * the issues described above (fingers crossed). The downside is that
+		 * the number of cells that should be cached needs to be specified
+		 * beforehand. So {@link OutOfMemoryError} may occur if many caches are
+		 * opened and consume too much memory in total.
+		 */
+		BOUNDED
 	}
 
 	/**
