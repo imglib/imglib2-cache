@@ -186,7 +186,7 @@ public class DiskCachedCellImgFactory<T extends NativeType<T>> extends AbstractR
 				type.getClass().getCanonicalName() + " does not implement NativeType.");
 	}
 
-	private Path createBlockCachePath( final DiskCachedCellImgOptions.Values options )
+	static Path createBlockCachePath( final DiskCachedCellImgOptions.Values options )
 	{
 		try
 		{
@@ -229,29 +229,29 @@ public class DiskCachedCellImgFactory<T extends NativeType<T>> extends AbstractR
 			CacheLoader<Long, Cell<A>> backingLoader,
 			T type, 
 			Fraction entitiesPerPixel) {
-				DiskCachedCellImgOptions.Values diskCacheOptions;
-				if (options instanceof DiskCachedCellImgOptions) {
-					diskCacheOptions = ((DiskCachedCellImgOptions)options).values();
-				} else {
-					// If the given options are no DiskCachedCellImgOptions, we create default options for
-					// the disk cache specifics, and merge them with the provided values.
-					diskCacheOptions = DiskCachedCellImgOptions.options().merge(options).values();
-				}
-				
-				final Path blockcache = createBlockCachePath(diskCacheOptions);
-				return diskCacheOptions.dirtyAccesses()
-						? (ReadWriteCellCache<A>)new DirtyDiskCellCache(blockcache, grid, backingLoader, AccessIo.get(type, diskCacheOptions.accessFlags()),
-								entitiesPerPixel)
-						: new DiskCellCache<>(blockcache, grid, backingLoader, AccessIo.get(type, diskCacheOptions.accessFlags()),
-								entitiesPerPixel);
+		DiskCachedCellImgOptions.Values diskCacheOptions;
+		if (options instanceof DiskCachedCellImgOptions) {
+			diskCacheOptions = ((DiskCachedCellImgOptions)options).values();
+		} else {
+			// If the given options are no DiskCachedCellImgOptions, we create default options for
+			// the disk cache specifics, and merge them with the provided values.
+			diskCacheOptions = DiskCachedCellImgOptions.options().merge(options).values();
+		}
+		
+		final Path blockcache = createBlockCachePath(diskCacheOptions);
+		return diskCacheOptions.dirtyAccesses()
+				? (ReadWriteCellCache<A>)new DirtyDiskCellCache(blockcache, grid, backingLoader, AccessIo.get(type, diskCacheOptions.accessFlags()),
+						entitiesPerPixel)
+				: new DiskCellCache<>(blockcache, grid, backingLoader, AccessIo.get(type, diskCacheOptions.accessFlags()),
+						entitiesPerPixel);
 	}
 
 	@Override
 	protected <A extends ArrayDataAccess<A>> CachedCellImg<T, A> createCachedCellImg(
-		final CellGrid grid, 
-		final Fraction entitiesPerPixel,
-		final Cache<Long, Cell<A>> cache,
-		final A accessType
+			final CellGrid grid, 
+			final Fraction entitiesPerPixel,
+			final Cache<Long, Cell<A>> cache,
+			final A accessType
 	) {
 		return new DiskCachedCellImg<>(this, grid, entitiesPerPixel, cache, accessType);
 	}
