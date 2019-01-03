@@ -45,31 +45,42 @@ import net.imglib2.img.basictypeaccess.ArrayDataAccessFactory;
 import net.imglib2.img.basictypeaccess.array.ArrayDataAccess;
 import net.imglib2.img.cell.Cell;
 import net.imglib2.img.cell.CellGrid;
-import net.imglib2.img.cell.CellImgFactory;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.NativeTypeFactory;
 import net.imglib2.util.Fraction;
 
 /**
- * Abstract factory for creating {@link CachedCellImg}s. See {@link DiskCachedCellImgFactory} or 
- * {@link N5CachedCellImgFactory} for implementations.
+ * Abstract factory for creating {@link CachedCellImg}s. Holds functionality shared by read-write-caches,
+ * but leaves the implementation of the cell writing to specialized implementations.
+ * 
+ * See {@link DiskCachedCellImgFactory} for a specialized example.
  *
  * @author Tobias Pietzsch
  * @author Carsten Haubold
  */
 public abstract class AbstractReadWriteCachedCellImgFactory<T extends NativeType<T>> extends NativeImgFactory<T> {
 	/**
-	 * Create a new {@link AbstractReadWriteCachedCellImgFactory} with the specified
-	 * configuration.
+	 * Create a new {@link AbstractReadWriteCachedCellImgFactory} that can create images of the provided type.
 	 *
-	 * @param optional configuration options.
+	 * @param type Element type of the images that can be created by this factory
 	 */
 	public AbstractReadWriteCachedCellImgFactory(final T type) {
 		super(type);
 	}
 
-	abstract AbstractReadWriteCachedCellImgOptions mergeWithFactoryOptions(final AbstractReadWriteCachedCellImgOptions userProvidedValues);
+	/**
+	 * Merge this factory's default options (which can be specified in the constructor) with the user provided options.
+	 * User provided option values that differ from their default value take precedence over the factory's default options 
+	 * 
+	 * @param userProvidedOptions The options that were provided by the user when calling one of the methods of this factory.
+	 * @return a new options object created by merging this factory's default options with the provided ones
+	 */
+	abstract AbstractReadWriteCachedCellImgOptions mergeWithFactoryOptions(final AbstractReadWriteCachedCellImgOptions userProvidedOptions);
 
+	/**
+	 * Create a cached cell img with the provided settings. Much of the work is deferred to abstract methods that
+	 * must be implemented for the specific writer-backend in specialized classes.
+	 */
 	protected <A extends ArrayDataAccess<A>> CachedCellImg<T, ? extends A> create(final long[] dimensions,
 			final CacheLoader<Long, ? extends Cell<?>> cacheLoader, 
 			final CellLoader<T> cellLoader, 
@@ -81,7 +92,7 @@ public abstract class AbstractReadWriteCachedCellImgFactory<T extends NativeType
 
 		final Fraction entitiesPerPixel = type.getEntitiesPerPixel();
 
-		final CellGrid grid = createCellGrid(dimensions, entitiesPerPixel, options);
+		final CellGrid grid = ReadOnlyCachedCellImgFactory.createCellGrid(dimensions, options.values().cellDimensions(), entitiesPerPixel);
 
 		@SuppressWarnings("unchecked")
 		CacheLoader<Long, Cell<A>> backingLoader = (CacheLoader<Long, Cell<A>>) cacheLoader;
@@ -119,6 +130,10 @@ public abstract class AbstractReadWriteCachedCellImgFactory<T extends NativeType
 		return img;
 	}
 
+	/**
+	 * Derived classes should create an instance of the CachedCellImg type that they support.
+	 * E.g. a {@link DiskCachedCellImgFactory} would create and return a {@link DiskCachedCellImg}.
+	 */
 	protected abstract <A extends ArrayDataAccess<A>> CachedCellImg<T, ? extends A> createCachedCellImg(
 		final CellGrid grid, 
 		final Fraction entitiesPerPixel,
@@ -126,23 +141,21 @@ public abstract class AbstractReadWriteCachedCellImgFactory<T extends NativeType
 		final A accessType
 	);
 
-	protected abstract <A extends ArrayDataAccess<A>> CellCache<A> createCellCache(
+	/**
+	 * Derived classes should create a read-write cell cache with the given options, cell grid and backing loader.
+	 * @param options cache creation options
+	 * @param grid cell grid
+	 * @param backingLoader the backing loader for cache cells
+	 * @param type element type
+	 * @param entitiesPerPixel
+	 * @return
+	 */
+	protected abstract <A extends ArrayDataAccess<A>> ReadWriteCellCache<A> createCellCache(
 		final AbstractReadWriteCachedCellImgOptions options, 
 		final CellGrid grid, 
 		final CacheLoader<Long, Cell<A>> backingLoader,
 		final T type,
 		final Fraction entitiesPerPixel);
-
-	protected CellGrid createCellGrid(
-		final long[] dimensions, 
-		final Fraction entitiesPerPixel,
-		final AbstractReadWriteCachedCellImgOptions options) 
-	{
-		CellImgFactory.verifyDimensions(dimensions);
-		final int n = dimensions.length;
-		final int[] cellDimensions = CellImgFactory.getCellDimensions(options.values().cellDimensions(), n, entitiesPerPixel);
-		return new CellGrid(dimensions, cellDimensions);
-	}
 
 	/*
 	 * -----------------------------------------------------------------------

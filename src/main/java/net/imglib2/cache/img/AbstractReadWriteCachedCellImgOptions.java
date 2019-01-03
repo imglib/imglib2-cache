@@ -34,9 +34,12 @@ import net.imglib2.Dirty;
 import net.imglib2.cache.img.ReadOnlyCachedCellImgOptions.CacheType;
 
 /**
- * Base class for optional parameters for constructing a
- * {@link CachedCellImgFactory}. Must be subclassed, including a non-abstract
- * subclass of Values.
+ * Options base class used when constructing a cell image factory derived from {@link AbstractCachedCellImgFactory}. 
+ * This holds a set of default options shared by read-write-caches. Specialized writer-backends should provide their
+ * own CachedCellImgFactory and -Options.
+ * 
+ * Must be subclassed, which usually also requires a subclass of Values that adds 
+ * specific options depending on the writer-backend for the read-write-cache.
  *
  * @author Tobias Pietzsch
  * @author Carsten Haubold
@@ -158,11 +161,7 @@ public abstract class AbstractReadWriteCachedCellImgOptions {
 	public abstract AbstractReadWriteCachedCellImgOptions initializeCellsAsDirty(final boolean initializeAsDirty);
 
 	/**
-	 * Read-only {@link AbstractReadWriteCachedCellImgOptions} values. 
-	 * 
-	 * This is an abstract class to allow subclasses to extend the set of values by inheritance 
-	 * despite the usage of the curiously recursive template pattern which is necessary to 
-	 * facilitate chaining method calls on values objects.
+	 * Read-only {@link AbstractReadWriteCachedCellImgOptions} values.
 	 */
 	protected static class Values extends ReadOnlyCachedCellImgOptions.Values {
 		/**

@@ -128,7 +128,7 @@ public class ReadOnlyCachedCellImgFactory
 
 		final PrimitiveType primitiveType = type.getNativeTypeFactory().getPrimitiveType();
 		final Fraction entitiesPerPixel = type.getEntitiesPerPixel();
-		final CellGrid grid = createCellGrid( dimensions, entitiesPerPixel, options );
+		final CellGrid grid = createCellGrid( dimensions, options.cellDimensions(), entitiesPerPixel );
 		final A accessType = ArrayDataAccessFactory.get( primitiveType, options.accessFlags() );
 
 		@SuppressWarnings( "unchecked" )
@@ -152,11 +152,21 @@ public class ReadOnlyCachedCellImgFactory
 		return new CachedCellImg<>( grid, type, cache, accessType );
 	}
 
-	private CellGrid createCellGrid( final long[] dimensions, final Fraction entitiesPerPixel, final ReadOnlyCachedCellImgOptions.Values options )
+	/**
+	 * Create a {@link CellGrid} with the given image dimensions, desired cell dimensions, and entitiesPerPixel
+	 * @param dimensions image dimensions
+	 * @param defaultCellDimensions desired cell dimensions
+	 * @param entitiesPerPixel
+	 * @return
+	 */
+	static CellGrid createCellGrid(
+		final long[] dimensions, 
+		final int[] defaultCellDimensions,
+		final Fraction entitiesPerPixel)
 	{
-		CellImgFactory.verifyDimensions( dimensions );
+		CellImgFactory.verifyDimensions(dimensions);
 		final int n = dimensions.length;
-		final int[] cellDimensions = CellImgFactory.getCellDimensions( options.cellDimensions(), n, entitiesPerPixel );
-		return new CellGrid( dimensions, cellDimensions );
+		final int[] cellDimensions = CellImgFactory.getCellDimensions(defaultCellDimensions, n, entitiesPerPixel);
+		return new CellGrid(dimensions, cellDimensions);
 	}
 }

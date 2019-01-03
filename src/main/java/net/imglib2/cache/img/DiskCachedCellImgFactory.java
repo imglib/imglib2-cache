@@ -223,12 +223,21 @@ public class DiskCachedCellImgFactory<T extends NativeType<T>> extends AbstractR
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	@Override
-	protected <A extends ArrayDataAccess<A>> CellCache<A> createCellCache(AbstractReadWriteCachedCellImgOptions options,
-			CellGrid grid, CacheLoader<Long, Cell<A>> backingLoader, T type, Fraction entitiesPerPixel) {
-				if (!(options instanceof DiskCachedCellImgOptions)) {
-					throw new UnsupportedOperationException("cannot construct DiskCachedCellImg with wrong options");
+	protected <A extends ArrayDataAccess<A>> ReadWriteCellCache<A> createCellCache(
+			AbstractReadWriteCachedCellImgOptions options,
+			CellGrid grid, 
+			CacheLoader<Long, Cell<A>> backingLoader,
+			T type, 
+			Fraction entitiesPerPixel) {
+				DiskCachedCellImgOptions.Values diskCacheOptions;
+				if (options instanceof DiskCachedCellImgOptions) {
+					diskCacheOptions = ((DiskCachedCellImgOptions)options).values();
+				} else {
+					// If the given options are no DiskCachedCellImgOptions, we create default options for
+					// the disk cache specifics, and merge them with the provided values.
+					diskCacheOptions = DiskCachedCellImgOptions.options().merge(options).values();
 				}
-				DiskCachedCellImgOptions.Values diskCacheOptions = ((DiskCachedCellImgOptions)options).values();
+				
 				final Path blockcache = createBlockCachePath(diskCacheOptions);
 				return diskCacheOptions.dirtyAccesses()
 						? (ReadWriteCellCache<A>)new DirtyDiskCellCache(blockcache, grid, backingLoader, AccessIo.get(type, diskCacheOptions.accessFlags()),
