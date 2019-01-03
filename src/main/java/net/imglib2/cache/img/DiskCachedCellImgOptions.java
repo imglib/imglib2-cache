@@ -30,31 +30,40 @@ package net.imglib2.cache.img;
 
 import java.lang.ref.SoftReference;
 import java.nio.file.Path;
-import java.util.Set;
 
 import net.imglib2.Dirty;
-import net.imglib2.img.basictypeaccess.AccessFlags;
 import net.imglib2.cache.img.ReadOnlyCachedCellImgOptions.CacheType;
 import net.imglib2.img.cell.CellImgFactory;
-import net.imglib2.util.Util;
 
 /**
  * Optional parameters for constructing a {@link DiskCachedCellImgFactory}.
  *
  * @author Tobias Pietzsch
+ * @author Carsten Haubold
  */
-public class DiskCachedCellImgOptions
+public class DiskCachedCellImgOptions extends AbstractReadWriteCachedCellImgOptions
 {
 	public final Values values;
 
-	DiskCachedCellImgOptions( final Values values )
+	DiskCachedCellImgOptions(final Values values)
 	{
+		super();
 		this.values = values;
 	}
 
 	public DiskCachedCellImgOptions()
 	{
 		this( new Values() );
+	}
+
+	@Override
+	Values values() {
+		return values;
+	}
+
+	@Override
+	public DiskCachedCellImgOptions merge(final AbstractReadWriteCachedCellImgOptions other) {
+		return new DiskCachedCellImgOptions(new Values(values, other.values()));
 	}
 
 	/**
@@ -240,7 +249,7 @@ public class DiskCachedCellImgOptions
 	 * </p>
 	 * <p>
 	 * For safety reasons, only cell cache directories that are created by the
-	 * {@link DiskCachedCellImgFactory} are actually marked for deletion. This
+	 * {@link AbstractReadWriteCachedCellImgFactory} are actually marked for deletion. This
 	 * means that either no {@link #cacheDirectory(Path)} is specified (a
 	 * temporary directory is created), or the specified
 	 * {@link #cacheDirectory(Path)} does not exist yet.
@@ -252,7 +261,7 @@ public class DiskCachedCellImgOptions
 	 */
 	public DiskCachedCellImgOptions deleteCacheDirectoryOnExit( final boolean deleteOnExit )
 	{
-		return new DiskCachedCellImgOptions( values.copy().setDeleteCacheDirectoryOnExit( deleteOnExit ) );
+		return new DiskCachedCellImgOptions(values.copy().setDeleteCacheDirectoryOnExit( deleteOnExit ));
 	}
 
 	/**
@@ -267,7 +276,7 @@ public class DiskCachedCellImgOptions
 	 * <p>
 	 * This option only has an effect for {@link DiskCachedCellImg} that are
 	 * created with a {@link CellLoader}
-	 * ({@link DiskCachedCellImgFactory#create(long[], net.imglib2.type.NativeType, CellLoader)}).
+	 * ({@link AbstractReadWriteCachedCellImgFactory#create(long[], net.imglib2.type.NativeType, CellLoader)}).
 	 * </p>
 	 *
 	 * @param initializeAsDirty
@@ -276,33 +285,20 @@ public class DiskCachedCellImgOptions
 	 */
 	public DiskCachedCellImgOptions initializeCellsAsDirty( final boolean initializeAsDirty )
 	{
-		return new DiskCachedCellImgOptions( values.copy().setInitializeCellsAsDirty( initializeAsDirty ) );
+		return new DiskCachedCellImgOptions(values.copy().setInitializeCellsAsDirty( initializeAsDirty ));
 	}
 
 	/**
 	 * Read-only {@link DiskCachedCellImgOptions} values.
 	 */
-	public static class Values
+	protected static class Values extends AbstractReadWriteCachedCellImgOptions.Values
 	{
 		/**
 		 * Copy constructor.
 		 */
 		Values( final Values that )
 		{
-			this.dirtyAccesses = that.dirtyAccesses;
-			this.dirtyAccessesModified = that.dirtyAccessesModified;
-			this.volatileAccesses = that.volatileAccesses;
-			this.volatileAccessesModified = that.volatileAccessesModified;
-			this.numIoThreads = that.numIoThreads;
-			this.numIoThreadsModified = that.numIoThreadsModified;
-			this.maxIoQueueSize = that.maxIoQueueSize;
-			this.maxIoQueueSizeModified = that.maxIoQueueSizeModified;
-			this.cacheType = that.cacheType;
-			this.cacheTypeModified = that.cacheTypeModified;
-			this.maxCacheSize = that.maxCacheSize;
-			this.maxCacheSizeModified = that.maxCacheSizeModified;
-			this.cellDimensions = that.cellDimensions;
-			this.cellDimensionsModified = that.cellDimensionsModified;
+			super(that);
 			this.cacheDirectory = that.cacheDirectory;
 			this.cacheDirectoryModified = that.cacheDirectoryModified;
 			this.tempDirectory = that.tempDirectory;
@@ -311,8 +307,6 @@ public class DiskCachedCellImgOptions
 			this.tempDirectoryPrefixModified = that.tempDirectoryPrefixModified;
 			this.deleteCacheDirectoryOnExit = that.deleteCacheDirectoryOnExit;
 			this.deleteCacheDirectoryOnExitModified = that.deleteCacheDirectoryOnExitModified;
-			this.initializeCellsAsDirty = that.initializeCellsAsDirty;
-			this.initializeCellsAsDirtyModified = that.initializeCellsAsDirtyModified;
 		}
 
 		Values()
@@ -320,27 +314,7 @@ public class DiskCachedCellImgOptions
 
 		Values( final Values base, final Values aug )
 		{
-			dirtyAccesses = aug.dirtyAccessesModified
-					? aug.dirtyAccesses
-					: base.dirtyAccesses;
-			volatileAccesses = aug.volatileAccessesModified
-					? aug.volatileAccesses
-					: base.volatileAccesses;
-			numIoThreads = aug.numIoThreadsModified
-					? aug.numIoThreads
-					: base.numIoThreads;
-			maxIoQueueSize = aug.maxIoQueueSizeModified
-					? aug.maxIoQueueSize
-					: base.maxIoQueueSize;
-			cacheType = aug.cacheTypeModified
-					? aug.cacheType
-					: base.cacheType;
-			maxCacheSize = aug.maxCacheSizeModified
-					? aug.maxCacheSize
-					: base.maxCacheSize;
-			cellDimensions = aug.cellDimensionsModified
-					? aug.cellDimensions
-					: base.cellDimensions;
+			super(base, aug);
 			cacheDirectory = aug.cacheDirectoryModified
 					? aug.cacheDirectory
 					: base.cacheDirectory;
@@ -353,29 +327,16 @@ public class DiskCachedCellImgOptions
 			deleteCacheDirectoryOnExit = aug.deleteCacheDirectoryOnExitModified
 					? aug.deleteCacheDirectoryOnExit
 					: base.deleteCacheDirectoryOnExit;
-			initializeCellsAsDirty = aug.initializeCellsAsDirtyModified
-					? aug.initializeCellsAsDirty
-					: base.initializeCellsAsDirty;
 		}
 
-		public DiskCachedCellImgOptions optionsFromValues()
+		Values( final Values base, final AbstractReadWriteCachedCellImgOptions.Values aug )
 		{
-			return new DiskCachedCellImgOptions( new Values( this ) );
+			super(base, aug);
+			cacheDirectory = base.cacheDirectory;
+			tempDirectory = base.tempDirectory;
+			tempDirectoryPrefix = base.tempDirectoryPrefix;
+			deleteCacheDirectoryOnExit = base.deleteCacheDirectoryOnExit;
 		}
-
-		private boolean dirtyAccesses = true;
-
-		private boolean volatileAccesses = true;
-
-		private int numIoThreads = 1;
-
-		private int maxIoQueueSize = 10;
-
-		private CacheType cacheType = CacheType.SOFTREF;
-
-		private long maxCacheSize = 1000;
-
-		private int[] cellDimensions = new int[] { 10 };
 
 		private Path cacheDirectory = null;
 
@@ -384,48 +345,6 @@ public class DiskCachedCellImgOptions
 		private String tempDirectoryPrefix = "imglib2";
 
 		private boolean deleteCacheDirectoryOnExit = true;
-
-		private boolean initializeCellsAsDirty = false;
-
-		public boolean dirtyAccesses()
-		{
-			return dirtyAccesses;
-		}
-
-		public boolean volatileAccesses()
-		{
-			return volatileAccesses;
-		}
-
-		public Set< AccessFlags > accessFlags()
-		{
-			return AccessFlags.fromBooleansDirtyVolatile( dirtyAccesses, volatileAccesses );
-		}
-
-		public int numIoThreads()
-		{
-			return numIoThreads;
-		}
-
-		public int maxIoQueueSize()
-		{
-			return maxIoQueueSize;
-		}
-
-		public CacheType cacheType()
-		{
-			return cacheType;
-		}
-
-		public long maxCacheSize()
-		{
-			return maxCacheSize;
-		}
-
-		public int[] cellDimensions()
-		{
-			return cellDimensions;
-		}
 
 		public Path cacheDirectory()
 		{
@@ -447,25 +366,6 @@ public class DiskCachedCellImgOptions
 			return deleteCacheDirectoryOnExit;
 		}
 
-		public boolean initializeCellsAsDirty()
-		{
-			return initializeCellsAsDirty;
-		}
-
-		private boolean dirtyAccessesModified = false;
-
-		private boolean volatileAccessesModified = false;
-
-		private boolean numIoThreadsModified = false;
-
-		private boolean maxIoQueueSizeModified = false;
-
-		private boolean cacheTypeModified = false;
-
-		private boolean maxCacheSizeModified = false;
-
-		private boolean cellDimensionsModified = false;
-
 		private boolean cacheDirectoryModified = false;
 
 		private boolean tempDirectoryModified = false;
@@ -473,57 +373,6 @@ public class DiskCachedCellImgOptions
 		private boolean tempDirectoryPrefixModified = false;
 
 		private boolean deleteCacheDirectoryOnExitModified = false;
-
-		private boolean initializeCellsAsDirtyModified = false;
-
-		Values setDirtyAccesses( final boolean b )
-		{
-			dirtyAccesses = b;
-			dirtyAccessesModified = true;
-			return this;
-		}
-
-		Values setVolatileAccesses( final boolean b )
-		{
-			volatileAccesses = b;
-			volatileAccessesModified = true;
-			return this;
-		}
-
-		Values setNumIoThreads( final int n )
-		{
-			numIoThreads = n;
-			numIoThreadsModified = true;
-			return this;
-		}
-
-		Values setMaxIoQueueSize( final int n )
-		{
-			maxIoQueueSize = n;
-			maxIoQueueSizeModified = true;
-			return this;
-		}
-
-		Values setCacheType( final CacheType t )
-		{
-			cacheType = t;
-			cacheTypeModified = true;
-			return this;
-		}
-
-		Values setMaxCacheSize( final long n )
-		{
-			maxCacheSize = n;
-			maxCacheSizeModified = true;
-			return this;
-		}
-
-		Values setCellDimensions( final int[] dims )
-		{
-			cellDimensions = dims;
-			cellDimensionsModified = true;
-			return this;
-		}
 
 		Values setCacheDirectory( final Path dir )
 		{
@@ -553,66 +402,65 @@ public class DiskCachedCellImgOptions
 			return this;
 		}
 
-		Values setInitializeCellsAsDirty( final boolean b )
+		@Override
+		Values setDirtyAccesses( final boolean b )
 		{
-			initializeCellsAsDirty = b;
-			initializeCellsAsDirtyModified = true;
+			super.setDirtyAccesses(b);
 			return this;
 		}
 
-		Values copy()
+		@Override
+		Values setVolatileAccesses( final boolean b )
 		{
-			return new Values( this );
+			super.setVolatileAccesses(b);
+			return this;
+		}
+
+		@Override
+		Values setCacheType( final CacheType t )
+		{
+			super.setCacheType(t);
+			return this;
+		}
+
+		@Override
+		Values setMaxCacheSize( final long n )
+		{
+			super.setMaxCacheSize(n);
+			return this;
+		}
+
+		@Override
+		Values setCellDimensions( final int[] dims )
+		{
+			super.setCellDimensions(dims);
+			return this;
+		}
+
+		@Override
+		Values setNumIoThreads(final int n) {
+			super.setNumIoThreads(n);
+			return this;
+		}
+
+		@Override
+		Values setMaxIoQueueSize(final int n) {
+			super.setMaxIoQueueSize(n);
+			return this;
+		}
+
+		@Override
+		Values setInitializeCellsAsDirty(final boolean b) {
+			super.setInitializeCellsAsDirty(b);
+			return this;
 		}
 
 		@Override
 		public String toString()
 		{
 			final StringBuilder sb = new StringBuilder();
-
-			sb.append( "{" );
-
-			sb.append( "dirtyAccesses = " );
-			sb.append( Boolean.toString( dirtyAccesses ) );
-			if ( dirtyAccessesModified )
-				sb.append( " [m]" );
-			sb.append( ", " );
-
-			sb.append( "volatileAccesses = " );
-			sb.append( Boolean.toString( volatileAccesses ) );
-			if ( volatileAccessesModified )
-				sb.append( " [m]" );
-			sb.append( ", " );
-
-			sb.append( "numIoThreads = " );
-			sb.append( numIoThreads );
-			if ( numIoThreadsModified )
-				sb.append( " [m]" );
-			sb.append( ", " );
-
-			sb.append( "maxIoQueueSize = " );
-			sb.append( maxIoQueueSize );
-			if ( maxIoQueueSizeModified )
-				sb.append( " [m]" );
-			sb.append( ", " );
-
-			sb.append( "cacheType = " );
-			sb.append( cacheType );
-			if ( cacheTypeModified )
-				sb.append( " [m]" );
-			sb.append( ", " );
-
-			sb.append( "maxCacheSize = " );
-			sb.append( maxCacheSize );
-			if ( maxCacheSizeModified )
-				sb.append( " [m]" );
-			sb.append( ", " );
-
-			sb.append( "cellDimensions = " );
-			sb.append( Util.printCoordinates( cellDimensions ) );
-			if ( cellDimensionsModified )
-				sb.append( " [m]" );
-			sb.append( ", " );
+			sb.append(super.toString());
+			sb.append( "DiskCachedCellImgOptions = {" );
 
 			sb.append( "cacheDirectory = " );
 			sb.append( cacheDirectory );
@@ -637,14 +485,14 @@ public class DiskCachedCellImgOptions
 			if ( deleteCacheDirectoryOnExitModified )
 				sb.append( " [m]" );
 
-			sb.append( "initializeCellsAsDirty = " );
-			sb.append( Boolean.toString( initializeCellsAsDirty ) );
-			if ( initializeCellsAsDirtyModified )
-				sb.append( " [m]" );
-
 			sb.append( "}" );
 
 			return sb.toString();
+		}
+
+		@Override
+		Values copy() {
+			return new Values(this);
 		}
 	}
 }

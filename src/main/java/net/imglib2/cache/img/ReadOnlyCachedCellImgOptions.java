@@ -43,7 +43,7 @@ import net.imglib2.util.Util;
  */
 public class ReadOnlyCachedCellImgOptions
 {
-	public final Values values;
+	private final Values values;
 
 	ReadOnlyCachedCellImgOptions( final Values values )
 	{
@@ -63,6 +63,22 @@ public class ReadOnlyCachedCellImgOptions
 	public static ReadOnlyCachedCellImgOptions options()
 	{
 		return new ReadOnlyCachedCellImgOptions();
+	}
+
+	/**
+	 * @return The values of this options object
+	 */
+	public Values values() {
+		return values;
+	}
+
+	/**
+	 * @param other Options that should be merged with this option object
+	 * @return New {@link ReadOnlyCachedCellImgOptions} containing the options of this object, 
+	 * overwritten by the non-default settings in the provided other options object
+	 */
+	public ReadOnlyCachedCellImgOptions merge(final ReadOnlyCachedCellImgOptions other) {
+		return new ReadOnlyCachedCellImgOptions(new Values(values, other.values));
 	}
 
 	/**
@@ -176,10 +192,22 @@ public class ReadOnlyCachedCellImgOptions
 	}
 
 	/**
-	 * Read-only {@link ReadOnlyCachedCellImgOptions} values.
+	 * Abstract base class for read-only {@link ReadOnlyCachedCellImgOptions} values, that can be extended
+	 * in specialized classes to e.g. add options for writeable caches.
+	 * 
+	 * We use the curious recuring template pattern here to facilitate chaining the builder methods while
+	 * maintaining the concrete type of the values object. Hence non-abstract derived classes must implement 
+	 * a self() method which is used to return an instance to the updated value object.
 	 */
-	public static class Values
+	protected static class Values
 	{
+		/**
+		 * @return a copy of this value object
+		 */
+		Values copy() {
+			return new Values(this);
+		}
+
 		/**
 		 * Copy constructor.
 		 */
@@ -219,20 +247,15 @@ public class ReadOnlyCachedCellImgOptions
 					: base.cellDimensions;
 		}
 
-		public ReadOnlyCachedCellImgOptions optionsFromValues()
-		{
-			return new ReadOnlyCachedCellImgOptions( new Values( this ) );
-		}
+		protected boolean dirtyAccesses = false;
 
-		private boolean dirtyAccesses = false;
+		protected boolean volatileAccesses = true;
 
-		private boolean volatileAccesses = true;
+		protected CacheType cacheType = CacheType.SOFTREF;
 
-		private CacheType cacheType = CacheType.SOFTREF;
+		protected long maxCacheSize = 1000;
 
-		private long maxCacheSize = 1000;
-
-		private int[] cellDimensions = new int[] { 10 };
+		protected int[] cellDimensions = new int[] { 10 };
 
 		public boolean dirtyAccesses()
 		{
@@ -264,15 +287,15 @@ public class ReadOnlyCachedCellImgOptions
 			return cellDimensions;
 		}
 
-		private boolean dirtyAccessesModified = false;
+		protected boolean dirtyAccessesModified = false;
 
-		private boolean volatileAccessesModified = false;
+		protected boolean volatileAccessesModified = false;
 
-		private boolean cacheTypeModified = false;
+		protected boolean cacheTypeModified = false;
 
-		private boolean maxCacheSizeModified = false;
+		protected boolean maxCacheSizeModified = false;
 
-		private boolean cellDimensionsModified = false;
+		protected boolean cellDimensionsModified = false;
 
 		Values setDirtyAccesses( final boolean b )
 		{
@@ -309,17 +332,12 @@ public class ReadOnlyCachedCellImgOptions
 			return this;
 		}
 
-		Values copy()
-		{
-			return new Values( this );
-		}
-
 		@Override
 		public String toString()
 		{
 			final StringBuilder sb = new StringBuilder();
 
-			sb.append( "{" );
+			sb.append( "ReadOnlyCachedCellImgOptions = {" );
 
 			sb.append( "dirtyAccesses = " );
 			sb.append( Boolean.toString( dirtyAccesses ) );

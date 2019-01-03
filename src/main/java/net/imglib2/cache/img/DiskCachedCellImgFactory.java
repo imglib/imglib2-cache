@@ -41,18 +41,11 @@ import java.nio.file.Path;
 import net.imglib2.Dimensions;
 import net.imglib2.cache.Cache;
 import net.imglib2.cache.CacheLoader;
-import net.imglib2.cache.IoSync;
-import net.imglib2.cache.LoaderRemoverCache;
-import net.imglib2.cache.ref.GuardedStrongRefLoaderRemoverCache;
-import net.imglib2.cache.ref.SoftRefLoaderRemoverCache;
 import net.imglib2.exception.IncompatibleTypeException;
 import net.imglib2.img.ImgFactory;
-import net.imglib2.img.NativeImgFactory;
-import net.imglib2.img.basictypeaccess.ArrayDataAccessFactory;
 import net.imglib2.img.basictypeaccess.array.ArrayDataAccess;
 import net.imglib2.img.cell.Cell;
 import net.imglib2.img.cell.CellGrid;
-import net.imglib2.img.cell.CellImgFactory;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.NativeTypeFactory;
 import net.imglib2.util.Fraction;
@@ -65,9 +58,9 @@ import net.imglib2.util.Util;
  * defaults.
  *
  * @author Tobias Pietzsch
+ * @author Carsten Haubold
  */
-public class DiskCachedCellImgFactory< T extends NativeType< T > > extends NativeImgFactory< T >
-{
+public class DiskCachedCellImgFactory<T extends NativeType<T>> extends AbstractReadWriteCachedCellImgFactory<T> {
 	private DiskCachedCellImgOptions factoryOptions;
 
 	/**
@@ -175,108 +168,22 @@ public class DiskCachedCellImgFactory< T extends NativeType< T > > extends Nativ
 	 *            additional options that partially override general factory
 	 *            options, or {@code null}.
 	 */
-	private < A > DiskCachedCellImg< T, A > create(
-			final long[] dimensions,
-			final CacheLoader< Long, ? extends Cell< ? extends A > > cacheLoader,
-			final CellLoader< T > cellLoader,
-			final T type,
-			final DiskCachedCellImgOptions additionalOptions )
-	{
-		@SuppressWarnings( { "unchecked", "rawtypes" } )
-		final DiskCachedCellImg< T, A > img = create( dimensions, cacheLoader, cellLoader, type, ( NativeTypeFactory ) type.getNativeTypeFactory(), additionalOptions );
-		return img;
-	}
-
-	private < A extends ArrayDataAccess< A > > DiskCachedCellImg< T, ? extends A > create(
-			final long[] dimensions,
-			final CacheLoader< Long, ? extends Cell< ? > > cacheLoader,
-			final CellLoader< T > cellLoader,
-			final T type,
-			final NativeTypeFactory< T, A > typeFactory,
-			final DiskCachedCellImgOptions additionalOptions )
-	{
-		final DiskCachedCellImgOptions.Values options = ( additionalOptions == null )
-				? factoryOptions.values
-				: new DiskCachedCellImgOptions.Values( factoryOptions.values, additionalOptions.values );
-
-
-		final Fraction entitiesPerPixel = type.getEntitiesPerPixel();
-
-		final CellGrid grid = createCellGrid( dimensions, entitiesPerPixel, options );
-
-		@SuppressWarnings( "unchecked" )
-		CacheLoader< Long, Cell< A > > backingLoader = ( CacheLoader< Long, Cell< A > > ) cacheLoader;
-		if ( backingLoader == null )
-		{
-			if ( cellLoader != null )
-			{
-				final CellLoader< T > actualCellLoader = options.initializeCellsAsDirty()
-						? cell -> {
-							cellLoader.load( cell );
-							cell.setDirty();
-						}
-						: cellLoader;
-				backingLoader = LoadedCellCacheLoader.get( grid, actualCellLoader, type, options.accessFlags() );
-			}
-			else
-				backingLoader = EmptyCellCacheLoader.get( grid, type, options.accessFlags() );
-		}
-
-		final Path blockcache = createBlockCachePath( options );
-
-		@SuppressWarnings( { "rawtypes", "unchecked" } )
-		final DiskCellCache< A > diskcache = options.dirtyAccesses()
-				? new DirtyDiskCellCache(
-						blockcache, grid, backingLoader,
-						AccessIo.get( type, options.accessFlags() ),
-						entitiesPerPixel )
-				: new DiskCellCache<>(
-						blockcache, grid, backingLoader,
-						AccessIo.get( type, options.accessFlags() ),
-						entitiesPerPixel );
-
-		final IoSync< Long, Cell< A > > iosync = new IoSync<>(
-				diskcache,
-				options.numIoThreads(),
-				options.maxIoQueueSize() );
-
-		LoaderRemoverCache< Long, Cell< A > > listenableCache;
-		switch ( options.cacheType() )
-		{
-		case BOUNDED:
-			listenableCache = new GuardedStrongRefLoaderRemoverCache<>( options.maxCacheSize() );
-			break;
-		case SOFTREF:
-		default:
-			listenableCache = new SoftRefLoaderRemoverCache<>();
-			break;
-		}
-
-		final Cache< Long, Cell< A > > cache = listenableCache
-				.withRemover( iosync )
-				.withLoader( iosync );
-
-		final A accessType = ArrayDataAccessFactory.get( typeFactory, options.accessFlags() );
-		final DiskCachedCellImg< T, ? extends A > img = new DiskCachedCellImg<>( this, grid, entitiesPerPixel, cache, accessType );
-		img.setLinkedType( typeFactory.createLinkedType( img ) );
+	private <A> DiskCachedCellImg<T, A> create(final long[] dimensions,
+			final CacheLoader<Long, ? extends Cell<? extends A>> cacheLoader, final CellLoader<T> cellLoader,
+			final T type, final DiskCachedCellImgOptions additionalOptions) {
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		final DiskCachedCellImg<T, A> img = (DiskCachedCellImg<T, A>)create(dimensions, cacheLoader, cellLoader, type,
+				(NativeTypeFactory) type.getNativeTypeFactory(), additionalOptions);
 		return img;
 	}
 
 	@SuppressWarnings( { "unchecked", "rawtypes" } )
 	@Override
-	public < S > ImgFactory< S > imgFactory( final S type ) throws IncompatibleTypeException
-	{
-		if ( NativeType.class.isInstance( type ) )
-			return new DiskCachedCellImgFactory( factoryOptions );
-		throw new IncompatibleTypeException( this, type.getClass().getCanonicalName() + " does not implement NativeType." );
-	}
-
-	private CellGrid createCellGrid( final long[] dimensions, final Fraction entitiesPerPixel, final DiskCachedCellImgOptions.Values options )
-	{
-		CellImgFactory.verifyDimensions( dimensions );
-		final int n = dimensions.length;
-		final int[] cellDimensions = CellImgFactory.getCellDimensions( options.cellDimensions(), n, entitiesPerPixel );
-		return new CellGrid( dimensions, cellDimensions );
+	public <S> ImgFactory<S> imgFactory(final S type) throws IncompatibleTypeException {
+		if (NativeType.class.isInstance(type))
+			return new DiskCachedCellImgFactory(factoryOptions);
+		throw new IncompatibleTypeException(this,
+				type.getClass().getCanonicalName() + " does not implement NativeType.");
 	}
 
 	private Path createBlockCachePath( final DiskCachedCellImgOptions.Values options )
@@ -308,6 +215,37 @@ public class DiskCachedCellImgFactory< T extends NativeType< T > > extends Nativ
 		}
 	}
 
+	@Override
+	AbstractReadWriteCachedCellImgOptions mergeWithFactoryOptions(
+			AbstractReadWriteCachedCellImgOptions userProvidedOptions) {
+		return ( userProvidedOptions == null ) ? factoryOptions : factoryOptions.merge(userProvidedOptions);
+	}
+
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	@Override
+	protected <A extends ArrayDataAccess<A>> CellCache<A> createCellCache(AbstractReadWriteCachedCellImgOptions options,
+			CellGrid grid, CacheLoader<Long, Cell<A>> backingLoader, T type, Fraction entitiesPerPixel) {
+				if (!(options instanceof DiskCachedCellImgOptions)) {
+					throw new UnsupportedOperationException("cannot construct DiskCachedCellImg with wrong options");
+				}
+				DiskCachedCellImgOptions.Values diskCacheOptions = ((DiskCachedCellImgOptions)options).values();
+				final Path blockcache = createBlockCachePath(diskCacheOptions);
+				return diskCacheOptions.dirtyAccesses()
+						? (CellCache<A>)new DirtyDiskCellCache(blockcache, grid, backingLoader, AccessIo.get(type, diskCacheOptions.accessFlags()),
+								entitiesPerPixel)
+						: new DiskCellCache<>(blockcache, grid, backingLoader, AccessIo.get(type, diskCacheOptions.accessFlags()),
+								entitiesPerPixel);
+	}
+
+	@Override
+	protected <A extends ArrayDataAccess<A>> CachedCellImg<T, A> createCachedCellImg(
+		final CellGrid grid, 
+		final Fraction entitiesPerPixel,
+		final Cache<Long, Cell<A>> cache,
+		final A accessType
+	) {
+		return new DiskCachedCellImg<>(this, grid, entitiesPerPixel, cache, accessType);
+	}
 
 	/*
 	 * -----------------------------------------------------------------------
