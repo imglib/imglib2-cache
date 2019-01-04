@@ -43,7 +43,7 @@ import net.imglib2.img.cell.CellImgFactory;
  */
 public class DiskCachedCellImgOptions extends AbstractReadWriteCachedCellImgOptions
 {
-	public final Values values;
+	private final Values values;
 
 	DiskCachedCellImgOptions(final Values values)
 	{
@@ -57,7 +57,7 @@ public class DiskCachedCellImgOptions extends AbstractReadWriteCachedCellImgOpti
 	}
 
 	@Override
-	Values values() {
+	public Values values() {
 		return values;
 	}
 

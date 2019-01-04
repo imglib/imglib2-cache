@@ -51,7 +51,7 @@ public abstract class AbstractReadWriteCachedCellImgOptions {
 	/**
 	 * @return The values of the (derived) options object
 	 */
-	abstract Values values();
+	public abstract Values values();
 
 	/**
 	 * @param other Options that should be merged with this option object
