@@ -169,7 +169,9 @@ public abstract class AbstractReadWriteCachedCellImgOptions {
 		 */
 		Values(final Values that) {
 			super(that);
-			this.dirtyAccesses = true; // RW default value differs from readonly cache
+			if (!that.dirtyAccessesModified) {
+				this.dirtyAccesses = true; // RW default value differs from readonly cache
+			}
 			this.numIoThreads = that.numIoThreads;
 			this.numIoThreadsModified = that.numIoThreadsModified;
 			this.maxIoQueueSize = that.maxIoQueueSize;
