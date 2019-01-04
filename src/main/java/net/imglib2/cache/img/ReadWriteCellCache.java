@@ -40,7 +40,7 @@ import net.imglib2.img.cell.Cell;
 /**
  * Common interface for cell caches with loader and remover
  * 
- * @author Carsten Haubold
+ * @author Carsten Haubold, KNIME GmbH, Konstanz, Germany
  */
 public interface ReadWriteCellCache<A>
         extends CacheRemover<Long, Cell<A>>, CacheLoader<Long, Cell<A>> {

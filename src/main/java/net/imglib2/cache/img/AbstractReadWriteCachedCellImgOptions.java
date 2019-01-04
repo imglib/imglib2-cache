@@ -42,7 +42,7 @@ import net.imglib2.cache.img.ReadOnlyCachedCellImgOptions.CacheType;
  * specific options depending on the writer-backend for the read-write-cache.
  *
  * @author Tobias Pietzsch
- * @author Carsten Haubold
+ * @author Carsten Haubold, KNIME GmbH, Konstanz, Germany
  */
 public abstract class AbstractReadWriteCachedCellImgOptions {
 	AbstractReadWriteCachedCellImgOptions() {

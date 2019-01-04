@@ -58,7 +58,7 @@ import net.imglib2.util.Util;
  * defaults.
  *
  * @author Tobias Pietzsch
- * @author Carsten Haubold
+ * @author Carsten Haubold, KNIME GmbH, Konstanz, Germany
  */
 public class DiskCachedCellImgFactory<T extends NativeType<T>> extends AbstractReadWriteCachedCellImgFactory<T> {
 	private DiskCachedCellImgOptions factoryOptions;

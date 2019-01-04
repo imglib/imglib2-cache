@@ -39,7 +39,7 @@ import net.imglib2.img.cell.CellImgFactory;
  * Optional parameters for constructing a {@link DiskCachedCellImgFactory}.
  *
  * @author Tobias Pietzsch
- * @author Carsten Haubold
+ * @author Carsten Haubold, KNIME GmbH, Konstanz, Germany
  */
 public class DiskCachedCellImgOptions extends AbstractReadWriteCachedCellImgOptions
 {

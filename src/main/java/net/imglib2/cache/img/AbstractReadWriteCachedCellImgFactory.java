@@ -56,7 +56,7 @@ import net.imglib2.util.Fraction;
  * See {@link DiskCachedCellImgFactory} for a specialized example.
  *
  * @author Tobias Pietzsch
- * @author Carsten Haubold
+ * @author Carsten Haubold, KNIME GmbH, Konstanz, Germany
  */
 public abstract class AbstractReadWriteCachedCellImgFactory<T extends NativeType<T>> extends NativeImgFactory<T> {
 	/**
