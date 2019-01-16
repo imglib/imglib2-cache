@@ -41,15 +41,13 @@ public class AbstractCacheKeyAdapter< K, L, V, C extends AbstractCache< L, V > >
 	@Override
 	public void invalidate( final K key )
 	{
-		// TODO
-		throw new UnsupportedOperationException( "not implemented yet" );
+		cache.invalidate( keymap.getTarget( key ) );
 	}
 
 	@Override
 	public void invalidateIf( final Predicate< K > condition )
 	{
-		// TODO
-		throw new UnsupportedOperationException( "not implemented yet" );
+		cache.invalidateIf( l -> condition.test( keymap.getSource( l ) ) );
 	}
 
 	@Override
