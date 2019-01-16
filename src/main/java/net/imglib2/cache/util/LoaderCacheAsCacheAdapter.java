@@ -7,6 +7,18 @@ import net.imglib2.cache.Cache;
 import net.imglib2.cache.CacheLoader;
 import net.imglib2.cache.LoaderCache;
 
+/**
+ * Wraps a {@code LoaderCache<K,V>} as a {@code Cache<K,V>}. This is done by
+ * supplying a default {@code CacheLoader} (specified in the constructor) to
+ * {@link LoaderCache#get(Object, CacheLoader)}.
+ *
+ * @param <K>
+ *            key type
+ * @param <V>
+ *            value type
+ *
+ * @author Tobias Pietzsch
+ */
 public class LoaderCacheAsCacheAdapter< K, V > implements Cache< K, V >
 {
 	private final LoaderCache< K, V > cache;

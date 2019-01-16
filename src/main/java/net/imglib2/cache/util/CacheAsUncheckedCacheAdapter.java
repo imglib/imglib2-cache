@@ -6,6 +6,18 @@ import java.util.function.Predicate;
 import net.imglib2.cache.Cache;
 import net.imglib2.cache.UncheckedCache;
 
+/**
+ * Wraps a {@code Cache<K,V>} as an {@code UncheckedCache<K,V>}. This is done by
+ * wrapping {@code ExecutionException} thrown by {@link Cache#get(Object)} as a
+ * {@code RuntimeException}.
+ *
+ * @param <K>
+ *            key type
+ * @param <V>
+ *            value type
+ *
+ * @author Tobias Pietzsch
+ */
 public class CacheAsUncheckedCacheAdapter< K, V > implements UncheckedCache< K, V >
 {
 	private final Cache< K, V > cache;

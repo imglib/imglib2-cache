@@ -8,6 +8,19 @@ import net.imglib2.cache.CacheRemover;
 import net.imglib2.cache.LoaderCache;
 import net.imglib2.cache.LoaderRemoverCache;
 
+/**
+ * Wraps a {@code LoaderRemoverCache<K,V>} as a {@code LoaderCache<K,V>}. This
+ * is done by supplying a default {@code CacheRemover} (specified in the
+ * constructor) to
+ * {@link LoaderRemoverCache#get(Object, CacheLoader, CacheRemover)}.
+ *
+ * @param <K>
+ *            key type
+ * @param <V>
+ *            value type
+ *
+ * @author Tobias Pietzsch
+ */
 public class LoaderRemoverCacheAsLoaderCacheAdapter< K, V > implements LoaderCache< K, V >
 {
 	private final LoaderRemoverCache< K, V > cache;
