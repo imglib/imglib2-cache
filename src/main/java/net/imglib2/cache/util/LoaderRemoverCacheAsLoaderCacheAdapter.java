@@ -40,28 +40,26 @@ public class LoaderRemoverCacheAsLoaderCacheAdapter< K, V > implements LoaderCac
 	}
 
 	@Override
+	public V get( final K key, final CacheLoader< ? super K, ? extends V > loader ) throws ExecutionException
+	{
+		return cache.get( key, loader, remover );
+	}
+
+	@Override
 	public void invalidate( final K key )
 	{
-		// TODO
-		throw new UnsupportedOperationException( "not implemented yet" );
+		cache.invalidate( key );
 	}
 
 	@Override
 	public void invalidateIf( final Predicate< K > condition )
 	{
-		// TODO
-		throw new UnsupportedOperationException( "not implemented yet" );
+		cache.invalidateIf( condition );
 	}
 
 	@Override
 	public void invalidateAll()
 	{
 		cache.invalidateAll();
-	}
-
-	@Override
-	public V get( final K key, final CacheLoader< ? super K, ? extends V > loader ) throws ExecutionException
-	{
-		return cache.get( key, loader, remover );
 	}
 }

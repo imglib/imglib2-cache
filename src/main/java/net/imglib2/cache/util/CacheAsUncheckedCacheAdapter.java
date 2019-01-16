@@ -49,15 +49,13 @@ public class CacheAsUncheckedCacheAdapter< K, V > implements UncheckedCache< K, 
 	@Override
 	public void invalidate( final K key )
 	{
-		// TODO
-		throw new UnsupportedOperationException( "not implemented yet" );
+		cache.invalidate( key );
 	}
 
 	@Override
 	public void invalidateIf( final Predicate< K > condition )
 	{
-		// TODO
-		throw new UnsupportedOperationException( "not implemented yet" );
+		cache.invalidateIf( condition );
 	}
 
 	@Override
