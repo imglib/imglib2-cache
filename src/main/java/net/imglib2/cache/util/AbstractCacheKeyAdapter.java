@@ -4,6 +4,21 @@ import java.util.function.Predicate;
 
 import net.imglib2.cache.AbstractCache;
 
+/**
+ * Wraps a {@code Cache<L,V>} as a {@code Cache<K,V>}, using a
+ * {@code KeyBimap<K,L>} to translate keys.
+ *
+ * @param <K>
+ *            key type of this cache
+ * @param <L>
+ *            key type of wrapped cache
+ * @param <V>
+ *            value type (of both of this cache and the wrapped cache)
+ * @param <C>
+ *            wrapped cache type
+ *
+ * @author Tobias Pietzsch
+ */
 public class AbstractCacheKeyAdapter< K, L, V, C extends AbstractCache< L, V > >
 		implements AbstractCache< K, V >
 {

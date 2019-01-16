@@ -131,6 +131,9 @@ public class DiskCellCache< A > implements CacheRemover< Long, Cell< A > >, Cach
 		}
 	}
 
+	/**
+	 * Removes the file for the given {@code key} (if it exists).
+	 */
 	@Override
 	public void invalidate( final Long key )
 	{
@@ -144,6 +147,9 @@ public class DiskCellCache< A > implements CacheRemover< Long, Cell< A > >, Cach
 		}
 	}
 
+	/**
+	 * Removes all files for keys matching the given {@code condition}.
+	 */
 	@Override
 	public void invalidateIf( final Predicate< Long > condition )
 	{
@@ -172,6 +178,9 @@ public class DiskCellCache< A > implements CacheRemover< Long, Cell< A > >, Cach
 		}
 	}
 
+	/**
+	 * Removes all files.
+	 */
 	@Override
 	public void invalidateAll()
 	{

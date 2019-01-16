@@ -12,7 +12,7 @@ import java.util.function.Function;
  * @param <T>
  *            target type
  *
- * @author Tobias Pietzsch &lt;tobias.pietzsch@gmail.com&gt;
+ * @author Tobias Pietzsch
  */
 public interface KeyBimap< S, T >
 {
