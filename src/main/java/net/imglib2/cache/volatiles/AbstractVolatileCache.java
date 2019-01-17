@@ -9,7 +9,4 @@ public interface AbstractVolatileCache< K, V >
 			CacheHints cacheHints ) throws ExecutionException;
 
 	void invalidateAll();
-//	void cleanUp();
-//	void invalidate( Object key );
-//	long size();
 }

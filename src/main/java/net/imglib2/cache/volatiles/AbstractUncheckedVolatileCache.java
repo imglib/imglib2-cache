@@ -7,7 +7,4 @@ public interface AbstractUncheckedVolatileCache< K, V >
 			CacheHints cacheHints );
 
 	void invalidateAll();
-//	void cleanUp();
-//	void invalidate( Object key );
-//	long size();
 }

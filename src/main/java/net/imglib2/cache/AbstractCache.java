@@ -45,7 +45,4 @@ public interface AbstractCache< K, V >
 	 * result in cache corruption and/or a deadlock.</em>
 	 */
 	void invalidateAll();
-
-//	void cleanUp();
-//	long size();
 }
