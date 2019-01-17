@@ -15,9 +15,9 @@ public class SoftRefLoaderCache< K, V > implements LoaderCache< K, V >
 
 	final ReferenceQueue< V > queue = new ReferenceQueue<>();
 
-	final class CacheSoftReference extends SoftReference< V >
+	static final class CacheSoftReference< V > extends SoftReference< V >
 	{
-		private final Entry entry;
+		private final SoftRefLoaderCache< ?, V >.Entry entry;
 
 		public CacheSoftReference()
 		{
@@ -25,15 +25,10 @@ public class SoftRefLoaderCache< K, V > implements LoaderCache< K, V >
 			this.entry = null;
 		}
 
-		public CacheSoftReference( final V referent, final Entry entry )
+		public CacheSoftReference( final V referent, final ReferenceQueue< V > remove, final SoftRefLoaderCache< ?, V >.Entry entry )
 		{
-			super( referent, queue );
+			super( referent, remove );
 			this.entry = entry;
-		}
-
-		public void clean()
-		{
-			map.remove( entry.key, entry );
 		}
 	}
 
@@ -41,14 +36,14 @@ public class SoftRefLoaderCache< K, V > implements LoaderCache< K, V >
 	{
 		final K key;
 
-		private SoftReference< V > ref;
+		private CacheSoftReference< V > ref;
 
 		boolean loaded;
 
 		public Entry( final K key )
 		{
 			this.key = key;
-			this.ref = new CacheSoftReference();
+			this.ref = new CacheSoftReference<>();
 			this.loaded = false;
 		}
 
@@ -60,7 +55,12 @@ public class SoftRefLoaderCache< K, V > implements LoaderCache< K, V >
 		public void setValue( final V value )
 		{
 			this.loaded = true;
-			this.ref = new CacheSoftReference( value, this );
+			this.ref = new CacheSoftReference<>( value, queue, this );
+		}
+
+		public void remove()
+		{
+			map.remove( key, this );
 		}
 	}
 
@@ -91,7 +91,7 @@ public class SoftRefLoaderCache< K, V > implements LoaderCache< K, V >
 						 * The entry was already loaded, but its value has been
 						 * garbage collected. We need to create a new entry
 						 */
-						map.remove( key, entry );
+						entry.remove();
 						value = get( key, loader );
 					}
 				}
@@ -120,21 +120,46 @@ public class SoftRefLoaderCache< K, V > implements LoaderCache< K, V >
 	@Override
 	public void invalidate( final K key )
 	{
-		// TODO
-		throw new UnsupportedOperationException( "not implemented yet" );
+		final Entry entry = map.remove( key );
+		if ( entry != null )
+		{
+			final CacheSoftReference< V > ref = entry.ref;
+			if ( ref != null )
+				ref.clear();
+			entry.ref = null;
+		}
 	}
+
+	// TODO: make parameter to invalidateAll(), invalidateIf()
+	static int parallelismThreshold = 1000;
 
 	@Override
 	public void invalidateIf( final Predicate< K > condition )
 	{
-		// TODO
-		throw new UnsupportedOperationException( "not implemented yet" );
+		map.forEachValue( parallelismThreshold, entry ->
+		{
+			if ( condition.test( entry.key ) )
+			{
+				entry.remove();
+				final CacheSoftReference< V > ref = entry.ref;
+				if ( ref != null )
+					ref.clear();
+				entry.ref = null;
+			}
+		} );
 	}
 
 	@Override
 	public void invalidateAll()
 	{
-		map.clear();
+		map.forEachValue( parallelismThreshold, entry ->
+		{
+			entry.remove();
+			final CacheSoftReference< V > ref = entry.ref;
+			if ( ref != null )
+				ref.clear();
+			entry.ref = null;
+		} );
 	}
 
 	/**
@@ -149,7 +174,7 @@ public class SoftRefLoaderCache< K, V > implements LoaderCache< K, V >
 			final CacheSoftReference poll = ( CacheSoftReference ) queue.poll();
 			if ( poll == null )
 				break;
-			poll.clean();
+			poll.entry.remove();
 		}
 	}
 }

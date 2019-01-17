@@ -45,7 +45,7 @@ public class SoftRefLoaderRemoverCache< K, V > implements LoaderRemoverCache< K,
 			referent.setAccessible( true );
 		}
 
-		SoftRefLoaderRemoverCache< ?, V >.Entry entry;
+		private final SoftRefLoaderRemoverCache< ?, V >.Entry entry;
 
 		public CachePhantomReference( final V referent, final ReferenceQueue< V > remove, final SoftRefLoaderRemoverCache< ?, V >.Entry entry )
 		{
@@ -111,8 +111,8 @@ public class SoftRefLoaderRemoverCache< K, V > implements LoaderRemoverCache< K,
 				phantomRef = null;
 				remover.onRemoval( key, value );
 				remover = null;
-				map.remove( key, this );
 			}
+			map.remove( key, this );
 		}
 	}
 
@@ -172,15 +172,6 @@ public class SoftRefLoaderRemoverCache< K, V > implements LoaderRemoverCache< K,
 		return value;
 	}
 
-	/**
-	 * Remove the {@code key} and discard the corresponding cached value.
-	 * <p>
-	 * This will <em>not</em> call
-	 * {@link CacheRemover#onRemoval(Object, Object)} for the discarded entry.
-	 * <p>
-	 * <em>There must be no concurrent {@code get()} operations for {@code key}.
-	 * This will result in cache corruption and/or a deadlock.</em>
-	 */
 	@Override
 	public void invalidate( final K key )
 	{
@@ -199,15 +190,6 @@ public class SoftRefLoaderRemoverCache< K, V > implements LoaderRemoverCache< K,
 	// TODO: make parameter to invalidateAll(), invalidateIf()
 	static int parallelismThreshold = 1000;
 
-	/**
-	 * Remove and discard all cached values with keys matching {@code condition}.
-	 * <p>
-	 * This will <em>not</em> call
-	 * {@link CacheRemover#onRemoval(Object, Object)} for the discarded entries.
-	 * <p>
-	 * <em>There must be no concurrent {@code get()} operations for keys matching {@code condition}.
-	 * This will result in cache corruption and/or a deadlock.</em>
-	 */
 	@Override
 	public void invalidateIf( final Predicate< K > condition )
 	{
@@ -226,15 +208,6 @@ public class SoftRefLoaderRemoverCache< K, V > implements LoaderRemoverCache< K,
 		} );
 	}
 
-	/**
-	 * Remove and discard all cached values.
-	 * <p>
-	 * This will <em>not</em> call
-	 * {@link CacheRemover#onRemoval(Object, Object)} for the discarded entries.
-	 * <p>
-	 * <em>There must be no concurrent {@code get()} operations.
-	 * This will result in cache corruption and/or a deadlock.</em>
-	 */
 	@Override
 	public void invalidateAll()
 	{
