@@ -34,7 +34,7 @@ import net.imglib2.Dirty;
 import net.imglib2.cache.img.ReadOnlyCachedCellImgOptions.CacheType;
 
 /**
- * Options base class used when constructing a cell image factory derived from {@link AbstractCachedCellImgFactory}. 
+ * Options base class used when constructing a cell image factory derived from {@link AbstractReadWriteCachedCellImgFactory}. 
  * This holds a set of default options shared by read-write-caches. Specialized writer-backends should provide their
  * own CachedCellImgFactory and -Options.
  * 

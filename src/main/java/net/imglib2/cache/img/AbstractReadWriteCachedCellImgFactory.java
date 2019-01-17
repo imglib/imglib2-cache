@@ -54,6 +54,8 @@ import net.imglib2.util.Fraction;
  * but leaves the implementation of the cell writing to specialized implementations.
  * 
  * See {@link DiskCachedCellImgFactory} for a specialized example.
+ * 
+ * @param <T> Element type of the images that can be created by this factory
  *
  * @author Tobias Pietzsch
  * @author Carsten Haubold, KNIME GmbH, Konstanz, Germany
@@ -80,6 +82,15 @@ public abstract class AbstractReadWriteCachedCellImgFactory<T extends NativeType
 	/**
 	 * Create a cached cell img with the provided settings. Much of the work is deferred to abstract methods that
 	 * must be implemented for the specific writer-backend in specialized classes.
+	 * 
+	 * @param dimensions Dimensions of the image that should be created
+	 * @param cacheLoader Loader for already cached cells (optional)
+	 * @param cellLoader Loader for Cells that are not cached yet (optional, cache will provide empty cells if this is null)
+	 * @param type Instance of the element type of the image that should be created
+	 * @param typeFactory A native type factory
+	 * @param additionalOptions Cache options that extend this cache factory's options
+	 * @param <A> Access Type
+	 * @return A CachedCellImg with the given cache configuration
 	 */
 	protected <A extends ArrayDataAccess<A>> CachedCellImg<T, ? extends A> create(final long[] dimensions,
 			final CacheLoader<Long, ? extends Cell<?>> cacheLoader, 
@@ -131,8 +142,14 @@ public abstract class AbstractReadWriteCachedCellImgFactory<T extends NativeType
 	}
 
 	/**
-	 * Derived classes should create an instance of the CachedCellImg type that they support.
+	 * Derived classes should create an instance of the CachedCellImg type that they support, given the provided cache and grid
 	 * E.g. a {@link DiskCachedCellImgFactory} would create and return a {@link DiskCachedCellImg}.
+	 * 
+	 * @param grid The grid structure of the CellCache
+	 * @param entitiesPerPixel 
+	 * @param cache The configured cache to use as backing for the image
+	 * @param accessType
+	 * @return A {@link CachedCellImg}
 	 */
 	protected abstract <A extends ArrayDataAccess<A>> CachedCellImg<T, ? extends A> createCachedCellImg(
 		final CellGrid grid, 
@@ -148,7 +165,7 @@ public abstract class AbstractReadWriteCachedCellImgFactory<T extends NativeType
 	 * @param backingLoader the backing loader for cache cells
 	 * @param type element type
 	 * @param entitiesPerPixel
-	 * @return
+	 * @return A {@link ReadWriteCellCache}
 	 */
 	protected abstract <A extends ArrayDataAccess<A>> ReadWriteCellCache<A> createCellCache(
 		final AbstractReadWriteCachedCellImgOptions options, 

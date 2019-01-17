@@ -249,7 +249,7 @@ public class DiskCachedCellImgOptions extends AbstractReadWriteCachedCellImgOpti
 	 * </p>
 	 * <p>
 	 * For safety reasons, only cell cache directories that are created by the
-	 * {@link AbstractReadWriteCachedCellImgFactory} are actually marked for deletion. This
+	 * {@link DiskCachedCellImgFactory} are actually marked for deletion. This
 	 * means that either no {@link #cacheDirectory(Path)} is specified (a
 	 * temporary directory is created), or the specified
 	 * {@link #cacheDirectory(Path)} does not exist yet.
@@ -275,8 +275,7 @@ public class DiskCachedCellImgOptions extends AbstractReadWriteCachedCellImgOpti
 	 * </p>
 	 * <p>
 	 * This option only has an effect for {@link DiskCachedCellImg} that are
-	 * created with a {@link CellLoader}
-	 * ({@link AbstractReadWriteCachedCellImgFactory#create(long[], net.imglib2.type.NativeType, CellLoader)}).
+	 * created with a {@link CellLoader} ({@link DiskCachedCellImgFactory#create(net.imglib2.Dimensions, CellLoader)}})
 	 * </p>
 	 *
 	 * @param initializeAsDirty
