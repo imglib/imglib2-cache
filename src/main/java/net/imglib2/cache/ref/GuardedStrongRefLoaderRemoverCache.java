@@ -65,7 +65,7 @@ public class GuardedStrongRefLoaderRemoverCache< K, V > implements LoaderRemover
 			referent.setAccessible( true );
 		}
 
-		GuardedStrongRefLoaderRemoverCache< ?, V >.Entry entry;
+		private final GuardedStrongRefLoaderRemoverCache< ?, V >.Entry entry;
 
 		public CachePhantomReference( final V referent, final ReferenceQueue< V > remove, final GuardedStrongRefLoaderRemoverCache< ?, V >.Entry entry )
 		{
@@ -131,8 +131,8 @@ public class GuardedStrongRefLoaderRemoverCache< K, V > implements LoaderRemover
 				phantomRef = null;
 				remover.onRemoval( key, value );
 				remover = null;
-				map.remove( key, this );
 			}
+			map.remove( key, this );
 		}
 	}
 
@@ -207,22 +207,55 @@ public class GuardedStrongRefLoaderRemoverCache< K, V > implements LoaderRemover
 	@Override
 	public void invalidate( final K key )
 	{
-		// TODO
-		throw new UnsupportedOperationException( "not implemented yet" );
+		final Entry entry = map.remove( key );
+		if ( entry != null )
+		{
+			strongCache.invalidate( key );
+			synchronized ( entry )
+			{
+				entry.phantomRef.clear();
+				entry.phantomRef = null;
+				entry.remover = null;
+			}
+		}
 	}
+
+	// TODO: make parameter to invalidateAll(), invalidateIf()
+	static int parallelismThreshold = 1000;
 
 	@Override
 	public void invalidateIf( final Predicate< K > condition )
 	{
-		// TODO
-		throw new UnsupportedOperationException( "not implemented yet" );
+		map.forEachValue( parallelismThreshold, entry ->
+		{
+			if ( condition.test( entry.key ) )
+			{
+				strongCache.invalidate( entry.key );
+				synchronized ( entry )
+				{
+					map.remove( entry.key, entry );
+					entry.phantomRef.clear();
+					entry.phantomRef = null;
+					entry.remover = null;
+				}
+			}
+		} );
 	}
 
 	@Override
 	public void invalidateAll()
 	{
-		// TODO
-		throw new UnsupportedOperationException( "not implemented yet" );
+		map.forEachValue( parallelismThreshold, entry ->
+		{
+			synchronized ( entry )
+			{
+				map.remove( entry.key, entry );
+				entry.phantomRef.clear();
+				entry.phantomRef = null;
+				entry.remover = null;
+			}
+		} );
+		strongCache.invalidateAll();
 	}
 
 	/**
