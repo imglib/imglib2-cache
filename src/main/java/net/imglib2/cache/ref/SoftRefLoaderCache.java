@@ -152,6 +152,8 @@ public class SoftRefLoaderCache< K, V > implements LoaderCache< K, V >
 	@Override
 	public void invalidateAll()
 	{
+		// TODO: We could also simply do map.clear(). Pros/Cons?
+
 		map.forEachValue( parallelismThreshold, entry ->
 		{
 			entry.remove();
