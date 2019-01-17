@@ -2,6 +2,7 @@ package net.imglib2.cache.util;
 
 import java.util.concurrent.ExecutionException;
 
+import java.util.function.Predicate;
 import net.imglib2.cache.volatiles.CacheHints;
 import net.imglib2.cache.volatiles.UncheckedVolatileCache;
 import net.imglib2.cache.volatiles.VolatileCache;
@@ -39,6 +40,18 @@ public class VolatileCacheAsUncheckedVolatileCacheAdapter< K, V > implements Unc
 		{
 			throw new RuntimeException( e );
 		}
+	}
+
+	@Override
+	public void invalidate( final K key )
+	{
+		cache.invalidate( key );
+	}
+
+	@Override
+	public void invalidateIf( final Predicate< K > condition )
+	{
+		cache.invalidateIf( condition );
 	}
 
 	@Override

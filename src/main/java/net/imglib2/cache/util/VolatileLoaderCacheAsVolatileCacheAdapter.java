@@ -2,6 +2,7 @@ package net.imglib2.cache.util;
 
 import java.util.concurrent.ExecutionException;
 
+import java.util.function.Predicate;
 import net.imglib2.cache.volatiles.CacheHints;
 import net.imglib2.cache.volatiles.VolatileLoaderCache;
 import net.imglib2.cache.volatiles.VolatileCacheLoader;
@@ -29,6 +30,18 @@ public class VolatileLoaderCacheAsVolatileCacheAdapter< K, V > implements Volati
 	public V get( final K key, final CacheHints cacheHints ) throws ExecutionException
 	{
 		return cache.get( key, loader, cacheHints );
+	}
+
+	@Override
+	public void invalidate( final K key )
+	{
+		cache.invalidate( key );
+	}
+
+	@Override
+	public void invalidateIf( final Predicate< K > condition )
+	{
+		cache.invalidateIf( condition );
 	}
 
 	@Override
