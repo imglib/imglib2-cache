@@ -47,12 +47,16 @@ public class AbstractCacheKeyAdapter< K, L, V, C extends AbstractCache< L, V > >
 	@Override
 	public void invalidateIf( final Predicate< K > condition )
 	{
-		cache.invalidateIf( l -> condition.test( keymap.getSource( l ) ) );
+		cache.invalidateIf( l ->
+		{
+			final K k = keymap.getSource( l );
+			return k != null && condition.test( k );
+		} );
 	}
 
 	@Override
 	public void invalidateAll()
 	{
-		cache.invalidateAll();
+		cache.invalidateIf( l -> keymap.getSource( l ) != null );
 	}
 }
