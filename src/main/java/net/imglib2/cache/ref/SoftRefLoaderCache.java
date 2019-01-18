@@ -173,7 +173,7 @@ public class SoftRefLoaderCache< K, V > implements LoaderCache< K, V >
 		while ( true )
 		{
 			@SuppressWarnings( "unchecked" )
-			final CacheSoftReference poll = ( CacheSoftReference ) queue.poll();
+			final CacheSoftReference< V > poll = ( CacheSoftReference< V > ) queue.poll();
 			if ( poll == null )
 				break;
 			poll.entry.remove();

@@ -173,7 +173,7 @@ public class WeakRefLoaderCache< K, V > implements LoaderCache< K, V >
 		while ( true )
 		{
 			@SuppressWarnings( "unchecked" )
-			final CacheWeakReference poll = ( CacheWeakReference ) queue.poll();
+			final CacheWeakReference< V > poll = ( CacheWeakReference< V > ) queue.poll();
 			if ( poll == null )
 				break;
 			poll.entry.remove();

@@ -68,7 +68,7 @@ public class GuardedStrongRefLoaderCache< K, V > implements LoaderCache< K, V >
 		public Entry( final K key )
 		{
 			this.key = key;
-			this.ref = new CacheWeakReference();
+			this.ref = new CacheWeakReference<>();
 			this.loaded = false;
 		}
 
@@ -80,7 +80,7 @@ public class GuardedStrongRefLoaderCache< K, V > implements LoaderCache< K, V >
 		public void setValue( final V value )
 		{
 			this.loaded = true;
-			this.ref = new CacheWeakReference( value, queue, this );
+			this.ref = new CacheWeakReference<>( value, queue, this );
 		}
 
 		public void remove()
@@ -213,7 +213,7 @@ public class GuardedStrongRefLoaderCache< K, V > implements LoaderCache< K, V >
 		while ( true )
 		{
 			@SuppressWarnings( "unchecked" )
-			final CacheWeakReference poll = ( CacheWeakReference ) queue.poll();
+			final CacheWeakReference< V > poll = ( CacheWeakReference< V > ) queue.poll();
 			if ( poll == null )
 				break;
 			poll.entry.remove();
