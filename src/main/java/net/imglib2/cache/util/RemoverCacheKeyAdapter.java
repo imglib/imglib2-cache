@@ -19,6 +19,6 @@ public class RemoverCacheKeyAdapter< K, L, V, C extends RemoverCache< L, V > >
 	{
 		return cache.get(
 				keymap.getTarget( key ),
-				( k, v ) -> remover.onRemoval( keymap.getSource( k ), v ) );
+				( l, v ) -> remover.onRemoval( keymap.getSource( l ), v ) );
 	}
 }
