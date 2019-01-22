@@ -84,5 +84,5 @@ public interface Invalidate< K >
 	/**
 	 * TODO: Should do some benchmarks. This is picked completely arbitrarily.
 	 */
-	static final long defaultParallelismThreshold = 5000;
+	long defaultParallelismThreshold = 5000;
 }
