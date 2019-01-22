@@ -2,7 +2,7 @@ package net.imglib2.cache;
 
 import java.util.function.Predicate;
 
-public interface AbstractCache< K, V >
+public interface AbstractCache< K, V > extends Invalidate< K >
 {
 	V getIfPresent( K key );
 
@@ -16,7 +16,11 @@ public interface AbstractCache< K, V >
 	 * <p>
 	 * <em>There must be no concurrent {@code get()} operations for {@code key}.
 	 * This may result in cache corruption and/or a deadlock.</em>
+	 *
+	 * @param key
+	 *            key of the entry to remove
 	 */
+	@Override
 	void invalidate( final K key );
 
 	/**
@@ -30,19 +34,31 @@ public interface AbstractCache< K, V >
 	 * <em>There must be no concurrent {@code get()} operations for keys
 	 * matching {@code condition}. This may result in cache corruption and/or a
 	 * deadlock.</em>
+	 *
+	 * @param parallelismThreshold
+	 *            the (estimated) number of entries in the cache needed for this
+	 *            operation to be executed in parallel
+	 * @param condition
+	 *            condition on keys of entries to remove
 	 */
-	void invalidateIf( final Predicate< K > condition );
+	@Override
+	void invalidateIf( final long parallelismThreshold, final Predicate< K > condition );
 
 	/**
 	 * Removes and discards all entries. Calls
-	 * {@link CacheRemover#invalidateAll()} (which should in turn invalidate any
-	 * backing cache)
+	 * {@link CacheRemover#invalidateAll(long)} (which should in turn invalidate
+	 * any backing cache)
 	 * <p>
 	 * Note that this will <em>not</em> call
 	 * {@link CacheRemover#onRemoval(Object, Object)} for the discarded entries.
 	 * <p>
 	 * <em> There must be no concurrent {@code get()} operations. This may
 	 * result in cache corruption and/or a deadlock.</em>
+	 *
+	 * @param parallelismThreshold
+	 *            the (estimated) number of entries in the cache needed for this
+	 *            operation to be executed in parallel
 	 */
-	void invalidateAll();
+	@Override
+	void invalidateAll( final long parallelismThreshold );
 }

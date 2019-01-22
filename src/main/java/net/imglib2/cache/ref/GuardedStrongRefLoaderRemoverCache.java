@@ -220,11 +220,8 @@ public class GuardedStrongRefLoaderRemoverCache< K, V > implements LoaderRemover
 		}
 	}
 
-	// TODO: make parameter to invalidateAll(), invalidateIf()
-	static int parallelismThreshold = 1000;
-
 	@Override
-	public void invalidateIf( final Predicate< K > condition )
+	public void invalidateIf( final long parallelismThreshold, final Predicate< K > condition )
 	{
 		map.forEachValue( parallelismThreshold, entry ->
 		{
@@ -243,7 +240,7 @@ public class GuardedStrongRefLoaderRemoverCache< K, V > implements LoaderRemover
 	}
 
 	@Override
-	public void invalidateAll()
+	public void invalidateAll( final long parallelismThreshold )
 	{
 		map.forEachValue( parallelismThreshold, entry ->
 		{

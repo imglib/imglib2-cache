@@ -205,6 +205,9 @@ public class IoSync< K, V > implements CacheLoader< K, V >, CacheRemover< K, V >
 	/**
 	 * Cancel any enqueued write for {@code key}. Blocks until all in-progress
 	 * writes for {@code key} are finished.
+	 *
+	 * @param key
+	 *            key of the entry to remove
 	 */
 	@Override
 	public void invalidate( final K key )
@@ -232,9 +235,15 @@ public class IoSync< K, V > implements CacheLoader< K, V >, CacheRemover< K, V >
 	 * Cancel all enqueued writes for keys matching {@code condition}. Blocks
 	 * until all in-progress writes for keys matching {@code condition} are
 	 * finished.
+	 *
+	 * @param parallelismThreshold
+	 *            the (estimated) number of entries in the cache needed for this
+	 *            operation to be executed in parallel
+	 * @param condition
+	 *            condition on keys of entries to remove
 	 */
 	@Override
-	public void invalidateIf( final Predicate< K > condition )
+	public void invalidateIf( final long parallelismThreshold, final Predicate< K > condition )
 	{
 		invalidateLock.lock();
 		try
@@ -242,7 +251,7 @@ public class IoSync< K, V > implements CacheLoader< K, V >, CacheRemover< K, V >
 			queue.pause();
 			queue.removeIf( condition );
 			map.keySet().removeIf( condition );
-			saver.invalidateIf( condition );
+			saver.invalidateIf( parallelismThreshold, condition );
 			queue.resume();
 		}
 		catch ( final InterruptedException e )
@@ -257,9 +266,13 @@ public class IoSync< K, V > implements CacheLoader< K, V >, CacheRemover< K, V >
 
 	/**
 	 * Cancel all enqueued writes. Blocks until in-progress writes are finished.
+	 *
+	 * @param parallelismThreshold
+	 *            the (estimated) number of entries in the cache needed for this
+	 *            operation to be executed in parallel
 	 */
 	@Override
-	public void invalidateAll()
+	public void invalidateAll( final long parallelismThreshold )
 	{
 		invalidateLock.lock();
 		try
@@ -267,7 +280,7 @@ public class IoSync< K, V > implements CacheLoader< K, V >, CacheRemover< K, V >
 			queue.pause();
 			queue.clear();
 			map.clear();
-			saver.invalidateAll();
+			saver.invalidateAll( parallelismThreshold );
 			queue.resume();
 		}
 		catch ( final InterruptedException e )

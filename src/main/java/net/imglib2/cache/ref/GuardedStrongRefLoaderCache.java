@@ -168,11 +168,8 @@ public class GuardedStrongRefLoaderCache< K, V > implements LoaderCache< K, V >
 		}
 	}
 
-	// TODO: make parameter to invalidateAll(), invalidateIf()
-	static int parallelismThreshold = 1000;
-
 	@Override
-	public void invalidateIf( final Predicate< K > condition )
+	public void invalidateIf( final long parallelismThreshold, final Predicate< K > condition )
 	{
 		map.forEachValue( parallelismThreshold, entry ->
 		{
@@ -189,7 +186,7 @@ public class GuardedStrongRefLoaderCache< K, V > implements LoaderCache< K, V >
 	}
 
 	@Override
-	public void invalidateAll()
+	public void invalidateAll( final long parallelismThreshold )
 	{
 		// TODO: We could also simply do map.clear(). Pros/Cons?
 

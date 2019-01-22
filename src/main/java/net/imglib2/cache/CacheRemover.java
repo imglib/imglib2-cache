@@ -13,7 +13,7 @@ import java.util.function.Predicate;
  *
  * @author Tobias Pietzsch
  */
-public interface CacheRemover< K, V >
+public interface CacheRemover< K, V > extends Invalidate< K >
 {
 	/**
 	 * Called when an entry is evicted from the cache.
@@ -29,28 +29,44 @@ public interface CacheRemover< K, V >
 	 * <p>
 	 * If this {@code CacheRemover} itself represents a (higher-level) cache,
 	 * the entry should be invalidated in this cache as well.
+	 *
+	 * @param key
+	 *            key of the entry to remove
 	 */
+	@Override
 	default void invalidate( final K key )
 	{};
 
 	/**
 	 * Called when all entries with keys matching {@code condition} are
 	 * invalidated from the cache. (See
-	 * {@link AbstractCache#invalidateIf(Predicate)}.)
+	 * {@link AbstractCache#invalidateIf(long, Predicate)}.)
 	 * <p>
 	 * If this {@code CacheRemover} itself represents a (higher-level) cache,
 	 * the entries should be invalidated in this cache as well.
+	 *
+	 * @param parallelismThreshold
+	 *            the (estimated) number of entries in the cache needed for this
+	 *            operation to be executed in parallel
+	 * @param condition
+	 *            condition on keys of entries to remove
 	 */
-	default void invalidateIf( final Predicate< K > condition )
+	@Override
+	default void invalidateIf( final long parallelismThreshold, final Predicate< K > condition )
 	{};
 
 	/**
 	 * Called when all entries are invalidated from the cache. (See
-	 * {@link AbstractCache#invalidateAll()}.)
+	 * {@link AbstractCache#invalidateAll(long)}.)
 	 * <p>
 	 * If this {@code CacheRemover} itself represents a (higher-level) cache,
 	 * the entries should be invalidated in this cache as well.
+	 *
+	 * @param parallelismThreshold
+	 *            the (estimated) number of entries in the cache needed for this
+	 *            operation to be executed in parallel
 	 */
-	default void invalidateAll()
+	@Override
+	default void invalidateAll( final long parallelismThreshold )
 	{};
 }

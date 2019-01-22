@@ -64,17 +64,17 @@ public class BoundedSoftRefLoaderCache< K, V > implements LoaderCache< K, V >
 	}
 
 	@Override
-	public void invalidateIf( final Predicate< K > condition )
+	public void invalidateIf( final long parallelismThreshold, final Predicate< K > condition )
 	{
-		cache.invalidateIf( condition );
+		cache.invalidateIf( parallelismThreshold, condition );
 		softRefs.keySet().removeIf( condition );
 	}
 
 	@Override
-	public void invalidateAll()
+	public void invalidateAll( final long parallelismThreshold )
 	{
 		softRefs.clear();
-		cache.invalidateAll();
+		cache.invalidateAll( parallelismThreshold );
 	}
 
 	class SoftRefs extends LinkedHashMap< K, SoftReference< V > >

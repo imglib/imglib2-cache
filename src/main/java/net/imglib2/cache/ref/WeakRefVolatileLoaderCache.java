@@ -5,8 +5,8 @@ import java.lang.ref.WeakReference;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
-
 import java.util.function.Predicate;
+
 import net.imglib2.cache.LoaderCache;
 import net.imglib2.cache.iotiming.CacheIoTiming;
 import net.imglib2.cache.iotiming.IoStatistics;
@@ -235,11 +235,8 @@ public class WeakRefVolatileLoaderCache< K, V > implements VolatileLoaderCache< 
 		}
 	}
 
-	// TODO: make parameter to invalidateAll(), invalidateIf()
-	static int parallelismThreshold = 1000;
-
 	@Override
-	public void invalidateIf( final Predicate< K > condition )
+	public void invalidateIf( final long parallelismThreshold, final Predicate< K > condition )
 	{
 		try
 		{
@@ -261,7 +258,7 @@ public class WeakRefVolatileLoaderCache< K, V > implements VolatileLoaderCache< 
 			} );
 
 			// remove matching entries from backingCache
-			backingCache.invalidateIf( condition );
+			backingCache.invalidateIf( parallelismThreshold, condition );
 
 			// resume fetcher threads
 			fetchQueue.resume();
@@ -273,7 +270,7 @@ public class WeakRefVolatileLoaderCache< K, V > implements VolatileLoaderCache< 
 	}
 
 	@Override
-	public void invalidateAll()
+	public void invalidateAll( final long parallelismThreshold )
 	{
 		try
 		{
@@ -282,8 +279,7 @@ public class WeakRefVolatileLoaderCache< K, V > implements VolatileLoaderCache< 
 
 			// remove all entries from this cache
 			// TODO: We could also simply do map.clear(). Pros/Cons?
-			map.forEachValue( parallelismThreshold, entry ->
-			{
+			map.forEachValue( parallelismThreshold, entry -> {
 				entry.remove();
 				final CacheWeakReference< V > ref = entry.ref;
 				if ( ref != null )
@@ -293,7 +289,7 @@ public class WeakRefVolatileLoaderCache< K, V > implements VolatileLoaderCache< 
 			} );
 
 			// remove all entries from backingCache
-			backingCache.invalidateAll();
+			backingCache.invalidateAll( parallelismThreshold );
 
 			// resume fetcher threads
 			fetchQueue.resume();

@@ -52,14 +52,14 @@ public class LoaderRemoverCacheAsLoaderCacheAdapter< K, V > implements LoaderCac
 	}
 
 	@Override
-	public void invalidateIf( final Predicate< K > condition )
+	public void invalidateIf( final long parallelismThreshold, final Predicate< K > condition )
 	{
-		cache.invalidateIf( condition );
+		cache.invalidateIf( parallelismThreshold, condition );
 	}
 
 	@Override
-	public void invalidateAll()
+	public void invalidateAll( final long parallelismThreshold )
 	{
-		cache.invalidateAll();
+		cache.invalidateAll( parallelismThreshold );
 	}
 }

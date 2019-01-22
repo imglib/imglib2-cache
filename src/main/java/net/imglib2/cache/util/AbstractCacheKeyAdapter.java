@@ -45,18 +45,17 @@ public class AbstractCacheKeyAdapter< K, L, V, C extends AbstractCache< L, V > >
 	}
 
 	@Override
-	public void invalidateIf( final Predicate< K > condition )
+	public void invalidateIf( final long parallelismThreshold, final Predicate< K > condition )
 	{
-		cache.invalidateIf( l ->
-		{
+		cache.invalidateIf( parallelismThreshold, l -> {
 			final K k = keymap.getSource( l );
 			return k != null && condition.test( k );
 		} );
 	}
 
 	@Override
-	public void invalidateAll()
+	public void invalidateAll( final long parallelismThreshold )
 	{
-		cache.invalidateIf( l -> keymap.getSource( l ) != null );
+		cache.invalidateIf( parallelismThreshold, l -> keymap.getSource( l ) != null );
 	}
 }

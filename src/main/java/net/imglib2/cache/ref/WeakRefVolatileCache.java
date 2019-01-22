@@ -234,11 +234,8 @@ public class WeakRefVolatileCache< K, V > implements VolatileCache< K, V >
 		}
 	}
 
-	// TODO: make parameter to invalidateAll(), invalidateIf()
-	static int parallelismThreshold = 1000;
-
 	@Override
-	public void invalidateIf( final Predicate< K > condition )
+	public void invalidateIf( final long parallelismThreshold, final Predicate< K > condition )
 	{
 		try
 		{
@@ -259,7 +256,7 @@ public class WeakRefVolatileCache< K, V > implements VolatileCache< K, V >
 			} );
 
 			// remove matching entries from backingCache
-			backingCache.invalidateIf( condition );
+			backingCache.invalidateIf( parallelismThreshold, condition );
 
 			// resume fetcher threads
 			fetchQueue.resume();
@@ -271,7 +268,7 @@ public class WeakRefVolatileCache< K, V > implements VolatileCache< K, V >
 	}
 
 	@Override
-	public void invalidateAll()
+	public void invalidateAll( final long parallelismThreshold )
 	{
 		try
 		{
@@ -290,7 +287,7 @@ public class WeakRefVolatileCache< K, V > implements VolatileCache< K, V >
 			} );
 
 			// remove all entries from backingCache
-			backingCache.invalidateAll();
+			backingCache.invalidateAll( parallelismThreshold );
 
 			// resume fetcher threads
 			fetchQueue.resume();

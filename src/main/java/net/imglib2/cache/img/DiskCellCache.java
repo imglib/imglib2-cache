@@ -149,9 +149,14 @@ public class DiskCellCache< A > implements CacheRemover< Long, Cell< A > >, Cach
 
 	/**
 	 * Removes all files for keys matching the given {@code condition}.
+	 *
+	 * @param parallelismThreshold
+	 *            ignored
+	 * @param condition
+	 *            condition on keys of entries to remove
 	 */
 	@Override
-	public void invalidateIf( final Predicate< Long > condition )
+	public void invalidateIf( final long parallelismThreshold, final Predicate< Long > condition )
 	{
 		try
 		{
@@ -180,9 +185,12 @@ public class DiskCellCache< A > implements CacheRemover< Long, Cell< A > >, Cach
 
 	/**
 	 * Removes all files.
+	 *
+	 * @param parallelismThreshold
+	 *            ignored
 	 */
 	@Override
-	public void invalidateAll()
+	public void invalidateAll( final long parallelismThreshold )
 	{
 		try
 		{
