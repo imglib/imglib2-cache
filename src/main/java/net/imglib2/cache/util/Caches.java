@@ -20,8 +20,8 @@ public class Caches
 		return new LoaderCacheKeyAdapter<>( cache, keymap );
 	}
 
-	public static < K, L, V > LoaderRemoverCache< K, V >
-			mapKeys( final LoaderRemoverCache< L, V > cache, final KeyBimap< K, L > keymap )
+	public static < K, L, V, D > LoaderRemoverCache< K, V, D >
+			mapKeys( final LoaderRemoverCache< L, V, D > cache, final KeyBimap< K, L > keymap )
 	{
 		return new LoaderRemoverCacheKeyAdapter<>( cache, keymap );
 	}
@@ -32,8 +32,8 @@ public class Caches
 		return new CacheKeyAdapter<>( cache, keymap );
 	}
 
-	public static < K, L, V > RemoverCache< K, V >
-			mapKeys( final RemoverCache< L, V > cache, final KeyBimap< K, L > keymap )
+	public static < K, L, V, D > RemoverCache< K, V, D >
+			mapKeys( final RemoverCache< L, V, D > cache, final KeyBimap< K, L > keymap )
 	{
 		return new RemoverCacheKeyAdapter<>( cache, keymap );
 	}
@@ -50,8 +50,8 @@ public class Caches
 		return new LoaderCacheAsCacheAdapter<>( cache, loader );
 	}
 
-	public static < K, V > LoaderCache< K, V >
-			withRemover( final LoaderRemoverCache< K, V > cache, final CacheRemover< K, V > removalListener )
+	public static < K, V, D > LoaderCache< K, V >
+			withRemover( final LoaderRemoverCache< K, V, D > cache, final CacheRemover< K, V, D > removalListener )
 	{
 		return new LoaderRemoverCacheAsLoaderCacheAdapter<>( cache, removalListener );
 	}
