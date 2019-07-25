@@ -7,12 +7,15 @@ public interface AbstractCache< K, V > extends Invalidate< K >
 	V getIfPresent( K key );
 
 	/**
-	 * Removes and discards the entry with the specified {@code key}. Calls
-	 * {@link CacheRemover#invalidate(Object)} for the discarded entry, (which
-	 * should in turn remove it from any backing cache)
+	 * Removes and discards the entry with the specified {@code key}.
 	 * <p>
 	 * Note that this will <em>not</em> call
 	 * {@link CacheRemover#onRemoval(Object, Object)} for the discarded entry.
+	 * <p>
+	 * If this cache has a {@code CacheRemover}, calls {@link CacheRemover#invalidate(Object)} for the discarded
+	 * entry, (which should in turn remove it from any backing cache).
+	 * <em>Note that this applies only when the whole cache has a {@code CacheRemover},
+	 * instead of each individual entry as in {@link LoaderRemoverCache}.</em>
 	 * <p>
 	 * <em>There must be no concurrent {@code get()} operations for {@code key}.
 	 * This may result in cache corruption and/or a deadlock.</em>
@@ -25,11 +28,14 @@ public interface AbstractCache< K, V > extends Invalidate< K >
 
 	/**
 	 * Removes and discards all entries with keys matching {@code condition}.
-	 * Calls {@link CacheRemover#invalidateIf(Predicate)} for the discarded
-	 * entries, (which should in turn remove them from any backing cache)
 	 * <p>
 	 * Note that this will <em>not</em> call
 	 * {@link CacheRemover#onRemoval(Object, Object)} for the discarded entries.
+	 * <p>
+	 * If this cache has a {@code CacheRemover}, calls {@link CacheRemover#invalidateIf(Predicate)} for the discarded
+	 * entries, (which should in turn remove them from any backing cache).
+	 * <em>Note that this applies only when the whole cache has a {@code CacheRemover},
+	 * instead of each individual entry as in {@link LoaderRemoverCache}.</em>
 	 * <p>
 	 * <em>There must be no concurrent {@code get()} operations for keys
 	 * matching {@code condition}. This may result in cache corruption and/or a
@@ -45,12 +51,15 @@ public interface AbstractCache< K, V > extends Invalidate< K >
 	void invalidateIf( final long parallelismThreshold, final Predicate< K > condition );
 
 	/**
-	 * Removes and discards all entries. Calls
-	 * {@link CacheRemover#invalidateAll(long)} (which should in turn invalidate
-	 * any backing cache)
+	 * Removes and discards all entries.
 	 * <p>
 	 * Note that this will <em>not</em> call
 	 * {@link CacheRemover#onRemoval(Object, Object)} for the discarded entries.
+	 * <p>
+	 * If this cache has a {@code CacheRemover}, calls {@link CacheRemover#invalidateAll(long)}
+	 * (which should in turn invalidate any backing cache).
+	 * <em>Note that this applies only when the whole cache has a {@code CacheRemover},
+	 * instead of each individual entry as in {@link LoaderRemoverCache}.</em>
 	 * <p>
 	 * <em> There must be no concurrent {@code get()} operations. This may
 	 * result in cache corruption and/or a deadlock.</em>

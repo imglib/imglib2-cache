@@ -47,17 +47,20 @@ public class RemoverCacheAsCacheAdapter< K, V > implements Cache< K, V >
 	public void invalidate( final K key )
 	{
 		cache.invalidate( key );
+		remover.invalidate( key );
 	}
 
 	@Override
 	public void invalidateIf( final long parallelismThreshold, final Predicate< K > condition )
 	{
 		cache.invalidateIf( parallelismThreshold, condition );
+		remover.invalidateIf( parallelismThreshold, condition );
 	}
 
 	@Override
 	public void invalidateAll( final long parallelismThreshold )
 	{
 		cache.invalidateAll( parallelismThreshold );
+		remover.invalidateAll( parallelismThreshold );
 	}
 }
