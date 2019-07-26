@@ -19,7 +19,9 @@ public interface CacheRemover< K, V > extends Invalidate< K >
 	 * Called when an entry is evicted from the cache.
 	 *
 	 * @param key
-	 * @param value
+	 *            key of the entry to remove
+	 * @param valueData
+	 *            value data of the entry to remove
 	 */
 	void onRemoval( K key, V value );
 
