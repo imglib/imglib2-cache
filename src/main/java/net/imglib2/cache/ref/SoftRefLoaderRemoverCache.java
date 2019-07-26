@@ -22,7 +22,7 @@ import net.imglib2.cache.LoaderRemoverCache;
  * @param <K>
  * @param <V>
  *
- * @author Tobias Pietzsch &lt;tobias.pietzsch@gmail.com&gt;
+ * @author Tobias Pietzsch
  */
 public class SoftRefLoaderRemoverCache< K, V > implements LoaderRemoverCache< K, V >
 {

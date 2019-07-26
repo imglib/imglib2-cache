@@ -6,7 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Utilities for per {@link ThreadGroup} measuring and budgeting of time spent
  * in (blocking) IO.
  *
- * @author Tobias Pietzsch &lt;tobias.pietzsch@gmail.com&gt;
+ * @author Tobias Pietzsch
  */
 public class CacheIoTiming
 {

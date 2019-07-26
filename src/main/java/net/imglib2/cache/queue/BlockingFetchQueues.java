@@ -55,7 +55,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @param <E>
  *            element type.
  *
- * @author Tobias Pietzsch &lt;tobias.pietzsch@gmail.com&gt;
+ * @author Tobias Pietzsch
  */
 public class BlockingFetchQueues< E >
 {
@@ -253,7 +253,6 @@ public class BlockingFetchQueues< E >
 	 * be empty after this call returns. Removed elements are moved to the
 	 * {@link #prefetch} deque.
 	 */
-	// TODO: rename? (because of currentFrame)
 	public void clearToPrefetch()
 	{
 		final ReentrantLock lock = this.lock;

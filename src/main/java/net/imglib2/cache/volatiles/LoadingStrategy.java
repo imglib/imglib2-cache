@@ -49,7 +49,7 @@ import net.imglib2.cache.iotiming.IoTimeBudget;
  *        Do nothing (entry remains invalid).
  * </ul>
  *
- * @author Tobias Pietzsch &lt;tobias.pietzsch@gmail.com&gt;
+ * @author Tobias Pietzsch
  */
 public enum LoadingStrategy
 {

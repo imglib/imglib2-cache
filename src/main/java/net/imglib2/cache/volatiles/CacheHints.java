@@ -48,7 +48,7 @@ import net.imglib2.cache.queue.BlockingFetchQueues;
  * In BigDataViewer, priorities usually correspond to resolution levels in some
  * way. For example this can be used to load low-resolution data first.
  *
- * @author Tobias Pietzsch &lt;tobias.pietzsch@gmail.com&gt;
+ * @author Tobias Pietzsch
  */
 public class CacheHints
 {
