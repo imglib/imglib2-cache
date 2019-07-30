@@ -12,9 +12,12 @@ import static net.imglib2.type.PrimitiveType.SHORT;
 
 import java.io.IOException;
 import java.util.Set;
+import java.util.function.Consumer;
 
+import net.imglib2.Interval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.cache.img.CachedCellImg;
+import net.imglib2.cache.img.CellLoader;
 import net.imglib2.cache.img.LoadedCellCacheLoader;
 import net.imglib2.cache.ref.SoftRefLoaderCache;
 import net.imglib2.img.basictypeaccess.AccessFlags;
@@ -39,6 +42,9 @@ import net.imglib2.view.Views;
  */
 public class Caches
 {
+	private Caches()
+	{}
+
 	@SuppressWarnings( { "unchecked", "rawtypes" } )
 	public static final < T extends NativeType< T > > RandomAccessibleInterval< T > cache(
 			final RandomAccessibleInterval< T > source,
@@ -86,5 +92,110 @@ public class Caches
 		}
 
 		return img;
+	}
+
+	/**
+	 * Create a memory {@link CachedCellImg} with a cell {@link Cache}.
+	 *
+	 * @param grid
+	 * @param cache
+	 * @param type
+	 * @param accessFlags
+	 * @return
+	 */
+	@SuppressWarnings( { "unchecked", "rawtypes" } )
+	public static < T extends NativeType< T > > CachedCellImg< T, ? > createImg(
+			final CellGrid grid,
+			final Cache< Long, Cell< ? > > cache,
+			final T type,
+			final Set< AccessFlags > accessFlags )
+	{
+
+		final CachedCellImg< T, ? > img;
+
+		if ( GenericByteType.class.isInstance( type ) )
+		{
+			img = new CachedCellImg( grid, type, cache, ArrayDataAccessFactory.get( BYTE, accessFlags ) );
+		}
+		else if ( GenericShortType.class.isInstance( type ) )
+		{
+			img = new CachedCellImg( grid, type, cache, ArrayDataAccessFactory.get( SHORT, accessFlags ) );
+		}
+		else if ( GenericIntType.class.isInstance( type ) )
+		{
+			img = new CachedCellImg( grid, type, cache, ArrayDataAccessFactory.get( INT, accessFlags ) );
+		}
+		else if ( GenericLongType.class.isInstance( type ) )
+		{
+			img = new CachedCellImg( grid, type, cache, ArrayDataAccessFactory.get( LONG, accessFlags ) );
+		}
+		else if ( FloatType.class.isInstance( type ) )
+		{
+			img = new CachedCellImg( grid, type, cache, ArrayDataAccessFactory.get( FLOAT, accessFlags ) );
+		}
+		else if ( DoubleType.class.isInstance( type ) )
+		{
+			img = new CachedCellImg( grid, type, cache, ArrayDataAccessFactory.get( DOUBLE, accessFlags ) );
+		}
+		else
+		{
+			img = null;
+		}
+		return img;
+	}
+
+	/**
+	 * Create a memory {@link CachedCellImg} with a {@link CellLoader}.
+	 *
+	 * @param targetInterval
+	 * @param blockSize
+	 * @param type
+	 * @param accessFlags
+	 * @param loader
+	 * @return
+	 */
+	public static < T extends NativeType< T > > CachedCellImg< T, ? > createImg(
+			final Interval targetInterval,
+			final int[] blockSize,
+			final T type,
+			final Set< AccessFlags > accessFlags,
+			final CellLoader< T > loader )
+	{
+
+		final long[] dimensions = Intervals.dimensionsAsLongArray( targetInterval );
+		final CellGrid grid = new CellGrid( dimensions, blockSize );
+
+		@SuppressWarnings( { "unchecked", "rawtypes" } )
+		final Cache< Long, Cell< ? > > cache =
+				new SoftRefLoaderCache().withLoader( LoadedCellCacheLoader.get( grid, loader, type, accessFlags ) );
+
+		return createImg( grid, cache, type, accessFlags );
+	}
+
+	/**
+	 * Create a memory {@link CachedCellImg} with a cell generator
+	 * {@link Consumer}.
+	 *
+	 * @param targetInterval
+	 * @param blockSize
+	 * @param type
+	 * @param accessFlags
+	 * @param op
+	 * @return
+	 */
+	public static < T extends NativeType< T > > CachedCellImg< T, ? > process(
+			final Interval targetInterval,
+			final int[] blockSize,
+			final T type,
+			final Set< AccessFlags > accessFlags,
+			final Consumer< RandomAccessibleInterval< T > > op )
+	{
+
+		return createImg(
+				targetInterval,
+				blockSize,
+				type,
+				accessFlags,
+				op::accept );
 	}
 }
