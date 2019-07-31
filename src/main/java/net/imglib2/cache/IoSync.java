@@ -38,14 +38,16 @@ import net.imglib2.cache.ref.SoftRefLoaderRemoverCache;
  *            key type
  * @param <V>
  *            value type
+ * @param <D>
+ *            value data type
  *
  * @author Tobias Pietzsch
  */
-public class IoSync< K, V > implements CacheLoader< K, V >, CacheRemover< K, V >
+public class IoSync< K, V, D > implements CacheLoader< K, V >, CacheRemover< K, V, D >
 {
 	final CacheLoader< K, V > loader;
 
-	final CacheRemover< K, V > saver;
+	final CacheRemover< K, V, D > saver;
 
 	/**
 	 * A hash map containing key-value pairs that are enqueued for writing. This
@@ -69,7 +71,7 @@ public class IoSync< K, V > implements CacheLoader< K, V >, CacheRemover< K, V >
 	 *            used to asynchronously write removed values, and to load
 	 *            values that are <em>not</em> currently enqueued for writing.
 	 */
-	public < T extends CacheLoader< K, V > & CacheRemover< K, V > > IoSync( final T io )
+	public < T extends CacheLoader< K, V > & CacheRemover< K, V, D > > IoSync( final T io )
 	{
 		this( io, io, 1, 10 );
 	}
@@ -89,7 +91,7 @@ public class IoSync< K, V > implements CacheLoader< K, V >, CacheRemover< K, V >
 	 *            {@link CacheRemover#onRemoval(Object, Object)} will block
 	 *            until earlier values have been written.
 	 */
-	public < T extends CacheLoader< K, V > & CacheRemover< K, V > > IoSync(
+	public < T extends CacheLoader< K, V > & CacheRemover< K, V, D > > IoSync(
 			final T io,
 			final int numThreads,
 			final int maxQueueSize )
@@ -116,7 +118,7 @@ public class IoSync< K, V > implements CacheLoader< K, V >, CacheRemover< K, V >
 	 */
 	public IoSync(
 			final CacheLoader< K, V > loader,
-			final CacheRemover< K, V > saver,
+			final CacheRemover< K, V, D > saver,
 			final int numThreads,
 			final int maxQueueSize )
 	{
@@ -135,17 +137,17 @@ public class IoSync< K, V > implements CacheLoader< K, V >, CacheRemover< K, V >
 	}
 
 	@Override
-	public void onRemoval( final K key, final V value )
+	public void onRemoval( final K key, final D valueData )
 	{
 		map.compute( key, ( k, oldEntry ) ->
 		{
 			if ( oldEntry == null )
 			{
-				return new Entry( value, 0 );
+				return new Entry( valueData, 0 );
 			}
 			else
 			{
-				assert( oldEntry.value == value );
+				assert( oldEntry.valueData == valueData );
 
 				oldEntry.generation++;
 				return oldEntry;
@@ -162,31 +164,43 @@ public class IoSync< K, V > implements CacheLoader< K, V >, CacheRemover< K, V >
 	}
 
 	@Override
+	public D extract( final V value )
+	{
+		return saver.extract( value );
+	}
+
+	@Override
+	public V reconstruct( final K key, final D valueData )
+	{
+		return saver.reconstruct( key, valueData );
+	}
+
+	@Override
 	public V get( final K key ) throws Exception
 	{
 		final Entry entry = map.get( key );
 		if ( entry != null )
-			return entry.value;
+			return reconstruct( key, entry.valueData );
 		else
 			return loader.get( key );
 	}
 
 	class Entry
 	{
-		final V value;
+		final D valueData;
 
 		volatile int generation;
 
-		Entry( final V value, final int generation )
+		Entry( final D valueData, final int generation )
 		{
-			this.value = value;
+			this.valueData = valueData;
 			this.generation = generation;
 		}
 
 		@Override
 		public int hashCode()
 		{
-			return value.hashCode();
+			return valueData.hashCode();
 		}
 
 		@Override
@@ -196,7 +210,7 @@ public class IoSync< K, V > implements CacheLoader< K, V >, CacheRemover< K, V >
 			{
 				@SuppressWarnings( "unchecked" )
 				final Entry other = ( Entry ) obj;
-				return other.value.equals( this.value ) && other.generation == this.generation;
+				return other.valueData.equals( this.valueData ) && other.generation == this.generation;
 			}
 			return false;
 		}
@@ -321,15 +335,15 @@ public class IoSync< K, V > implements CacheLoader< K, V >, CacheRemover< K, V >
 						synchronized ( entry )
 						{
 							final int writeGeneration = entry.generation;
-							final V value = entry.value;
-							saver.onRemoval( key, value );
+							final D valueData = entry.valueData;
+							saver.onRemoval( key, valueData );
 
 							/*
 							 * Because of the implementation of Entry.equals,
 							 * this will only remove the entry if the generation
 							 * has not been incremented since we started.
 							 */
-							map.remove( key, new Entry( value, writeGeneration ) );
+							map.remove( key, new Entry( valueData, writeGeneration ) );
 						}
 					}
 				}

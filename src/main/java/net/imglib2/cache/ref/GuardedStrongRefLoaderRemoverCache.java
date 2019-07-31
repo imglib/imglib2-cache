@@ -42,7 +42,7 @@ import net.imglib2.cache.LoaderRemoverCache;
  *
  * @author Tobias Pietzsch
  */
-public class GuardedStrongRefLoaderRemoverCache< K, V > implements LoaderRemoverCache< K, V >
+public class GuardedStrongRefLoaderRemoverCache< K, V, D > implements LoaderRemoverCache< K, V, D >
 {
 	final ConcurrentHashMap< K, Entry > map = new ConcurrentHashMap<>();
 
@@ -52,39 +52,12 @@ public class GuardedStrongRefLoaderRemoverCache< K, V > implements LoaderRemover
 
 	static final class CachePhantomReference< V > extends PhantomReference< V >
 	{
-		static Field referent = null;
-		static {
-			try
-			{
-				referent = Reference.class.getDeclaredField( "referent" );
-			}
-			catch ( NoSuchFieldException | SecurityException e )
-			{
-				e.printStackTrace();
-			}
-			referent.setAccessible( true );
-		}
+		final GuardedStrongRefLoaderRemoverCache< ?, V, ? >.Entry entry;
 
-		private final GuardedStrongRefLoaderRemoverCache< ?, V >.Entry entry;
-
-		public CachePhantomReference( final V referent, final ReferenceQueue< V > remove, final GuardedStrongRefLoaderRemoverCache< ?, V >.Entry entry )
+		public CachePhantomReference( final V referent, final ReferenceQueue< V > remove, final GuardedStrongRefLoaderRemoverCache< ?, V, ? >.Entry entry )
 		{
 			super( referent, remove );
 			this.entry = entry;
-		}
-
-		@SuppressWarnings( "unchecked" )
-		public V resurrect()
-		{
-			try
-			{
-				return ( V ) referent.get( this );
-			}
-			catch ( IllegalArgumentException | IllegalAccessException e )
-			{
-				e.printStackTrace();
-				return null;
-			}
 		}
 	}
 
@@ -96,9 +69,11 @@ public class GuardedStrongRefLoaderRemoverCache< K, V > implements LoaderRemover
 
 		private CachePhantomReference< V > phantomRef;
 
-		private CacheRemover< ? super K, ? super V > remover;
+		private CacheRemover< ? super K, V, D > remover;
 
 		boolean loaded;
+
+		private D valueData;
 
 		public Entry( final K key )
 		{
@@ -114,23 +89,25 @@ public class GuardedStrongRefLoaderRemoverCache< K, V > implements LoaderRemover
 			return ref.get();
 		}
 
-		public void setValue( final V value, final CacheRemover< ? super K, ? super V > remover )
+		public void setValue( final V value, final CacheRemover< ? super K, V, D > remover )
 		{
 			this.loaded = true;
 			this.ref = new WeakReference<>( value );
 			this.phantomRef = new CachePhantomReference<>( value, queue, this );
 			this.remover = remover;
+			this.valueData = remover.extract( value );
 		}
 
 		public synchronized void remove()
 		{
 			if ( remover != null )
 			{
-				final V value = phantomRef.resurrect();
-				phantomRef.clear();
+				phantomRef.clear(); // TODO: probably not necessary with Java 10 anymore
 				phantomRef = null;
-				remover.onRemoval( key, value );
+				remover.onRemoval( key, valueData );
 				remover = null;
+				valueData = null;
+
 			}
 			map.remove( key, this );
 		}
@@ -153,7 +130,7 @@ public class GuardedStrongRefLoaderRemoverCache< K, V > implements LoaderRemover
 	}
 
 	@Override
-	public V get( final K key, final CacheLoader< ? super K, ? extends V > loader, final CacheRemover< ? super K, ? super V > remover ) throws ExecutionException
+	public V get( final K key, final CacheLoader< ? super K, ? extends V > loader, final CacheRemover< ? super K, V, D > remover ) throws ExecutionException
 	{
 		cleanUp();
 		V value = strongCache.getIfPresent( key );

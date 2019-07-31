@@ -24,7 +24,7 @@ import net.imglib2.cache.LoaderRemoverCache;
  *
  * @author Tobias Pietzsch
  */
-public class SoftRefLoaderRemoverCache< K, V > implements LoaderRemoverCache< K, V >
+public class SoftRefLoaderRemoverCache< K, V, D > implements LoaderRemoverCache< K, V, D >
 {
 	final ConcurrentHashMap< K, Entry > map = new ConcurrentHashMap<>();
 
@@ -32,39 +32,12 @@ public class SoftRefLoaderRemoverCache< K, V > implements LoaderRemoverCache< K,
 
 	static final class CachePhantomReference< V > extends PhantomReference< V >
 	{
-		static Field referent = null;
-		static {
-			try
-			{
-				referent = Reference.class.getDeclaredField( "referent" );
-			}
-			catch ( NoSuchFieldException | SecurityException e )
-			{
-				e.printStackTrace();
-			}
-			referent.setAccessible( true );
-		}
+		final SoftRefLoaderRemoverCache< ?, V, ? >.Entry entry;
 
-		private final SoftRefLoaderRemoverCache< ?, V >.Entry entry;
-
-		public CachePhantomReference( final V referent, final ReferenceQueue< V > remove, final SoftRefLoaderRemoverCache< ?, V >.Entry entry )
+		public CachePhantomReference( final V referent, final ReferenceQueue< V > remove, final SoftRefLoaderRemoverCache< ?, V, ? >.Entry entry )
 		{
 			super( referent, remove );
 			this.entry = entry;
-		}
-
-		@SuppressWarnings( "unchecked" )
-		public V resurrect()
-		{
-			try
-			{
-				return ( V ) referent.get( this );
-			}
-			catch ( IllegalArgumentException | IllegalAccessException e )
-			{
-				e.printStackTrace();
-				return null;
-			}
 		}
 	}
 
@@ -76,9 +49,11 @@ public class SoftRefLoaderRemoverCache< K, V > implements LoaderRemoverCache< K,
 
 		private CachePhantomReference< V > phantomRef;
 
-		private CacheRemover< ? super K, ? super V > remover;
+		private CacheRemover< ? super K, V, D > remover;
 
 		boolean loaded;
+
+		private D valueData;
 
 		public Entry( final K key )
 		{
@@ -94,23 +69,24 @@ public class SoftRefLoaderRemoverCache< K, V > implements LoaderRemoverCache< K,
 			return ref.get();
 		}
 
-		public void setValue( final V value, final CacheRemover< ? super K, ? super V > remover )
+		public void setValue( final V value, final CacheRemover< ? super K, V, D > remover )
 		{
 			this.loaded = true;
 			this.ref = new SoftReference<>( value );
 			this.phantomRef = new CachePhantomReference<>( value, queue, this );
 			this.remover = remover;
+			this.valueData = remover.extract( value );
 		}
 
 		public synchronized void remove()
 		{
 			if ( remover != null )
 			{
-				final V value = phantomRef.resurrect();
-				phantomRef.clear();
+				phantomRef.clear(); // TODO: probably not necessary with Java 10 anymore
 				phantomRef = null;
-				remover.onRemoval( key, value );
+				remover.onRemoval( key, valueData );
 				remover = null;
+				valueData = null;
 			}
 			map.remove( key, this );
 		}
@@ -125,7 +101,7 @@ public class SoftRefLoaderRemoverCache< K, V > implements LoaderRemoverCache< K,
 	}
 
 	@Override
-	public V get( final K key, final CacheLoader< ? super K, ? extends V > loader, final CacheRemover< ? super K, ? super V > remover ) throws ExecutionException
+	public V get( final K key, final CacheLoader< ? super K, ? extends V > loader, final CacheRemover< ? super K, V, D > remover ) throws ExecutionException
 	{
 		cleanUp();
 		final Entry entry = map.computeIfAbsent( key, ( k ) -> new Entry( k ) );

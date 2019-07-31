@@ -44,7 +44,7 @@ import net.imglib2.util.Intervals;
  *
  * @author Tobias Pietzsch
  */
-public class DiskCellCache< A > implements CacheRemover< Long, Cell< A > >, CacheLoader< Long, Cell< A > >
+public class DiskCellCache< A > implements CacheRemover< Long, Cell< A >, A >, CacheLoader< Long, Cell< A > >
 {
 	private final Path blockcache;
 
@@ -110,20 +110,37 @@ public class DiskCellCache< A > implements CacheRemover< Long, Cell< A > >, Cach
 	}
 
 	@Override
-	public void onRemoval( final Long key, final Cell< A > value )
+	public A extract( final Cell< A > value )
+	{
+		return value.getData();
+	}
+
+	@Override
+	public Cell< A > reconstruct( final Long key, final A valueData )
+	{
+		final long index = key;
+		final long[] cellMin = new long[ n ];
+		final int[] cellDims = new int[ n ];
+		grid.getCellDimensions( index, cellMin, cellDims );
+		return new Cell<>( cellDims, cellMin, valueData );
+	}
+
+	@Override
+	public void onRemoval( final Long key, final A valueData )
 	{
 		final long index = key;
 		final String filename = blockname( index );
 
+		final long[] cellMin = new long[ n ];
 		final int[] cellDims = new int[ n ];
-		value.dimensions( cellDims );
+		grid.getCellDimensions( index, cellMin, cellDims );
 		final long blocksize = entitiesPerPixel.mulCeil( Intervals.numElements( cellDims ) );
 		final long bytesize = blocksize * accessIo.getBytesPerElement();
 		try (
 				final RandomAccessFile mmFile = new RandomAccessFile( filename, "rw" ); )
 		{
 			final MappedByteBuffer out = mmFile.getChannel().map( MapMode.READ_WRITE, 0, bytesize );
-			accessIo.save( value.getData(), out, ( int ) blocksize );
+			accessIo.save( valueData, out, ( int ) blocksize );
 		}
 		catch ( final IOException e )
 		{

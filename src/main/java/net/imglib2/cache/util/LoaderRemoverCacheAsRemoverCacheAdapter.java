@@ -21,13 +21,13 @@ import net.imglib2.cache.RemoverCache;
  *
  * @author Tobias Pietzsch
  */
-public class LoaderRemoverCacheAsRemoverCacheAdapter< K, V > implements RemoverCache< K, V >
+public class LoaderRemoverCacheAsRemoverCacheAdapter< K, V, D > implements RemoverCache< K, V, D >
 {
-	private final LoaderRemoverCache< K, V > cache;
+	private final LoaderRemoverCache< K, V, D > cache;
 
 	private final CacheLoader< K, V > loader;
 
-	public LoaderRemoverCacheAsRemoverCacheAdapter( final LoaderRemoverCache< K, V > cache, final CacheLoader< K, V > loader )
+	public LoaderRemoverCacheAsRemoverCacheAdapter( final LoaderRemoverCache< K, V, D > cache, final CacheLoader< K, V > loader )
 	{
 		this.cache = cache;
 		this.loader = loader;
@@ -40,7 +40,7 @@ public class LoaderRemoverCacheAsRemoverCacheAdapter< K, V > implements RemoverC
 	}
 
 	@Override
-	public V get( final K key, final CacheRemover< ? super K, ? super V > remover ) throws ExecutionException
+	public V get( final K key, final CacheRemover< ? super K, V, D > remover ) throws ExecutionException
 	{
 		return cache.get( key, loader, remover );
 	}

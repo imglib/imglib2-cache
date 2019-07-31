@@ -21,13 +21,13 @@ import net.imglib2.cache.LoaderRemoverCache;
  *
  * @author Tobias Pietzsch
  */
-public class LoaderRemoverCacheAsLoaderCacheAdapter< K, V > implements LoaderCache< K, V >
+public class LoaderRemoverCacheAsLoaderCacheAdapter< K, V, D > implements LoaderCache< K, V >
 {
-	private final LoaderRemoverCache< K, V > cache;
+	private final LoaderRemoverCache< K, V, D > cache;
 
-	private final CacheRemover< K, V > remover;
+	private final CacheRemover< K, V, D > remover;
 
-	public LoaderRemoverCacheAsLoaderCacheAdapter( final LoaderRemoverCache< K, V > cache, final CacheRemover< K, V > remover )
+	public LoaderRemoverCacheAsLoaderCacheAdapter( final LoaderRemoverCache< K, V, D > cache, final CacheRemover< K, V, D > remover )
 	{
 		this.cache = cache;
 		this.remover = remover;

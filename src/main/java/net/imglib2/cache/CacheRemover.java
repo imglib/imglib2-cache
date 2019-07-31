@@ -5,15 +5,23 @@ import java.util.function.Predicate;
 /**
  * Handles entries that are removed from a cache (by propagating to a
  * higher-level cache, writing to disk, or similar).
+ * <p>
+ * To make this work, it must be possible to {@link #extract(Object) extract}
+ * data {@code D} out of a value {@code V}, and to
+ * {@link #reconstruct(Object, Object) reconstruct} an identical value {@code V}
+ * from {@code D}. {@code D} must be sufficient to reconstruct an identical
+ * {@code V}, and must not contain any references to {@code V}.
  *
  * @param <K>
  *            key type
  * @param <V>
  *            value type
+ * @param <D>
+ *            value data type
  *
  * @author Tobias Pietzsch
  */
-public interface CacheRemover< K, V > extends Invalidate< K >
+public interface CacheRemover< K, V, D > extends Invalidate< K >
 {
 	/**
 	 * Called when an entry is evicted from the cache.
@@ -23,7 +31,19 @@ public interface CacheRemover< K, V > extends Invalidate< K >
 	 * @param valueData
 	 *            value data of the entry to remove
 	 */
-	void onRemoval( K key, V value );
+	void onRemoval( K key, D valueData );
+
+	/**
+	 * Extract data out of {@code value}. The data must be sufficient to
+	 * reconstruct an identical value, and must not contain any references to
+	 * value.
+	 */
+	D extract( V value );
+
+	/**
+	 * Construct a value from its {@code key} and {@code valueData}.
+	 */
+	V reconstruct( K key, D valueData );
 
 	/**
 	 * Called when a specific entry is invalidated from the cache. (See

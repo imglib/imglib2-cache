@@ -30,9 +30,9 @@ public class DirtyDiskCellCache< A extends Dirty > extends DiskCellCache< A >
 	}
 
 	@Override
-	public void onRemoval( final Long key, final Cell< A > value )
+	public void onRemoval( final Long key, final A valueData )
 	{
-		if ( value.getData().isDirty() )
-			super.onRemoval( key, value );
+		if ( valueData.isDirty() )
+			super.onRemoval( key, valueData );
 	}
 }

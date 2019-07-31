@@ -19,13 +19,13 @@ import net.imglib2.cache.RemoverCache;
  *
  * @author Tobias Pietzsch
  */
-public class RemoverCacheAsCacheAdapter< K, V > implements Cache< K, V >
+public class RemoverCacheAsCacheAdapter< K, V, D > implements Cache< K, V >
 {
-	private final RemoverCache< K, V > cache;
+	private final RemoverCache< K, V, D > cache;
 
-	private final CacheRemover< K, V > remover;
+	private final CacheRemover< K, V, D > remover;
 
-	public RemoverCacheAsCacheAdapter( final RemoverCache< K, V > cache, final CacheRemover< K, V > remover )
+	public RemoverCacheAsCacheAdapter( final RemoverCache< K, V, D > cache, final CacheRemover< K, V, D > remover )
 	{
 		this.cache = cache;
 		this.remover = remover;

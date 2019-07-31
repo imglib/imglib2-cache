@@ -10,7 +10,7 @@ import net.imglib2.cache.CacheRemover;
  * <p>
  * TODO: REMOVE?
  */
-public interface VolatileRemoverCache< K, V > extends AbstractVolatileCache< K, V >
+public interface VolatileRemoverCache< K, V, D > extends AbstractVolatileCache< K, V >
 {
-	V get( K key, CacheRemover< ? super K, ? super V > remover, CacheHints cacheHints ) throws ExecutionException;
+	V get( K key, CacheRemover< ? super K, V, D > remover, CacheHints cacheHints ) throws ExecutionException;
 }

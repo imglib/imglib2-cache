@@ -235,12 +235,12 @@ public class DiskCachedCellImgFactory< T extends NativeType< T > > extends Nativ
 						AccessIo.get( type, options.accessFlags() ),
 						entitiesPerPixel );
 
-		final IoSync< Long, Cell< A > > iosync = new IoSync<>(
+		final IoSync< Long, Cell< A >, A > iosync = new IoSync<>(
 				diskcache,
 				options.numIoThreads(),
 				options.maxIoQueueSize() );
 
-		LoaderRemoverCache< Long, Cell< A > > listenableCache;
+		LoaderRemoverCache< Long, Cell< A >, A > listenableCache;
 		switch ( options.cacheType() )
 		{
 		case BOUNDED:
