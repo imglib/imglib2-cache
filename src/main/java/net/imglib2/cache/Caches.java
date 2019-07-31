@@ -3,6 +3,10 @@
  */
 package net.imglib2.cache;
 
+import static net.imglib2.cache.img.DiskCachedCellImgOptions.CacheType.SOFTREF;
+import static net.imglib2.cache.img.ReadOnlyCachedCellImgOptions.options;
+import static net.imglib2.img.basictypeaccess.AccessFlags.DIRTY;
+import static net.imglib2.img.basictypeaccess.AccessFlags.VOLATILE;
 import static net.imglib2.type.PrimitiveType.BYTE;
 import static net.imglib2.type.PrimitiveType.DOUBLE;
 import static net.imglib2.type.PrimitiveType.FLOAT;
@@ -18,7 +22,10 @@ import net.imglib2.Interval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.cache.img.CachedCellImg;
 import net.imglib2.cache.img.CellLoader;
+import net.imglib2.cache.img.DiskCachedCellImgOptions;
 import net.imglib2.cache.img.LoadedCellCacheLoader;
+import net.imglib2.cache.img.ReadOnlyCachedCellImgFactory;
+import net.imglib2.cache.img.ReadOnlyCachedCellImgOptions;
 import net.imglib2.cache.ref.SoftRefLoaderCache;
 import net.imglib2.img.basictypeaccess.AccessFlags;
 import net.imglib2.img.basictypeaccess.ArrayDataAccessFactory;
@@ -40,58 +47,30 @@ import net.imglib2.view.Views;
  *
  * @author Stephan Saalfeld
  */
+/*
+	TODO rename or otherwise resolve clash with net.imglib2.cache.util.Caches
+		Caching?
+ */
 public class Caches
 {
 	private Caches()
 	{}
 
-	@SuppressWarnings( { "unchecked", "rawtypes" } )
-	public static final < T extends NativeType< T > > RandomAccessibleInterval< T > cache(
+	@SuppressWarnings( "rawtypes" )
+	public static < T extends NativeType< T > > RandomAccessibleInterval< T > cache(
 			final RandomAccessibleInterval< T > source,
 			final int[] blockSize,
-			final Set< AccessFlags > accessFlags ) throws IOException
+			final Set< AccessFlags > accessFlags )
 	{
 		final long[] dimensions = Intervals.dimensionsAsLongArray( source );
-		final CellGrid grid = new CellGrid( dimensions, blockSize );
-
-		final RandomAccessibleLoader< T > loader = new RandomAccessibleLoader< T >( Views.zeroMin( source ) );
-
 		final T type = Util.getTypeFromInterval( source );
-
-		final CachedCellImg< T, ? > img;
-		final Cache< Long, Cell< ? > > cache = new SoftRefLoaderCache()
-				.withLoader( LoadedCellCacheLoader.get( grid, loader, type, accessFlags ) );
-
-		if ( GenericByteType.class.isInstance( type ) )
-		{
-			img = new CachedCellImg( grid, type, cache, ArrayDataAccessFactory.get( BYTE, accessFlags ) );
-		}
-		else if ( GenericShortType.class.isInstance( type ) )
-		{
-			img = new CachedCellImg( grid, type, cache, ArrayDataAccessFactory.get( SHORT, accessFlags ) );
-		}
-		else if ( GenericIntType.class.isInstance( type ) )
-		{
-			img = new CachedCellImg( grid, type, cache, ArrayDataAccessFactory.get( INT, accessFlags ) );
-		}
-		else if ( GenericLongType.class.isInstance( type ) )
-		{
-			img = new CachedCellImg( grid, type, cache, ArrayDataAccessFactory.get( LONG, accessFlags ) );
-		}
-		else if ( FloatType.class.isInstance( type ) )
-		{
-			img = new CachedCellImg( grid, type, cache, ArrayDataAccessFactory.get( FLOAT, accessFlags ) );
-		}
-		else if ( DoubleType.class.isInstance( type ) )
-		{
-			img = new CachedCellImg( grid, type, cache, ArrayDataAccessFactory.get( DOUBLE, accessFlags ) );
-		}
-		else
-		{
-			img = null;
-		}
-
-		return img;
+		final RandomAccessibleLoader< T > loader = new RandomAccessibleLoader< T >( Views.zeroMin( source ) );
+		final CachedCellImg< T, ? > img = new ReadOnlyCachedCellImgFactory().create( dimensions, type, loader, options()
+//				.cacheType( SOFTREF )
+				.cellDimensions( blockSize )
+				.dirtyAccesses( accessFlags.contains( DIRTY ) )
+				.volatileAccesses( accessFlags.contains( VOLATILE ) ) );
+		return Views.isZeroMin( source ) ? img : Views.translate( img, Intervals.minAsLongArray( source ) );
 	}
 
 	/**
@@ -110,38 +89,7 @@ public class Caches
 			final T type,
 			final Set< AccessFlags > accessFlags )
 	{
-
-		final CachedCellImg< T, ? > img;
-
-		if ( GenericByteType.class.isInstance( type ) )
-		{
-			img = new CachedCellImg( grid, type, cache, ArrayDataAccessFactory.get( BYTE, accessFlags ) );
-		}
-		else if ( GenericShortType.class.isInstance( type ) )
-		{
-			img = new CachedCellImg( grid, type, cache, ArrayDataAccessFactory.get( SHORT, accessFlags ) );
-		}
-		else if ( GenericIntType.class.isInstance( type ) )
-		{
-			img = new CachedCellImg( grid, type, cache, ArrayDataAccessFactory.get( INT, accessFlags ) );
-		}
-		else if ( GenericLongType.class.isInstance( type ) )
-		{
-			img = new CachedCellImg( grid, type, cache, ArrayDataAccessFactory.get( LONG, accessFlags ) );
-		}
-		else if ( FloatType.class.isInstance( type ) )
-		{
-			img = new CachedCellImg( grid, type, cache, ArrayDataAccessFactory.get( FLOAT, accessFlags ) );
-		}
-		else if ( DoubleType.class.isInstance( type ) )
-		{
-			img = new CachedCellImg( grid, type, cache, ArrayDataAccessFactory.get( DOUBLE, accessFlags ) );
-		}
-		else
-		{
-			img = null;
-		}
-		return img;
+		return new CachedCellImg( grid, type, cache, ArrayDataAccessFactory.get( type, accessFlags ) );
 	}
 
 	/**
@@ -161,15 +109,13 @@ public class Caches
 			final Set< AccessFlags > accessFlags,
 			final CellLoader< T > loader )
 	{
-
 		final long[] dimensions = Intervals.dimensionsAsLongArray( targetInterval );
-		final CellGrid grid = new CellGrid( dimensions, blockSize );
-
-		@SuppressWarnings( { "unchecked", "rawtypes" } )
-		final Cache< Long, Cell< ? > > cache =
-				new SoftRefLoaderCache().withLoader( LoadedCellCacheLoader.get( grid, loader, type, accessFlags ) );
-
-		return createImg( grid, cache, type, accessFlags );
+		final CachedCellImg< T, ? > img = new ReadOnlyCachedCellImgFactory().create( dimensions, type, loader, options()
+//				.cacheType( SOFTREF )
+				.cellDimensions( blockSize )
+				.dirtyAccesses( accessFlags.contains( DIRTY ) )
+				.volatileAccesses( accessFlags.contains( VOLATILE ) ) );
+		return img;
 	}
 
 	/**
@@ -190,7 +136,6 @@ public class Caches
 			final Set< AccessFlags > accessFlags,
 			final Consumer< RandomAccessibleInterval< T > > op )
 	{
-
 		return createImg(
 				targetInterval,
 				blockSize,
