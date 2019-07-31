@@ -7,10 +7,11 @@ import java.lang.ref.SoftReference;
 import java.lang.reflect.Field;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Predicate;
 
 import net.imglib2.cache.CacheLoader;
-import net.imglib2.cache.LoaderRemoverCache;
 import net.imglib2.cache.CacheRemover;
+import net.imglib2.cache.LoaderRemoverCache;
 
 /**
  * TODO: Consider periodically calling {@link #cleanUp()} from a background
@@ -21,7 +22,7 @@ import net.imglib2.cache.CacheRemover;
  * @param <K>
  * @param <V>
  *
- * @author Tobias Pietzsch &lt;tobias.pietzsch@gmail.com&gt;
+ * @author Tobias Pietzsch
  */
 public class SoftRefLoaderRemoverCache< K, V > implements LoaderRemoverCache< K, V >
 {
@@ -44,7 +45,7 @@ public class SoftRefLoaderRemoverCache< K, V > implements LoaderRemoverCache< K,
 			referent.setAccessible( true );
 		}
 
-		SoftRefLoaderRemoverCache< ?, V >.Entry entry;
+		private final SoftRefLoaderRemoverCache< ?, V >.Entry entry;
 
 		public CachePhantomReference( final V referent, final ReferenceQueue< V > remove, final SoftRefLoaderRemoverCache< ?, V >.Entry entry )
 		{
@@ -93,12 +94,6 @@ public class SoftRefLoaderRemoverCache< K, V > implements LoaderRemoverCache< K,
 			return ref.get();
 		}
 
-		public void setValue( final V value )
-		{
-			this.loaded = true;
-			this.ref = new SoftReference<>( value );
-		}
-
 		public void setValue( final V value, final CacheRemover< ? super K, ? super V > remover )
 		{
 			this.loaded = true;
@@ -116,8 +111,8 @@ public class SoftRefLoaderRemoverCache< K, V > implements LoaderRemoverCache< K,
 				phantomRef = null;
 				remover.onRemoval( key, value );
 				remover = null;
-				map.remove( key, this );
 			}
+			map.remove( key, this );
 		}
 	}
 
@@ -178,10 +173,51 @@ public class SoftRefLoaderRemoverCache< K, V > implements LoaderRemoverCache< K,
 	}
 
 	@Override
-	public void invalidateAll()
+	public void invalidate( final K key )
 	{
-		// TODO
-		throw new UnsupportedOperationException( "not implemented yet" );
+		final Entry entry = map.remove( key );
+		if ( entry != null )
+		{
+			synchronized ( entry )
+			{
+				entry.phantomRef.clear();
+				entry.phantomRef = null;
+				entry.remover = null;
+			}
+		}
+	}
+
+	@Override
+	public void invalidateIf( final long parallelismThreshold, final Predicate< K > condition )
+	{
+		map.forEachValue( parallelismThreshold, entry ->
+		{
+			if ( condition.test( entry.key ) )
+			{
+				synchronized ( entry )
+				{
+					map.remove( entry.key, entry );
+					entry.phantomRef.clear();
+					entry.phantomRef = null;
+					entry.remover = null;
+				}
+			}
+		} );
+	}
+
+	@Override
+	public void invalidateAll( final long parallelismThreshold )
+	{
+		map.forEachValue( parallelismThreshold, entry ->
+		{
+			synchronized ( entry )
+			{
+				map.remove( entry.key, entry );
+				entry.phantomRef.clear();
+				entry.phantomRef = null;
+				entry.remover = null;
+			}
+		} );
 	}
 
 	/**

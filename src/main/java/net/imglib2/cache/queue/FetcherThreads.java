@@ -45,10 +45,7 @@ import java.util.function.IntFunction;
  * {@link FetcherThreads} are employed by the cache to
  * asynchronously load values.
  *
- * <p>
- * TODO Add shutdown() method.
- *
- * @author Tobias Pietzsch &lt;tobias.pietzsch@gmail.com&gt;
+ * @author Tobias Pietzsch
  */
 public class FetcherThreads
 {

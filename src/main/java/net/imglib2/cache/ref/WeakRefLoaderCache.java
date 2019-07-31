@@ -4,9 +4,10 @@ import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Predicate;
 
-import net.imglib2.cache.LoaderCache;
 import net.imglib2.cache.CacheLoader;
+import net.imglib2.cache.LoaderCache;
 
 public class WeakRefLoaderCache< K, V > implements LoaderCache< K, V >
 {
@@ -14,9 +15,9 @@ public class WeakRefLoaderCache< K, V > implements LoaderCache< K, V >
 
 	final ReferenceQueue< V > queue = new ReferenceQueue<>();
 
-	final class CacheWeakReference extends WeakReference< V >
+	static final class CacheWeakReference< V > extends WeakReference< V >
 	{
-		private final Entry entry;
+		private final WeakRefLoaderCache< ?, V >.Entry entry;
 
 		public CacheWeakReference()
 		{
@@ -24,15 +25,10 @@ public class WeakRefLoaderCache< K, V > implements LoaderCache< K, V >
 			this.entry = null;
 		}
 
-		public CacheWeakReference( final V referent, final Entry entry )
+		public CacheWeakReference( final V referent, final ReferenceQueue< V > remove, final WeakRefLoaderCache< ?, V >.Entry entry )
 		{
-			super( referent, queue );
+			super( referent, remove );
 			this.entry = entry;
-		}
-
-		public void clean()
-		{
-			map.remove( entry.key, entry );
 		}
 	}
 
@@ -40,14 +36,14 @@ public class WeakRefLoaderCache< K, V > implements LoaderCache< K, V >
 	{
 		final K key;
 
-		private CacheWeakReference ref;
+		private CacheWeakReference< V > ref;
 
 		boolean loaded;
 
 		public Entry( final K key )
 		{
 			this.key = key;
-			this.ref = new CacheWeakReference();
+			this.ref = new CacheWeakReference<>();
 			this.loaded = false;
 		}
 
@@ -59,7 +55,12 @@ public class WeakRefLoaderCache< K, V > implements LoaderCache< K, V >
 		public void setValue( final V value )
 		{
 			this.loaded = true;
-			this.ref = new CacheWeakReference( value, this );
+			this.ref = new CacheWeakReference<>( value, queue, this );
+		}
+
+		public void remove()
+		{
+			map.remove( key, this );
 		}
 	}
 
@@ -90,7 +91,7 @@ public class WeakRefLoaderCache< K, V > implements LoaderCache< K, V >
 						 * The entry was already loaded, but its value has been
 						 * garbage collected. We need to create a new entry
 						 */
-						map.remove( key, entry );
+						entry.remove();
 						value = get( key, loader );
 					}
 				}
@@ -117,10 +118,47 @@ public class WeakRefLoaderCache< K, V > implements LoaderCache< K, V >
 	}
 
 	@Override
-	public void invalidateAll()
+	public void invalidate( final K key )
 	{
-		// TODO
-		throw new UnsupportedOperationException( "not implemented yet" );
+		final Entry entry = map.remove( key );
+		if ( entry != null )
+		{
+			final CacheWeakReference< V > ref = entry.ref;
+			if ( ref != null )
+				ref.clear();
+			entry.ref = null;
+		}
+	}
+
+	@Override
+	public void invalidateIf( final long parallelismThreshold, final Predicate< K > condition )
+	{
+		map.forEachValue( parallelismThreshold, entry ->
+		{
+			if ( condition.test( entry.key ) )
+			{
+				entry.remove();
+				final CacheWeakReference< V > ref = entry.ref;
+				if ( ref != null )
+					ref.clear();
+				entry.ref = null;
+			}
+		} );
+	}
+
+	@Override
+	public void invalidateAll( final long parallelismThreshold )
+	{
+		// TODO: We could also simply do map.clear(). Pros/Cons?
+
+		map.forEachValue( parallelismThreshold, entry ->
+		{
+			entry.remove();
+			final CacheWeakReference< V > ref = entry.ref;
+			if ( ref != null )
+				ref.clear();
+			entry.ref = null;
+		} );
 	}
 
 	/**
@@ -132,10 +170,10 @@ public class WeakRefLoaderCache< K, V > implements LoaderCache< K, V >
 		while ( true )
 		{
 			@SuppressWarnings( "unchecked" )
-			final CacheWeakReference poll = ( CacheWeakReference ) queue.poll();
+			final CacheWeakReference< V > poll = ( CacheWeakReference< V > ) queue.poll();
 			if ( poll == null )
 				break;
-			poll.clean();
+			poll.entry.remove();
 		}
 	}
 }

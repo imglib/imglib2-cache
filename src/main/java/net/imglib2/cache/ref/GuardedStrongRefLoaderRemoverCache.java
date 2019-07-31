@@ -1,5 +1,8 @@
 package net.imglib2.cache.ref;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+
 import java.lang.ref.PhantomReference;
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
@@ -7,9 +10,7 @@ import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
-
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
+import java.util.function.Predicate;
 
 import net.imglib2.cache.CacheLoader;
 import net.imglib2.cache.CacheRemover;
@@ -64,7 +65,7 @@ public class GuardedStrongRefLoaderRemoverCache< K, V > implements LoaderRemover
 			referent.setAccessible( true );
 		}
 
-		GuardedStrongRefLoaderRemoverCache< ?, V >.Entry entry;
+		private final GuardedStrongRefLoaderRemoverCache< ?, V >.Entry entry;
 
 		public CachePhantomReference( final V referent, final ReferenceQueue< V > remove, final GuardedStrongRefLoaderRemoverCache< ?, V >.Entry entry )
 		{
@@ -130,8 +131,8 @@ public class GuardedStrongRefLoaderRemoverCache< K, V > implements LoaderRemover
 				phantomRef = null;
 				remover.onRemoval( key, value );
 				remover = null;
-				map.remove( key, this );
 			}
+			map.remove( key, this );
 		}
 	}
 
@@ -204,10 +205,54 @@ public class GuardedStrongRefLoaderRemoverCache< K, V > implements LoaderRemover
 	}
 
 	@Override
-	public void invalidateAll()
+	public void invalidate( final K key )
 	{
-		// TODO
-		throw new UnsupportedOperationException( "not implemented yet" );
+		final Entry entry = map.remove( key );
+		if ( entry != null )
+		{
+			strongCache.invalidate( key );
+			synchronized ( entry )
+			{
+				entry.phantomRef.clear();
+				entry.phantomRef = null;
+				entry.remover = null;
+			}
+		}
+	}
+
+	@Override
+	public void invalidateIf( final long parallelismThreshold, final Predicate< K > condition )
+	{
+		map.forEachValue( parallelismThreshold, entry ->
+		{
+			if ( condition.test( entry.key ) )
+			{
+				strongCache.invalidate( entry.key );
+				synchronized ( entry )
+				{
+					map.remove( entry.key, entry );
+					entry.phantomRef.clear();
+					entry.phantomRef = null;
+					entry.remover = null;
+				}
+			}
+		} );
+	}
+
+	@Override
+	public void invalidateAll( final long parallelismThreshold )
+	{
+		map.forEachValue( parallelismThreshold, entry ->
+		{
+			synchronized ( entry )
+			{
+				map.remove( entry.key, entry );
+				entry.phantomRef.clear();
+				entry.phantomRef = null;
+				entry.remover = null;
+			}
+		} );
+		strongCache.invalidateAll();
 	}
 
 	/**

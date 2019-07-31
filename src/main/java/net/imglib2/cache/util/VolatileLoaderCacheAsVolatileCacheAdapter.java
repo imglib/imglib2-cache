@@ -1,11 +1,12 @@
 package net.imglib2.cache.util;
 
 import java.util.concurrent.ExecutionException;
+import java.util.function.Predicate;
 
 import net.imglib2.cache.volatiles.CacheHints;
-import net.imglib2.cache.volatiles.VolatileLoaderCache;
-import net.imglib2.cache.volatiles.VolatileCacheLoader;
 import net.imglib2.cache.volatiles.VolatileCache;
+import net.imglib2.cache.volatiles.VolatileCacheLoader;
+import net.imglib2.cache.volatiles.VolatileLoaderCache;
 
 public class VolatileLoaderCacheAsVolatileCacheAdapter< K, V > implements VolatileCache< K, V >
 {
@@ -32,8 +33,20 @@ public class VolatileLoaderCacheAsVolatileCacheAdapter< K, V > implements Volati
 	}
 
 	@Override
-	public void invalidateAll()
+	public void invalidate( final K key )
 	{
-		cache.invalidateAll();
+		cache.invalidate( key );
+	}
+
+	@Override
+	public void invalidateIf( final long parallelismThreshold, final Predicate< K > condition )
+	{
+		cache.invalidateIf( parallelismThreshold, condition );
+	}
+
+	@Override
+	public void invalidateAll( final long parallelismThreshold )
+	{
+		cache.invalidateAll( parallelismThreshold );
 	}
 }

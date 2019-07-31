@@ -20,7 +20,7 @@ public class LoaderRemoverCacheKeyAdapter< K, L, V, C extends LoaderRemoverCache
 	{
 		return cache.get(
 				keymap.getTarget( key ),
-				k -> loader.get( keymap.getSource( k ) ),
-				( k, v ) -> remover.onRemoval( keymap.getSource( k ), v ) );
+				l -> loader.get( keymap.getSource( l ) ),
+				( l, v ) -> remover.onRemoval( keymap.getSource( l ), v ) );
 	}
 }

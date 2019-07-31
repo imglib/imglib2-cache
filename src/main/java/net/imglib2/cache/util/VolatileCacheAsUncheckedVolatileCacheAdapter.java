@@ -1,6 +1,7 @@
 package net.imglib2.cache.util;
 
 import java.util.concurrent.ExecutionException;
+import java.util.function.Predicate;
 
 import net.imglib2.cache.volatiles.CacheHints;
 import net.imglib2.cache.volatiles.UncheckedVolatileCache;
@@ -42,8 +43,20 @@ public class VolatileCacheAsUncheckedVolatileCacheAdapter< K, V > implements Unc
 	}
 
 	@Override
-	public void invalidateAll()
+	public void invalidate( final K key )
 	{
-		cache.invalidateAll();
+		cache.invalidate( key );
+	}
+
+	@Override
+	public void invalidateIf( final long parallelismThreshold, final Predicate< K > condition )
+	{
+		cache.invalidateIf( parallelismThreshold, condition );
+	}
+
+	@Override
+	public void invalidateAll( final long parallelismThreshold )
+	{
+		cache.invalidateAll( parallelismThreshold );
 	}
 }

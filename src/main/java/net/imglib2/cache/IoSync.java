@@ -1,9 +1,10 @@
 package net.imglib2.cache;
 
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Predicate;
 
 import net.imglib2.cache.ref.SoftRefLoaderRemoverCache;
 
@@ -14,7 +15,7 @@ import net.imglib2.cache.ref.SoftRefLoaderRemoverCache;
  * returns immediately. Actual writing is done asynchronously on separate
  * threads, calling the connected {@link CacheRemover}.
  * <p>
- * {@link IoSync} takes care of directly returning values that reloaded are
+ * {@link IoSync} takes care of directly returning values that are reloaded
  * while they are written. It ensures that the final state of a value that is
  * enqueued for removal several times is the state that is written (eventually).
  * </p>
@@ -57,7 +58,7 @@ public class IoSync< K, V > implements CacheLoader< K, V >, CacheRemover< K, V >
 	 * Keys to be written are enqueued here. The corresponding values can be
 	 * obtained from {@link #map}.
 	 */
-	final BlockingQueue< K > queue;
+	final PausableQueue< K > queue;
 
 	/**
 	 * Create a new {@link IoSync} that asynchronously forwards to the specified
@@ -76,9 +77,7 @@ public class IoSync< K, V > implements CacheLoader< K, V >, CacheRemover< K, V >
 	/**
 	 * Create a new {@link IoSync} that asynchronously forwards to the specified
 	 * {@link CacheRemover}. The specified number of {@link Writer} threads
-	 * is started to handle writing values through {@code saver}. New writer
-	 * threads can be always started later, for example by
-	 * {@code new Thread(iosync.new Writer()).start()}.
+	 * is started to handle writing values through {@code saver}.
 	 *
 	 * @param io
 	 *            used to asynchronously write removed values, and to load
@@ -101,9 +100,7 @@ public class IoSync< K, V > implements CacheLoader< K, V >, CacheRemover< K, V >
 	/**
 	 * Create a new {@link IoSync} that asynchronously forwards to the specified
 	 * {@link CacheRemover}. The specified number of {@link Writer} threads
-	 * is started to handle writing values through {@code saver}. New writer
-	 * threads can be always started later, for example by
-	 * {@code new Thread(iosync.new Writer()).start()}.
+	 * is started to handle writing values through {@code saver}.
 	 *
 	 * @param loader
 	 *            used to load values that are <em>not</em> currently enqueued
@@ -126,12 +123,12 @@ public class IoSync< K, V > implements CacheLoader< K, V >, CacheRemover< K, V >
 		this.saver = saver;
 		this.loader = loader;
 		map = new ConcurrentHashMap<>();
-		queue = new LinkedBlockingQueue<>( maxQueueSize );
+		queue = new PausableQueue<>( maxQueueSize, numThreads, false );
 
 		final String[] names = createThreadNames( numThreads );
 		for ( int i = 0; i < numThreads; ++i )
 		{
-			final Thread t = new Thread( new Writer(), names[ i ] );
+			final Writer t = new Writer( names[ i ] );
 			t.setDaemon( true );
 			t.start();
 		}
@@ -205,12 +202,110 @@ public class IoSync< K, V > implements CacheLoader< K, V >, CacheRemover< K, V >
 		}
 	}
 
-	public class Writer implements Runnable
+	/**
+	 * Cancel any enqueued write for {@code key}. Blocks until all in-progress
+	 * writes for {@code key} are finished.
+	 *
+	 * @param key
+	 *            key of the entry to remove
+	 */
+	@Override
+	public void invalidate( final K key )
 	{
+		invalidateLock.lock();
+		try
+		{
+			queue.pause();
+			queue.remove( key );
+			map.remove( key );
+			saver.invalidate( key );
+			queue.resume();
+		}
+		catch ( final InterruptedException e )
+		{
+			Thread.currentThread().interrupt();
+		}
+		finally
+		{
+			invalidateLock.unlock();
+		}
+	}
+
+	/**
+	 * Cancel all enqueued writes for keys matching {@code condition}. Blocks
+	 * until all in-progress writes for keys matching {@code condition} are
+	 * finished.
+	 *
+	 * @param parallelismThreshold
+	 *            the (estimated) number of entries in the cache needed for this
+	 *            operation to be executed in parallel
+	 * @param condition
+	 *            condition on keys of entries to remove
+	 */
+	@Override
+	public void invalidateIf( final long parallelismThreshold, final Predicate< K > condition )
+	{
+		invalidateLock.lock();
+		try
+		{
+			queue.pause();
+			queue.removeIf( condition );
+			map.keySet().removeIf( condition );
+			saver.invalidateIf( parallelismThreshold, condition );
+			queue.resume();
+		}
+		catch ( final InterruptedException e )
+		{
+			Thread.currentThread().interrupt();
+		}
+		finally
+		{
+			invalidateLock.unlock();
+		}
+	}
+
+	/**
+	 * Cancel all enqueued writes. Blocks until in-progress writes are finished.
+	 *
+	 * @param parallelismThreshold
+	 *            the (estimated) number of entries in the cache needed for this
+	 *            operation to be executed in parallel
+	 */
+	@Override
+	public void invalidateAll( final long parallelismThreshold )
+	{
+		invalidateLock.lock();
+		try
+		{
+			queue.pause();
+			queue.clear();
+			map.clear();
+			saver.invalidateAll( parallelismThreshold );
+			queue.resume();
+		}
+		catch ( final InterruptedException e )
+		{
+			Thread.currentThread().interrupt();
+		}
+		finally
+		{
+			invalidateLock.unlock();
+		}
+	}
+
+	private final Lock invalidateLock = new ReentrantLock();
+
+	class Writer extends Thread
+	{
+		public Writer( final String name )
+		{
+			super( name );
+		}
+
 		@Override
 		public void run()
 		{
-			while ( !Thread.currentThread().isInterrupted() )
+			while ( true )
 			{
 				try
 				{
@@ -239,9 +334,7 @@ public class IoSync< K, V > implements CacheLoader< K, V >, CacheRemover< K, V >
 					}
 				}
 				catch ( final InterruptedException e )
-				{
-					Thread.currentThread().interrupt();
-				}
+				{}
 			}
 		}
 	}

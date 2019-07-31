@@ -227,7 +227,7 @@ public class RandomAccessibleCacheLoader<
 
 	static class NoImg< T extends NativeType< T >, A > extends AbstractNativeImg< T, A >
 	{
-		public NoImg( final A data)
+		public NoImg( final A data )
 		{
 			super( new long[] { 1 }, new Fraction() );
 			this.data = data;

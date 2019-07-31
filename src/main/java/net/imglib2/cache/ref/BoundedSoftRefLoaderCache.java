@@ -4,19 +4,22 @@ import java.lang.ref.SoftReference;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Predicate;
 
-import net.imglib2.cache.LoaderCache;
 import net.imglib2.cache.CacheLoader;
+import net.imglib2.cache.LoaderCache;
 
 /**
- * A cache that forwards to some other (usually {@link WeakRefLoaderCache}) cache and
- * additionally keeps {@link SoftReference}s to the <em>N</em> most recently
- * accessed values.
+ * A cache that forwards to some other cache (usually
+ * {@link WeakRefLoaderCache}) and additionally keeps {@link SoftReference}s to
+ * the <em>N</em> most recently accessed values.
  *
  * @param <K>
+ *            key type
  * @param <V>
+ *            value type
  *
- * @author Tobias Pietzsch &lt;tobias.pietzsch@gmail.com&gt;
+ * @author Tobias Pietzsch
  */
 public class BoundedSoftRefLoaderCache< K, V > implements LoaderCache< K, V >
 {
@@ -54,10 +57,24 @@ public class BoundedSoftRefLoaderCache< K, V > implements LoaderCache< K, V >
 	}
 
 	@Override
-	public void invalidateAll()
+	public void invalidate( final K key )
+	{
+		cache.invalidate( key );
+		softRefs.remove( key );
+	}
+
+	@Override
+	public void invalidateIf( final long parallelismThreshold, final Predicate< K > condition )
+	{
+		cache.invalidateIf( parallelismThreshold, condition );
+		softRefs.keySet().removeIf( condition );
+	}
+
+	@Override
+	public void invalidateAll( final long parallelismThreshold )
 	{
 		softRefs.clear();
-		cache.invalidateAll();
+		cache.invalidateAll( parallelismThreshold );
 	}
 
 	class SoftRefs extends LinkedHashMap< K, SoftReference< V > >

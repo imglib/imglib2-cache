@@ -19,6 +19,6 @@ public class LoaderCacheKeyAdapter< K, L, V, C extends LoaderCache< L, V > >
 	{
 		return cache.get(
 				keymap.getTarget( key ),
-				k -> loader.get( keymap.getSource( k ) ) );
+				l -> loader.get( keymap.getSource( l ) ) );
 	}
 }

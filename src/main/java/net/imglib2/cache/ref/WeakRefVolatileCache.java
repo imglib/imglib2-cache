@@ -5,6 +5,7 @@ import java.lang.ref.WeakReference;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Predicate;
 
 import net.imglib2.cache.Cache;
 import net.imglib2.cache.iotiming.CacheIoTiming;
@@ -35,9 +36,9 @@ public class WeakRefVolatileCache< K, V > implements VolatileCache< K, V >
 	static final int INVALID = 1;
 	static final int VALID = 2;
 
-	final class CacheWeakReference extends WeakReference< V >
+	static final class CacheWeakReference< V > extends WeakReference< V >
 	{
-		private final Entry entry;
+		private final WeakRefVolatileCache< ?, V >.Entry entry;
 
 		final int loaded;
 
@@ -48,16 +49,17 @@ public class WeakRefVolatileCache< K, V > implements VolatileCache< K, V >
 			loaded = NOTLOADED;
 		}
 
-		public CacheWeakReference( final V referent, final Entry entry, final int loaded )
+		public CacheWeakReference( final V referent, final ReferenceQueue< V > remove, final WeakRefVolatileCache< ?, V >.Entry entry, final int loaded )
 		{
-			super( referent, queue );
+			super( referent, remove );
 			this.entry = entry;
 			this.loaded = loaded;
 		}
 
 		public void clean()
 		{
-			entry.clean( this );
+			if ( entry.ref == this )
+				entry.remove();
 		}
 	}
 
@@ -65,34 +67,33 @@ public class WeakRefVolatileCache< K, V > implements VolatileCache< K, V >
 	{
 		final K key;
 
-		CacheWeakReference ref;
+		CacheWeakReference< V > ref;
 
 		long enqueueFrame;
 
 		public Entry( final K key )
 		{
 			this.key = key;
-			this.ref = new CacheWeakReference( null );
+			this.ref = new CacheWeakReference<>( null );
 			this.enqueueFrame = -1;
 		}
 
 		public void setInvalid( final V value )
 		{
-			ref = new CacheWeakReference( value, this, INVALID );
+			ref = new CacheWeakReference<>( value, queue, this, INVALID );
 		}
 
 		// Precondition: caller must hold lock on this.
-		public void setValid( final V value )
+		public void setValid( final V	 value )
 		{
-			ref = new CacheWeakReference( value, this, VALID );
+			ref = new CacheWeakReference<>( value, queue, this, VALID );
 			enqueueFrame = Long.MAX_VALUE;
 			notifyAll();
 		}
 
-		public void clean( final CacheWeakReference ref )
+		public void remove()
 		{
-			if ( ref == this.ref )
-				map.remove( key, this );
+			map.remove( key, this );
 		}
 
 		public V tryCreateInvalid() throws ExecutionException
@@ -130,7 +131,7 @@ public class WeakRefVolatileCache< K, V > implements VolatileCache< K, V >
 		if ( entry == null )
 			return null;
 
-		final CacheWeakReference ref = entry.ref;
+		final CacheWeakReference< V > ref = entry.ref;
 		final V v = ref.get();
 		if ( v != null && ref.loaded == VALID )
 			return v;
@@ -159,7 +160,7 @@ public class WeakRefVolatileCache< K, V > implements VolatileCache< K, V >
 		 */
 		final Entry entry = map.computeIfAbsent( key, k -> new Entry( k ) );
 
-		final CacheWeakReference ref = entry.ref;
+		final CacheWeakReference< V > ref = entry.ref;
 		V v = ref.get();
 		if ( v != null && ref.loaded == VALID )
 			return v;
@@ -196,7 +197,7 @@ public class WeakRefVolatileCache< K, V > implements VolatileCache< K, V >
 		while ( true )
 		{
 			@SuppressWarnings( "unchecked" )
-			final CacheWeakReference poll = ( CacheWeakReference ) queue.poll();
+			final CacheWeakReference< V > poll = ( CacheWeakReference< V > ) queue.poll();
 			if ( poll == null )
 				break;
 			poll.clean();
@@ -204,10 +205,98 @@ public class WeakRefVolatileCache< K, V > implements VolatileCache< K, V >
 	}
 
 	@Override
-	public void invalidateAll()
+	public void invalidate( final K key )
 	{
-		// TODO
-		throw new UnsupportedOperationException( "not implemented yet" );
+		try
+		{
+			// stop fetcher threads to avoid concurrent load for key
+			fetchQueue.pause();
+
+			// remove entry from this cache
+			final Entry entry = map.remove( key );
+			if ( entry != null )
+			{
+				final CacheWeakReference< V > ref = entry.ref;
+				if ( ref != null )
+					ref.clear();
+				entry.ref = null;
+			}
+
+			// remove entry from backingCache
+			backingCache.invalidate( key );
+
+			// resume fetcher threads
+			fetchQueue.resume();
+		}
+		catch ( final InterruptedException e )
+		{
+			throw new RuntimeException( e );
+		}
+	}
+
+	@Override
+	public void invalidateIf( final long parallelismThreshold, final Predicate< K > condition )
+	{
+		try
+		{
+			// stop fetcher threads to avoid concurrent load for key
+			fetchQueue.pause();
+
+			// remove matching entries from this cache
+			map.forEachValue( parallelismThreshold, entry ->
+			{
+				if ( condition.test( entry.key ) )
+				{
+					entry.remove();
+					final CacheWeakReference< V > ref = entry.ref;
+					if ( ref != null )
+						ref.clear();
+					entry.ref = null;
+				}
+			} );
+
+			// remove matching entries from backingCache
+			backingCache.invalidateIf( parallelismThreshold, condition );
+
+			// resume fetcher threads
+			fetchQueue.resume();
+		}
+		catch ( final InterruptedException e )
+		{
+			throw new RuntimeException( e );
+		}
+	}
+
+	@Override
+	public void invalidateAll( final long parallelismThreshold )
+	{
+		try
+		{
+			// stop fetcher threads to avoid concurrent load for key
+			fetchQueue.pause();
+
+			// remove all entries from this cache
+			// TODO: We could also simply do map.clear(). Pros/Cons?
+			map.forEachValue( parallelismThreshold, entry ->
+			{
+				entry.remove();
+				final CacheWeakReference< V > ref = entry.ref;
+				if ( ref != null )
+					ref.clear();
+				entry.ref = null;
+			} );
+
+			// remove all entries from backingCache
+			backingCache.invalidateAll( parallelismThreshold );
+
+			// resume fetcher threads
+			fetchQueue.resume();
+		}
+		catch ( final InterruptedException e )
+		{
+			throw new RuntimeException( e );
+		}
+
 	}
 
 	// ================ private methods =====================
@@ -216,7 +305,7 @@ public class WeakRefVolatileCache< K, V > implements VolatileCache< K, V >
 	{
 		synchronized( entry )
 		{
-			final CacheWeakReference ref = entry.ref;
+			final CacheWeakReference< V > ref = entry.ref;
 			V v = ref.get();
 			if ( v == null && ref.loaded != NOTLOADED )
 			{
@@ -248,7 +337,7 @@ public class WeakRefVolatileCache< K, V > implements VolatileCache< K, V >
 	{
 		synchronized( entry )
 		{
-			final CacheWeakReference ref = entry.ref;
+			final CacheWeakReference< V > ref = entry.ref;
 			V v = ref.get();
 			if ( v == null && ref.loaded != NOTLOADED )
 			{
@@ -281,7 +370,7 @@ public class WeakRefVolatileCache< K, V > implements VolatileCache< K, V >
 	{
 		synchronized( entry )
 		{
-			CacheWeakReference ref = entry.ref;
+			CacheWeakReference< V > ref = entry.ref;
 			V v = ref.get();
 			if ( v == null && ref.loaded != NOTLOADED )
 			{
@@ -347,7 +436,7 @@ public class WeakRefVolatileCache< K, V > implements VolatileCache< K, V >
 	{
 		synchronized( entry )
 		{
-			final CacheWeakReference ref = entry.ref;
+			final CacheWeakReference< V > ref = entry.ref;
 			final V v = ref.get();
 			if ( v == null && ref.loaded != NOTLOADED )
 			{
@@ -362,7 +451,7 @@ public class WeakRefVolatileCache< K, V > implements VolatileCache< K, V >
 		final V vl = backingCache.get( entry.key );
 		synchronized( entry )
 		{
-			final CacheWeakReference ref = entry.ref;
+			final CacheWeakReference< V > ref = entry.ref;
 			final V v = ref.get();
 			if ( v == null && ref.loaded != NOTLOADED )
 			{
