@@ -18,6 +18,13 @@ public class LoaderRemoverCacheKeyAdapter< K, L, V, D, C extends LoaderRemoverCa
 	@Override
 	public V get( final K key, final CacheLoader< ? super K, ? extends V > loader, final CacheRemover< ? super K, V, D > remover ) throws ExecutionException
 	{
+		/*
+		 * NB: The cache has no global CacheRemover, so invalidate() calls will
+		 * not invoke CacheRemover.invalidate(). Therefore, the wrapped
+		 * CacheRemover does not override invalidate(). If on a higher level,
+		 * the CacheRemover is made cache-global, then invalidation is handled
+		 * already there.
+		 */
 		class LoaderRemover implements CacheRemover< L, V, D >, CacheLoader< L, V >
 		{
 			@Override

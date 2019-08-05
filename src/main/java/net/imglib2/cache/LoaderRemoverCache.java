@@ -25,4 +25,9 @@ public interface LoaderRemoverCache< K, V, D > extends AbstractCache< K, V >
 	{
 		return new LoaderRemoverCacheKeyAdapter<>( this, keymap );
 	}
+
+	/*
+	 * NB: This cache has no global CacheRemover, so invalidate() calls will not
+	 * invoke CacheRemover.invalidate().
+	 */
 }
