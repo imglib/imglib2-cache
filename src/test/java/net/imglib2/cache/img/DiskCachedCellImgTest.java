@@ -18,7 +18,7 @@ public class DiskCachedCellImgTest
 		final long[] dims = new long[] { 20_000_000 };
 
 		FunctionRandomAccessible< FloatType > src = new FunctionRandomAccessible<>( 1, ( pos, type ) -> type.set( pos.getFloatPosition( 0 ) ), FloatType::new );
-		final Img< FloatType > dst = new DiskCachedCellImgFactory<>( new FloatType(),
+		final DiskCachedCellImg< FloatType, ? > dst = new DiskCachedCellImgFactory<>( new FloatType(),
 				DiskCachedCellImgOptions.options()
 						.cacheType( DiskCachedCellImgOptions.CacheType.BOUNDED )
 						.maxCacheSize( 2 )
@@ -36,5 +36,6 @@ public class DiskCachedCellImgTest
 		while ( srcCursor.hasNext() )
 			if ( dstCursor.next().get() != srcCursor.next().get() )
 				throw new RuntimeException();
+		dst.shutdown();
 	}
 }

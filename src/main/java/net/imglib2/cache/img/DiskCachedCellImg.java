@@ -1,6 +1,7 @@
 package net.imglib2.cache.img;
 
 import net.imglib2.cache.Cache;
+import net.imglib2.cache.IoSync;
 import net.imglib2.img.ImgFactory;
 import net.imglib2.img.cell.Cell;
 import net.imglib2.img.cell.CellGrid;
@@ -23,15 +24,24 @@ public class DiskCachedCellImg< T extends NativeType< T >, A > extends CachedCel
 {
 	private final DiskCachedCellImgFactory< T > factory;
 
+	private final IoSync iosync;
+
 	public DiskCachedCellImg(
 			final DiskCachedCellImgFactory< T > factory,
 			final CellGrid grid,
 			final Fraction entitiesPerPixel,
 			final Cache< Long, Cell< A > > cache,
+			final IoSync iosync,
 			final A accessType )
 	{
 		super( grid, entitiesPerPixel, cache, accessType );
 		this.factory = factory;
+		this.iosync = iosync;
+	}
+
+	public void shutdown()
+	{
+		iosync.shutdown();
 	}
 
 	@Override

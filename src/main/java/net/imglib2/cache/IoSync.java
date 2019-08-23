@@ -1,5 +1,7 @@
 package net.imglib2.cache;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
@@ -61,6 +63,8 @@ public class IoSync< K, V, D > implements CacheLoader< K, V >, CacheRemover< K, 
 	 * obtained from {@link #map}.
 	 */
 	final PausableQueue< K > queue;
+
+	private final List<Writer> writers = new ArrayList<>();
 
 	/**
 	 * Create a new {@link IoSync} that asynchronously forwards to the specified
@@ -133,7 +137,14 @@ public class IoSync< K, V, D > implements CacheLoader< K, V >, CacheRemover< K, 
 			final Writer t = new Writer( names[ i ] );
 			t.setDaemon( true );
 			t.start();
+			writers.add( t );
 		}
+	}
+
+	public void shutdown()
+	{
+		for ( final Writer w : writers )
+			w.shutdown();
 	}
 
 	@Override
@@ -311,21 +322,29 @@ public class IoSync< K, V, D > implements CacheLoader< K, V >, CacheRemover< K, 
 
 	class Writer extends Thread
 	{
+		private volatile boolean shutdown = false;
+
 		public Writer( final String name )
 		{
 			super( name );
 		}
 
+		public void shutdown()
+		{
+			shutdown = true;
+			interrupt();
+		}
+
 		@Override
 		public void run()
 		{
-			while ( true )
+			while ( !shutdown )
 			{
 				try
 				{
 					final K key = queue.take();
 					final Entry entry = map.get( key );
-					if ( entry != null )
+					if ( entry != null && !shutdown )
 					{
 						/*
 						 * Synchronization is only between Writers: Only one
