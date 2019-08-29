@@ -64,7 +64,7 @@ public class IoSync< K, V, D > implements CacheLoader< K, V >, CacheRemover< K, 
 	 */
 	final PausableQueue< K > queue;
 
-	private final List<Writer> writers = new ArrayList<>();
+	private final List< Writer > writers = new ArrayList<>();
 
 	/**
 	 * Create a new {@link IoSync} that asynchronously forwards to the specified
@@ -141,6 +141,11 @@ public class IoSync< K, V, D > implements CacheLoader< K, V >, CacheRemover< K, 
 		}
 	}
 
+	/**
+	 * Shutdown all internal {@code Writer} instances to free resources.
+	 * Internal threads will terminate and no data will be written to disk
+	 * after shutdown.
+	 */
 	public void shutdown()
 	{
 		for ( final Writer w : writers )
@@ -329,6 +334,11 @@ public class IoSync< K, V, D > implements CacheLoader< K, V >, CacheRemover< K, 
 			super( name );
 		}
 
+		/**
+		 * Shutdown this {@code Writer}: The {@code Writer} will be interrupted
+		 * so it can terminate and resources can be freed. No data will be written
+		 * to disk after shutdown.
+		 */
 		public void shutdown()
 		{
 			shutdown = true;

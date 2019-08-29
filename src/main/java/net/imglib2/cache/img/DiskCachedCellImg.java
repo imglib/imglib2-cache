@@ -39,6 +39,11 @@ public class DiskCachedCellImg< T extends NativeType< T >, A > extends CachedCel
 		this.iosync = iosync;
 	}
 
+	/**
+	 * Shutdown the internal {@link IoSync} to free resources via
+	 * {@link IoSync#shutdown()}. No data will be written to disk after
+	 * shutdown.
+	 */
 	public void shutdown()
 	{
 		iosync.shutdown();
