@@ -257,7 +257,13 @@ public class DiskCachedCellImgFactory< T extends NativeType< T > > extends Nativ
 				.withLoader( iosync );
 
 		final A accessType = ArrayDataAccessFactory.get( typeFactory, options.accessFlags() );
-		final DiskCachedCellImg< T, ? extends A > img = new DiskCachedCellImg<>( this, grid, entitiesPerPixel, cache, accessType );
+		final DiskCachedCellImg< T, ? extends A > img = new DiskCachedCellImg<>(
+				this,
+				grid,
+				entitiesPerPixel,
+				cache,
+				iosync,
+				accessType );
 		img.setLinkedType( typeFactory.createLinkedType( img ) );
 		return img;
 	}
