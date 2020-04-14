@@ -31,10 +31,10 @@ package net.imglib2.cache.img;
 import java.lang.ref.SoftReference;
 import java.util.Set;
 
+import net.imglib2.Dimensions;
 import net.imglib2.Dirty;
 import net.imglib2.cache.img.DiskCachedCellImgOptions.CacheType;
 import net.imglib2.img.basictypeaccess.AccessFlags;
-import net.imglib2.img.cell.CellImgFactory;
 import net.imglib2.util.Util;
 
 /**
@@ -139,7 +139,7 @@ public class ReadOnlyCachedCellImgOptions
 	 */
 	public ReadOnlyCachedCellImgOptions cellDimensions( final int... cellDimensions )
 	{
-		CellImgFactory.verifyDimensions( cellDimensions );
+		Dimensions.verify( cellDimensions );
 		return new ReadOnlyCachedCellImgOptions( values.copy().setCellDimensions( cellDimensions ) );
 	}
 

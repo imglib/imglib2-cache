@@ -32,9 +32,9 @@ import java.lang.ref.SoftReference;
 import java.nio.file.Path;
 import java.util.Set;
 
+import net.imglib2.Dimensions;
 import net.imglib2.Dirty;
 import net.imglib2.img.basictypeaccess.AccessFlags;
-import net.imglib2.img.cell.CellImgFactory;
 import net.imglib2.util.Util;
 
 /**
@@ -204,7 +204,7 @@ public class DiskCachedCellImgOptions
 	 */
 	public DiskCachedCellImgOptions cellDimensions( final int... cellDimensions )
 	{
-		CellImgFactory.verifyDimensions( cellDimensions );
+		Dimensions.verify( cellDimensions );
 		return new DiskCachedCellImgOptions( values.copy().setCellDimensions( cellDimensions ) );
 	}
 

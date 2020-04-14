@@ -182,6 +182,7 @@ public class DiskCachedCellImgFactory< T extends NativeType< T > > extends Nativ
 			final T type,
 			final DiskCachedCellImgOptions additionalOptions )
 	{
+		Dimensions.verify( dimensions );
 		@SuppressWarnings( { "unchecked", "rawtypes" } )
 		final DiskCachedCellImg< T, A > img = create( dimensions, cacheLoader, cellLoader, type, ( NativeTypeFactory ) type.getNativeTypeFactory(), additionalOptions );
 		return img;
@@ -279,7 +280,7 @@ public class DiskCachedCellImgFactory< T extends NativeType< T > > extends Nativ
 
 	private CellGrid createCellGrid( final long[] dimensions, final Fraction entitiesPerPixel, final DiskCachedCellImgOptions.Values options )
 	{
-		CellImgFactory.verifyDimensions( dimensions );
+		Dimensions.verify( dimensions );
 		final int n = dimensions.length;
 		final int[] cellDimensions = CellImgFactory.getCellDimensions( options.cellDimensions(), n, entitiesPerPixel );
 		return new CellGrid( dimensions, cellDimensions );

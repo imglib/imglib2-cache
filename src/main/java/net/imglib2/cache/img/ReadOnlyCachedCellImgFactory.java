@@ -34,6 +34,7 @@
 
 package net.imglib2.cache.img;
 
+import net.imglib2.Dimensions;
 import net.imglib2.cache.Cache;
 import net.imglib2.cache.CacheLoader;
 import net.imglib2.cache.LoaderCache;
@@ -154,7 +155,7 @@ public class ReadOnlyCachedCellImgFactory
 
 	private CellGrid createCellGrid( final long[] dimensions, final Fraction entitiesPerPixel, final ReadOnlyCachedCellImgOptions.Values options )
 	{
-		CellImgFactory.verifyDimensions( dimensions );
+		Dimensions.verify( dimensions );
 		final int n = dimensions.length;
 		final int[] cellDimensions = CellImgFactory.getCellDimensions( options.cellDimensions(), n, entitiesPerPixel );
 		return new CellGrid( dimensions, cellDimensions );
