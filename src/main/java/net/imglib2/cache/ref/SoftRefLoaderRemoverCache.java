@@ -20,7 +20,11 @@ import net.imglib2.cache.LoaderRemoverCache;
  * be explicitly clear()ed before the referent is freed.)
  *
  * @param <K>
+ *            key type
  * @param <V>
+ *            value type
+ * @param <D>
+ *            value data type, see {@link CacheRemover}
  *
  * @author Tobias Pietzsch
  */
