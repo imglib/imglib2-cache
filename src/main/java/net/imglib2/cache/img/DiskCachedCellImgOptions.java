@@ -34,6 +34,7 @@ import java.util.Set;
 
 import net.imglib2.Dimensions;
 import net.imglib2.Dirty;
+import net.imglib2.cache.img.optional.CacheOptions;
 import net.imglib2.img.basictypeaccess.AccessFlags;
 import net.imglib2.util.Util;
 
@@ -119,42 +120,9 @@ public class DiskCachedCellImgOptions
 	}
 
 	/**
-	 * Rough in-memory cache types.
-	 *
-	 * @author Tobias Pietzsch
-	 */
-	public static enum CacheType
-	{
-		/**
-		 * The cache keeps SoftReferences to values (cells), basically relying
-		 * on GC for removal. The advantage of this is that many caches can be
-		 * created without needing to put a limit on the size of any of them. GC
-		 * will take care of balancing that. The downside is that
-		 * {@link OutOfMemoryError} may occur because {@link SoftReference}s are
-		 * cleared too slow. SoftReferences are not collected for a certain time
-		 * after they have been used. If there is heavy thrashing with cells
-		 * being constantly swapped in and out from disk then OutOfMemory may
-		 * happen because of this. This sounds worse than it is in practice and
-		 * should only happen in pathological situations. Tuning the
-		 * {@code -XX:SoftRefLRUPolicyMSPerMB} JVM flag does often help.
-		 */
-		SOFTREF,
-
-		/**
-		 * The cache keeps strong references to a limited number of values
-		 * (cells). The advantage is that there is never OutOfMemory because of
-		 * the issues described above (fingers crossed). The downside is that
-		 * the number of cells that should be cached needs to be specified
-		 * beforehand. So {@link OutOfMemoryError} may occur if many caches are
-		 * opened and consume too much memory in total.
-		 */
-		BOUNDED
-	}
-
-	/**
 	 * Which in-memory cache type to use. The options are
 	 * <ul>
-	 * <li>{@link CacheType#SOFTREF SOFTREF}: The cache keeps SoftReferences to
+	 * <li>{@link CacheOptions.CacheType#SOFTREF SOFTREF}: The cache keeps SoftReferences to
 	 * values (cells), basically relying on GC for removal. The advantage of
 	 * this is that many caches can be created without needing to put a limit on
 	 * the size of any of them. GC will take care of balancing that. The
@@ -165,7 +133,7 @@ public class DiskCachedCellImgOptions
 	 * OutOfMemory may happen because of this. This sounds worse than it is in
 	 * practice and should only happen in pathological situations. Tuning the
 	 * {@code -XX:SoftRefLRUPolicyMSPerMB} JVM flag does often help.</li>
-	 * <li>{@link CacheType#BOUNDED BOUNDED}: The cache keeps strong references
+	 * <li>{@link CacheOptions.CacheType#BOUNDED BOUNDED}: The cache keeps strong references
 	 * to a limited number of values (cells). The advantage is that there is
 	 * never OutOfMemory because of the issues described above (fingers
 	 * crossed). The downside is that the number of cells that should be cached
@@ -176,14 +144,14 @@ public class DiskCachedCellImgOptions
 	 * @param cacheType
 	 *            which cache type to use (default is {@code SOFTREF}).
 	 */
-	public DiskCachedCellImgOptions cacheType( final CacheType cacheType )
+	public DiskCachedCellImgOptions cacheType( final CacheOptions.CacheType cacheType )
 	{
 		return new DiskCachedCellImgOptions( values.copy().setCacheType( cacheType ) );
 	}
 
 	/**
 	 * Set the maximum number of values (cells) to keep in the cache. This is
-	 * only used if {@link #cacheType(CacheType)} is {@link CacheType#BOUNDED}.
+	 * only used if {@link #cacheType(CacheOptions.CacheType)} is {@link CacheOptions.CacheType#BOUNDED}.
 	 *
 	 * @param maxCacheSize
 	 *            maximum number of values in the cache (default is 1000).
@@ -403,7 +371,7 @@ public class DiskCachedCellImgOptions
 
 		private int maxIoQueueSize = 10;
 
-		private CacheType cacheType = CacheType.SOFTREF;
+		private CacheOptions.CacheType cacheType = CacheOptions.CacheType.SOFTREF;
 
 		private long maxCacheSize = 1000;
 
@@ -444,7 +412,7 @@ public class DiskCachedCellImgOptions
 			return maxIoQueueSize;
 		}
 
-		public CacheType cacheType()
+		public CacheOptions.CacheType cacheType()
 		{
 			return cacheType;
 		}
@@ -536,7 +504,7 @@ public class DiskCachedCellImgOptions
 			return this;
 		}
 
-		Values setCacheType( final CacheType t )
+		Values setCacheType( final CacheOptions.CacheType t )
 		{
 			cacheType = t;
 			cacheTypeModified = true;

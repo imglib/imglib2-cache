@@ -1,6 +1,7 @@
 package net.imglib2.cache.img;
 
 import net.imglib2.Cursor;
+import net.imglib2.cache.img.optional.CacheOptions;
 import net.imglib2.img.Img;
 import net.imglib2.position.FunctionRandomAccessible;
 import net.imglib2.type.numeric.real.FloatType;
@@ -20,7 +21,7 @@ public class DiskCachedCellImgTest
 		FunctionRandomAccessible< FloatType > src = new FunctionRandomAccessible<>( 1, ( pos, type ) -> type.set( pos.getFloatPosition( 0 ) ), FloatType::new );
 		final Img< FloatType > dst = new DiskCachedCellImgFactory<>( new FloatType(),
 				DiskCachedCellImgOptions.options()
-						.cacheType( DiskCachedCellImgOptions.CacheType.BOUNDED )
+						.cacheType( CacheOptions.CacheType.BOUNDED )
 						.maxCacheSize( 2 )
 						.cellDimensions( 256 ) ).create( dims );
 
