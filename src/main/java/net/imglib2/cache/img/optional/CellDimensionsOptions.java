@@ -1,14 +1,14 @@
 package net.imglib2.cache.img.optional;
 
+import java.util.function.BiConsumer;
 import net.imglib2.Dimensions;
-import org.scijava.optional.AbstractValues.ValuesToString;
 import org.scijava.optional.Options;
 import org.scijava.optional.Values;
 
 /**
  * Optional arguments that specify the dimensions of a Cell.
  */
-public interface CellDimensionsOptions< T extends CellDimensionsOptions< T > > extends Options< T >
+public interface CellDimensionsOptions< T > extends Options< T >
 {
 	/**
 	 * Set the dimensions of a cell. This is extended or truncated as necessary.
@@ -22,19 +22,19 @@ public interface CellDimensionsOptions< T extends CellDimensionsOptions< T > > e
 	default T cellDimensions( final int... cellDimensions )
 	{
 		Dimensions.verify( cellDimensions );
-		return add( "cellDimensions", cellDimensions );
+		return setValue( "cellDimensions", cellDimensions );
 	}
 
 	interface Val extends Values
 	{
-		default void buildToString( ValuesToString sb )
+		default void forEach( BiConsumer< String, Object > action )
 		{
-			sb.append( "cellDimensions", cellDimensions() );
+			action.accept( "cellDimensions", cellDimensions() );
 		}
 
 		default int[] cellDimensions()
 		{
-			return value( "cellDimensions", new int[] { 10 } );
+			return getValueOrDefault( "cellDimensions", new int[] { 10 } );
 		}
 	}
 }

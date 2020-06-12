@@ -29,12 +29,12 @@
 package net.imglib2.cache.img;
 
 import java.util.Set;
+import java.util.function.BiConsumer;
 import net.imglib2.cache.img.optional.AccessOptions;
 import net.imglib2.cache.img.optional.CacheOptions;
 import net.imglib2.cache.img.optional.CellDimensionsOptions;
 import net.imglib2.img.basictypeaccess.AccessFlags;
 import org.scijava.optional.AbstractOptions;
-import org.scijava.optional.AbstractValues;
 
 /**
  * Optional parameters for constructing a {@link ReadOnlyCachedCellImgFactory}.
@@ -47,7 +47,7 @@ public class ReadOnlyCachedCellImgOptions extends AbstractOptions< ReadOnlyCache
 			CellDimensionsOptions< ReadOnlyCachedCellImgOptions >,
 			CacheOptions< ReadOnlyCachedCellImgOptions >
 {
-	public final Values values = new Values( this );
+	public final Values values = new Values();
 
 	public ReadOnlyCachedCellImgOptions() {}
 
@@ -78,28 +78,22 @@ public class ReadOnlyCachedCellImgOptions extends AbstractOptions< ReadOnlyCache
 		return new ReadOnlyCachedCellImgOptions( this );
 	}
 
-	public static class Values extends AbstractValues implements
+	public class Values extends AbstractValues implements
 			AccessOptions.Val,
 			CellDimensionsOptions.Val,
 			CacheOptions.Val
 	{
-		public Values( final ReadOnlyCachedCellImgOptions options )
-		{
-			super( options );
-		}
-
 		public Set< AccessFlags > accessFlags()
 		{
 			return AccessFlags.fromBooleansDirtyVolatile( dirtyAccesses(), volatileAccesses() );
 		}
 
 		@Override
-		public String toString() {
-			final ValuesToString sb = new ValuesToString();
-			AccessOptions.Val.super.buildToString(sb);
-			CellDimensionsOptions.Val.super.buildToString(sb);
-			CacheOptions.Val.super.buildToString(sb);
-			return sb.toString();
+		public void forEach( BiConsumer< String, Object > action )
+		{
+			AccessOptions.Val.super.forEach( action );
+			CellDimensionsOptions.Val.super.forEach( action );
+			CacheOptions.Val.super.forEach( action );
 		}
 	}
 }

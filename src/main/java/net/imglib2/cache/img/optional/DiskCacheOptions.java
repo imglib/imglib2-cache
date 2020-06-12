@@ -1,17 +1,17 @@
 package net.imglib2.cache.img.optional;
 
 import java.nio.file.Path;
+import java.util.function.BiConsumer;
 import net.imglib2.cache.img.CellLoader;
 import net.imglib2.cache.img.DiskCachedCellImg;
 import net.imglib2.cache.img.DiskCachedCellImgFactory;
-import org.scijava.optional.AbstractValues.ValuesToString;
 import org.scijava.optional.Options;
 import org.scijava.optional.Values;
 
 /**
  * Optional arguments that specify the properties of the disk cache for {@link DiskCachedCellImg}.
  */
-public interface DiskCacheOptions< T extends DiskCacheOptions< T > > extends Options< T >
+public interface DiskCacheOptions< T > extends Options< T >
 {
 	/**
 	 * The specified number of threads is started to handle asynchronous writing
@@ -22,7 +22,7 @@ public interface DiskCacheOptions< T extends DiskCacheOptions< T > > extends Opt
 	 */
 	default T numIoThreads( final int numIoThreads )
 	{
-		return add( "numIoThreads", numIoThreads );
+		return setValue( "numIoThreads", numIoThreads );
 	}
 
 	/**
@@ -41,7 +41,7 @@ public interface DiskCacheOptions< T extends DiskCacheOptions< T > > extends Opt
 	 */
 	default T maxIoQueueSize( final int maxIoQueueSize )
 	{
-		return add( "maxIoQueueSize", maxIoQueueSize );
+		return setValue( "maxIoQueueSize", maxIoQueueSize );
 	}
 
 	/**
@@ -61,7 +61,7 @@ public interface DiskCacheOptions< T extends DiskCacheOptions< T > > extends Opt
 	 */
 	default T cacheDirectory( final Path dir )
 	{
-		return add( "cacheDirectory", dir );
+		return setValue( "cacheDirectory", dir );
 	}
 
 	/**
@@ -79,7 +79,7 @@ public interface DiskCacheOptions< T extends DiskCacheOptions< T > > extends Opt
 	 */
 	default T tempDirectory( final Path dir )
 	{
-		return add( "tempDirectory", dir );
+		return setValue( "tempDirectory", dir );
 	}
 
 	/**
@@ -97,7 +97,7 @@ public interface DiskCacheOptions< T extends DiskCacheOptions< T > > extends Opt
 	 */
 	default T tempDirectoryPrefix( final String prefix )
 	{
-		return add( "tempDirectoryPrefix", prefix );
+		return setValue( "tempDirectoryPrefix", prefix );
 	}
 
 	/**
@@ -120,7 +120,7 @@ public interface DiskCacheOptions< T extends DiskCacheOptions< T > > extends Opt
 	 */
 	default T deleteCacheDirectoryOnExit( final boolean deleteOnExit )
 	{
-		return add( "deleteCacheDirectoryOnExit", deleteOnExit );
+		return setValue( "deleteCacheDirectoryOnExit", deleteOnExit );
 	}
 
 	/**
@@ -144,55 +144,55 @@ public interface DiskCacheOptions< T extends DiskCacheOptions< T > > extends Opt
 	 */
 	default T initializeCellsAsDirty( final boolean initializeAsDirty )
 	{
-		return add( "initializeCellsAsDirty", initializeAsDirty );
+		return setValue( "initializeCellsAsDirty", initializeAsDirty );
 	}
 
 	interface Val extends Values
 	{
-		default void buildToString( ValuesToString sb )
+		default void forEach( BiConsumer< String, Object > action )
 		{
-			sb.append( "numIoThreads", numIoThreads() );
-			sb.append( "maxIoQueueSize", maxIoQueueSize() );
-			sb.append( "cacheDirectory", cacheDirectory() );
-			sb.append( "tempDirectory", tempDirectory() );
-			sb.append( "tempDirectoryPrefix", tempDirectoryPrefix() );
-			sb.append( "deleteCacheDirectoryOnExit", deleteCacheDirectoryOnExit() );
-			sb.append( "initializeCellsAsDirty", initializeCellsAsDirty() );
+			action.accept( "numIoThreads", numIoThreads() );
+			action.accept( "maxIoQueueSize", maxIoQueueSize() );
+			action.accept( "cacheDirectory", cacheDirectory() );
+			action.accept( "tempDirectory", tempDirectory() );
+			action.accept( "tempDirectoryPrefix", tempDirectoryPrefix() );
+			action.accept( "deleteCacheDirectoryOnExit", deleteCacheDirectoryOnExit() );
+			action.accept( "initializeCellsAsDirty", initializeCellsAsDirty() );
 		}
 
 		default int numIoThreads()
 		{
-			return value( "numIoThreads", 1 );
+			return getValueOrDefault( "numIoThreads", 1 );
 		}
 
 		default int maxIoQueueSize()
 		{
-			return value( "maxIoQueueSize", 10 );
+			return getValueOrDefault( "maxIoQueueSize", 10 );
 		}
 
 		default Path cacheDirectory()
 		{
-			return value( "cacheDirectory", null );
+			return getValueOrDefault( "cacheDirectory", null );
 		}
 
 		default Path tempDirectory()
 		{
-			return value( "tempDirectory", null );
+			return getValueOrDefault( "tempDirectory", null );
 		}
 
 		default String tempDirectoryPrefix()
 		{
-			return value( "tempDirectoryPrefix", "imglib2" );
+			return getValueOrDefault( "tempDirectoryPrefix", "imglib2" );
 		}
 
 		default boolean deleteCacheDirectoryOnExit()
 		{
-			return value( "deleteCacheDirectoryOnExit", true );
+			return getValueOrDefault( "deleteCacheDirectoryOnExit", true );
 		}
 
 		default boolean initializeCellsAsDirty()
 		{
-			return value( "initializeCellsAsDirty", false );
+			return getValueOrDefault( "initializeCellsAsDirty", false );
 		}
 	}
 }

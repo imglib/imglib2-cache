@@ -29,6 +29,7 @@
 package net.imglib2.cache.img;
 
 import java.util.Set;
+import java.util.function.BiConsumer;
 import net.imglib2.Dirty;
 import net.imglib2.cache.img.optional.AccessOptions;
 import net.imglib2.cache.img.optional.CacheOptions;
@@ -36,7 +37,6 @@ import net.imglib2.cache.img.optional.CellDimensionsOptions;
 import net.imglib2.cache.img.optional.DiskCacheOptions;
 import net.imglib2.img.basictypeaccess.AccessFlags;
 import org.scijava.optional.AbstractOptions;
-import org.scijava.optional.AbstractValues;
 
 /**
  * Optional parameters for constructing a {@link DiskCachedCellImgFactory}.
@@ -50,7 +50,7 @@ public class DiskCachedCellImgOptions extends AbstractOptions< DiskCachedCellImg
 		CacheOptions< DiskCachedCellImgOptions >,
 		DiskCacheOptions< DiskCachedCellImgOptions >
 {
-	public final Values values = new Values( this );
+	public final Values values = new Values();
 
 	public DiskCachedCellImgOptions()
 	{
@@ -101,22 +101,17 @@ public class DiskCachedCellImgOptions extends AbstractOptions< DiskCachedCellImg
 		return new DiskCachedCellImgOptions( this );
 	}
 
-	public static class Values extends AbstractValues implements
+	public class Values extends AbstractValues implements
 			AccessOptions.Val,
 			CellDimensionsOptions.Val,
 			CacheOptions.Val,
 			DiskCacheOptions.Val
 	{
-		public Values( final DiskCachedCellImgOptions options )
-		{
-			super( options );
-		}
-
 		// NB overrides default value
 		@Override
 		public boolean dirtyAccesses()
 		{
-			return value( "dirtyAccesses", true );
+			return getValueOrDefault( "dirtyAccesses", true );
 		}
 
 		public Set< AccessFlags > accessFlags()
@@ -125,14 +120,12 @@ public class DiskCachedCellImgOptions extends AbstractOptions< DiskCachedCellImg
 		}
 
 		@Override
-		public String toString()
+		public void forEach( BiConsumer< String, Object > action )
 		{
-			final ValuesToString sb = new ValuesToString();
-			AccessOptions.Val.super.buildToString( sb );
-			CellDimensionsOptions.Val.super.buildToString( sb );
-			CacheOptions.Val.super.buildToString( sb );
-			DiskCacheOptions.Val.super.buildToString( sb );
-			return sb.toString();
+			AccessOptions.Val.super.forEach( action );
+			CellDimensionsOptions.Val.super.forEach( action );
+			CacheOptions.Val.super.forEach( action );
+			DiskCacheOptions.Val.super.forEach( action );
 		}
 	}
 }

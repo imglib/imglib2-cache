@@ -1,14 +1,14 @@
 package net.imglib2.cache.img.optional;
 
 import java.lang.ref.SoftReference;
-import org.scijava.optional.AbstractValues.ValuesToString;
+import java.util.function.BiConsumer;
 import org.scijava.optional.Options;
 import org.scijava.optional.Values;
 
 /**
  * Optional arguments that specify the in memory-cache to use.
  */
-public interface CacheOptions< T extends CacheOptions< T > > extends Options< T >
+public interface CacheOptions< T > extends Options< T >
 {
 	/**
 	 * Which in-memory cache type to use. The options are
@@ -37,7 +37,7 @@ public interface CacheOptions< T extends CacheOptions< T > > extends Options< T 
 	 */
 	default T cacheType( final CacheType cacheType )
 	{
-		return add( "cacheType", cacheType );
+		return setValue( "cacheType", cacheType );
 	}
 
 	/**
@@ -49,7 +49,7 @@ public interface CacheOptions< T extends CacheOptions< T > > extends Options< T 
 	 */
 	default T maxCacheSize( final long maxCacheSize )
 	{
-		return add( "maxCacheSize", maxCacheSize );
+		return setValue( "maxCacheSize", maxCacheSize );
 	}
 
 	/**
@@ -87,20 +87,20 @@ public interface CacheOptions< T extends CacheOptions< T > > extends Options< T 
 
 	interface Val extends Values
 	{
-		default void buildToString( ValuesToString sb )
+		default void forEach( BiConsumer< String, Object > action )
 		{
-			sb.append( "cacheType", cacheType() );
-			sb.append( "maxCacheSize", maxCacheSize() );
+			action.accept( "cacheType", cacheType() );
+			action.accept( "maxCacheSize", maxCacheSize() );
 		}
 
 		default CacheType cacheType()
 		{
-			return value( "cacheType", CacheType.SOFTREF );
+			return getValueOrDefault( "cacheType", CacheType.SOFTREF );
 		}
 
 		default long maxCacheSize()
 		{
-			return value( "maxCacheSize", 1000L );
+			return getValueOrDefault( "maxCacheSize", 1000L );
 		}
 	}
 }

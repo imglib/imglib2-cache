@@ -1,7 +1,7 @@
 package net.imglib2.cache.img.optional;
 
+import java.util.function.BiConsumer;
 import net.imglib2.Dirty;
-import org.scijava.optional.AbstractValues.ValuesToString;
 import org.scijava.optional.Options;
 import org.scijava.optional.Values;
 
@@ -12,7 +12,7 @@ import org.scijava.optional.Values;
  *     <li>{@link #volatileAccesses(boolean) volatile} (default {@code true})</li>
  * </ul>
  */
-public interface AccessOptions< T extends AccessOptions< T > > extends Options< T >
+public interface AccessOptions< T > extends Options< T >
 {
 	/**
 	 * Specify whether the image should use {@link Dirty} accesses. Dirty
@@ -26,30 +26,30 @@ public interface AccessOptions< T extends AccessOptions< T > > extends Options< 
 	 */
 	default T dirtyAccesses( final boolean dirty )
 	{
-		return add( "dirtyAccesses", dirty );
+		return setValue( "dirtyAccesses", dirty );
 	}
 
 	default T volatileAccesses( final boolean volatil )
 	{
-		return add( "volatileAccesses", volatil );
+		return setValue( "volatileAccesses", volatil );
 	}
 
 	interface Val extends Values
 	{
-		default void buildToString( ValuesToString sb )
+		default void forEach( BiConsumer< String, Object > action )
 		{
-			sb.append( "dirtyAccesses", dirtyAccesses() );
-			sb.append( "volatileAccesses", volatileAccesses() );
+			action.accept( "dirtyAccesses", dirtyAccesses() );
+			action.accept( "volatileAccesses", volatileAccesses() );
 		}
 
 		default boolean dirtyAccesses()
 		{
-			return value( "dirtyAccesses", false );
+			return getValueOrDefault( "dirtyAccesses", false );
 		}
 
 		default boolean volatileAccesses()
 		{
-			return value( "volatileAccesses", true );
+			return getValueOrDefault( "volatileAccesses", true );
 		}
 	}
 }
