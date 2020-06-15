@@ -123,9 +123,7 @@ public class ReadOnlyCachedCellImgFactory
 			final T type,
 			final ReadOnlyCachedCellImgOptions additionalOptions )
 	{
-		final ReadOnlyCachedCellImgOptions.Values options = ( additionalOptions == null )
-				? factoryOptions.values
-				: new ReadOnlyCachedCellImgOptions.Values( factoryOptions.values, additionalOptions.values );
+		final ReadOnlyCachedCellImgOptions.Values options = factoryOptions.append( additionalOptions ).values;
 
 		final PrimitiveType primitiveType = type.getNativeTypeFactory().getPrimitiveType();
 		final Fraction entitiesPerPixel = type.getEntitiesPerPixel();

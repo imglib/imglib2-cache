@@ -196,10 +196,7 @@ public class DiskCachedCellImgFactory< T extends NativeType< T > > extends Nativ
 			final NativeTypeFactory< T, A > typeFactory,
 			final DiskCachedCellImgOptions additionalOptions )
 	{
-		final DiskCachedCellImgOptions.Values options = ( additionalOptions == null )
-				? factoryOptions.values
-				: new DiskCachedCellImgOptions.Values( factoryOptions.values, additionalOptions.values );
-
+		final DiskCachedCellImgOptions.Values options = factoryOptions.append( additionalOptions ).values;
 
 		final Fraction entitiesPerPixel = type.getEntitiesPerPixel();
 
