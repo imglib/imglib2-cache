@@ -165,7 +165,7 @@ public class IoSync< K, V, D > implements CacheLoader< K, V >, CacheRemover< K, 
 			{
 				assert( oldEntry.valueData == valueData );
 
-				oldEntry.generation++;
+				oldEntry.generation.incrementAndGet();
 				return oldEntry;
 			}
 		} );
@@ -205,12 +205,12 @@ public class IoSync< K, V, D > implements CacheLoader< K, V >, CacheRemover< K, 
 	{
 		final D valueData;
 
-		volatile int generation;
+		final AtomicInteger generation;
 
 		Entry( final D valueData, final int generation )
 		{
 			this.valueData = valueData;
-			this.generation = generation;
+			this.generation = new AtomicInteger( generation );
 		}
 
 		@Override
@@ -226,7 +226,7 @@ public class IoSync< K, V, D > implements CacheLoader< K, V >, CacheRemover< K, 
 			{
 				@SuppressWarnings( "unchecked" )
 				final Entry other = ( Entry ) obj;
-				return other.valueData.equals( this.valueData ) && other.generation == this.generation;
+				return other.valueData.equals( this.valueData ) && other.generation.get() == this.generation.get();
 			}
 			return false;
 		}
@@ -363,7 +363,7 @@ public class IoSync< K, V, D > implements CacheLoader< K, V >, CacheRemover< K, 
 						 */
 						synchronized ( entry )
 						{
-							final int writeGeneration = entry.generation;
+							final int writeGeneration = entry.generation.get();
 							final D valueData = entry.valueData;
 							saver.onRemoval( key, valueData );
 
