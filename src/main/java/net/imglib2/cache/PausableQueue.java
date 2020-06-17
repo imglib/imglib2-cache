@@ -167,10 +167,7 @@ class PausableQueue< E >
 	 */
 	public void remove( final E element )
 	{
-		final Iterator< E > it = elements.iterator();
-		while ( it.hasNext() )
-			if ( it.next() == element )
-				it.remove();
+		elements.removeIf( e -> e.equals( element ) );
 	}
 
 	/**
@@ -190,9 +187,6 @@ class PausableQueue< E >
 	 */
 	public void removeIf( final Predicate< E > condition )
 	{
-		final Iterator< E > it = elements.iterator();
-		while ( it.hasNext() )
-			if ( condition.test( it.next() ) )
-				it.remove();
+		elements.removeIf( condition::test );
 	}
 }
