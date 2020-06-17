@@ -60,10 +60,12 @@ public class IoSync< K, V, D > implements CacheLoader< K, V >, CacheRemover< K, 
 	final ConcurrentHashMap< K, Entry > map;
 
 	/**
+	 * TODO: revise javadoc
+	 *
 	 * Keys to be written are enqueued here. The corresponding values can be
 	 * obtained from {@link #map}.
 	 */
-	final PausableQueue< K > queue;
+	final PausableQueue< Runnable > queue;
 
 	private final List< Writer > writers = new ArrayList<>();
 
@@ -172,7 +174,7 @@ public class IoSync< K, V, D > implements CacheLoader< K, V >, CacheRemover< K, 
 		} );
 		try
 		{
-			queue.put( key );
+			queue.put( new OnRemovalTask( key ) );
 		}
 		catch( final InterruptedException e )
 		{
@@ -255,7 +257,7 @@ public class IoSync< K, V, D > implements CacheLoader< K, V >, CacheRemover< K, 
 		try
 		{
 			queue.pause();
-			queue.removeIf( k -> k.equals( key ) );
+			queue.removeIf( r -> ( ( OnRemovalTask ) r ).key.equals( key ) );
 			map.remove( key );
 			saver.invalidate( key );
 			queue.resume();
@@ -288,7 +290,7 @@ public class IoSync< K, V, D > implements CacheLoader< K, V >, CacheRemover< K, 
 		try
 		{
 			queue.pause();
-			queue.removeIf( condition );
+			queue.removeIf( r -> condition.test( ( ( OnRemovalTask ) r ).key ) );
 			map.keySet().removeIf( condition );
 			saver.invalidateIf( parallelismThreshold, condition );
 			queue.resume();
@@ -334,6 +336,43 @@ public class IoSync< K, V, D > implements CacheLoader< K, V >, CacheRemover< K, 
 
 	private final Lock invalidateLock = new ReentrantLock();
 
+	class OnRemovalTask implements Runnable
+	{
+		private final K key;
+
+		OnRemovalTask( final K key )
+		{
+			this.key = key;
+		}
+
+		@Override
+		public void run()
+		{
+			final Entry entry = map.get( key );
+			if ( entry != null )
+			{
+				/*
+				 * Synchronization is only between Writers: Only one
+				 * Writer can write data for the same key
+				 * simultaneously.
+				 */
+				synchronized ( entry )
+				{
+					final int writeGeneration = entry.generation.get();
+					final D valueData = entry.valueData;
+					saver.onRemoval( key, valueData );
+
+					/*
+					 * Because of the implementation of Entry.equals,
+					 * this will only remove the entry if the generation
+					 * has not been incremented since we started.
+					 */
+					map.remove( key, new Entry( valueData, writeGeneration ) );
+				}
+			}
+		}
+	}
+
 	class Writer extends Thread
 	{
 		private volatile boolean shutdown = false;
@@ -361,29 +400,9 @@ public class IoSync< K, V, D > implements CacheLoader< K, V >, CacheRemover< K, 
 			{
 				try
 				{
-					final K key = queue.take();
-					final Entry entry = map.get( key );
-					if ( entry != null && !shutdown )
-					{
-						/*
-						 * Synchronization is only between Writers: Only one
-						 * Writer can write data for the same key
-						 * simultaneously.
-						 */
-						synchronized ( entry )
-						{
-							final int writeGeneration = entry.generation.get();
-							final D valueData = entry.valueData;
-							saver.onRemoval( key, valueData ); // TODO should this be persist instead?
-
-							/*
-							 * Because of the implementation of Entry.equals,
-							 * this will only remove the entry if the generation
-							 * has not been incremented since we started.
-							 */
-							map.remove( key, new Entry( valueData, writeGeneration ) );
-						}
-					}
+					final Runnable r = queue.take();
+					if ( !shutdown )
+						r.run();
 				}
 				catch ( final InterruptedException e )
 				{}
