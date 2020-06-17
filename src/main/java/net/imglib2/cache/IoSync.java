@@ -3,6 +3,7 @@ package net.imglib2.cache;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -180,6 +181,14 @@ public class IoSync< K, V, D > implements CacheLoader< K, V >, CacheRemover< K, 
 	}
 
 	@Override
+	public Future< Void > persist( final K key, final V value )
+	{
+		// TODO
+		throw new UnsupportedOperationException();
+//		queue.put( key );
+	}
+
+	@Override
 	public D extract( final V value )
 	{
 		return saver.extract( value );
@@ -246,7 +255,7 @@ public class IoSync< K, V, D > implements CacheLoader< K, V >, CacheRemover< K, 
 		try
 		{
 			queue.pause();
-			queue.remove( key );
+			queue.removeIf( k -> k.equals( key ) );
 			map.remove( key );
 			saver.invalidate( key );
 			queue.resume();
@@ -365,7 +374,7 @@ public class IoSync< K, V, D > implements CacheLoader< K, V >, CacheRemover< K, 
 						{
 							final int writeGeneration = entry.generation.get();
 							final D valueData = entry.valueData;
-							saver.onRemoval( key, valueData );
+							saver.onRemoval( key, valueData ); // TODO should this be persist instead?
 
 							/*
 							 * Because of the implementation of Entry.equals,
