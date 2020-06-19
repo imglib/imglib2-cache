@@ -1,9 +1,10 @@
 package net.imglib2.cache.util;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-import net.imglib2.cache.RemoverCache;
 import net.imglib2.cache.CacheRemover;
+import net.imglib2.cache.RemoverCache;
 
 public class RemoverCacheKeyAdapter< K, L, V, D, C extends RemoverCache< L, V, D > >
 		extends AbstractCacheKeyAdapter< K, L, V, C >
@@ -30,6 +31,12 @@ public class RemoverCacheKeyAdapter< K, L, V, D, C extends RemoverCache< L, V, D
 			public void onRemoval( final L key, final D valueData )
 			{
 				remover.onRemoval( keymap.getSource( key ), valueData );
+			}
+
+			@Override
+			public CompletableFuture< Void > persist( final L key, final D valueData )
+			{
+				return remover.persist( keymap.getSource( key ), valueData );
 			}
 
 			@Override

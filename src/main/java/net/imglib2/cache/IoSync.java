@@ -2,8 +2,8 @@ package net.imglib2.cache;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -183,11 +183,19 @@ public class IoSync< K, V, D > implements CacheLoader< K, V >, CacheRemover< K, 
 	}
 
 	@Override
-	public Future< Void > persist( final K key, final V value )
+	public CompletableFuture< Void > persist( final K key, final D valueData )
 	{
-		// TODO
-		throw new UnsupportedOperationException();
-//		queue.put( key );
+		final CompletableFuture< Void > trigger = new CompletableFuture<>();
+		final CompletableFuture< Void > result = trigger.thenCompose( nul -> saver.persist( key, valueData ) );
+		try
+		{
+			queue.put( () -> trigger.complete( null ) );
+		}
+		catch ( final InterruptedException e )
+		{
+			Thread.currentThread().interrupt();
+		}
+		return result;
 	}
 
 	@Override

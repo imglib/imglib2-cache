@@ -1,5 +1,6 @@
 package net.imglib2.cache;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
 /**
@@ -32,6 +33,14 @@ public interface CacheRemover< K, V, D > extends Invalidate< K >
 	 *            value data of the entry to remove
 	 */
 	void onRemoval( K key, D valueData );
+
+	/**
+	 * TODO
+	 *
+	 * @param key
+	 * @param value
+	 */
+	CompletableFuture< Void > persist( K key, D valueData );
 
 	/**
 	 * Extract data out of {@code value}. The data must be sufficient to

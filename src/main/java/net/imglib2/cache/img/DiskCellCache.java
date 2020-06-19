@@ -14,6 +14,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
 import net.imglib2.cache.CacheLoader;
@@ -146,6 +147,13 @@ public class DiskCellCache< A > implements CacheRemover< Long, Cell< A >, A >, C
 		{
 			throw new RuntimeException( e );
 		}
+	}
+
+	@Override
+	public CompletableFuture< Void > persist( final Long key, final A valueData )
+	{
+		onRemoval( key, valueData );
+		return CompletableFuture.completedFuture( null );
 	}
 
 	/**
