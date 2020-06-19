@@ -30,10 +30,12 @@ package net.imglib2.cache.img;
 
 import java.util.Set;
 import java.util.function.BiConsumer;
+
 import net.imglib2.cache.img.optional.AccessOptions;
 import net.imglib2.cache.img.optional.CacheOptions;
 import net.imglib2.cache.img.optional.CellDimensionsOptions;
 import net.imglib2.img.basictypeaccess.AccessFlags;
+
 import org.scijava.optional.AbstractOptions;
 
 /**
@@ -67,7 +69,7 @@ public class ReadOnlyCachedCellImgOptions extends AbstractOptions< ReadOnlyCache
 		return super.append( additionalOptions );
 	}
 
-	private ReadOnlyCachedCellImgOptions( ReadOnlyCachedCellImgOptions that )
+	private ReadOnlyCachedCellImgOptions( final ReadOnlyCachedCellImgOptions that )
 	{
 		super( that );
 	}
@@ -89,7 +91,7 @@ public class ReadOnlyCachedCellImgOptions extends AbstractOptions< ReadOnlyCache
 		}
 
 		@Override
-		public void forEach( BiConsumer< String, Object > action )
+		public void forEach( final BiConsumer< String, Object > action )
 		{
 			AccessOptions.Val.super.forEach( action );
 			CellDimensionsOptions.Val.super.forEach( action );
