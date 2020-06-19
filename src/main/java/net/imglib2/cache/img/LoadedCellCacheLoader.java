@@ -194,6 +194,10 @@ public class LoadedCellCacheLoader< T extends NativeType< T >, A extends ArrayDa
 				@Override
 				public void setDirty()
 				{}
+
+				@Override
+				public void setDirty( final boolean dirty )
+				{}
 			};
 		}
 	};
