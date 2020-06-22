@@ -4,14 +4,14 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 
 import java.lang.ref.PhantomReference;
-import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
-import java.lang.reflect.Field;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Predicate;
 
+import java.util.stream.Collectors;
 import net.imglib2.cache.CacheLoader;
 import net.imglib2.cache.CacheRemover;
 import net.imglib2.cache.LoaderRemoverCache;
@@ -179,6 +179,54 @@ public class GuardedStrongRefLoaderRemoverCache< K, V, D > implements LoaderRemo
 			value = get( key, loader, remover );
 
 		return value;
+	}
+
+	@Override
+	public void persist( final K key )
+	{
+		final Entry entry = map.get( key );
+		if ( entry == null )
+			return;
+
+		final V value = entry.getValue();
+		if ( value == null )
+			return;
+
+		final D data = entry.remover.extract( value );
+		entry.remover.persist( key, data ).join();
+	}
+
+	@Override
+	public void persistIf( final Predicate< K > condition )
+	{
+		map.values().parallelStream()
+				.filter( entry -> condition.test( entry.key ) )
+				.map( entry -> {
+					final V value = entry.getValue();
+					if ( value == null )
+						return CompletableFuture.< Void >completedFuture( null );
+
+					final D data = entry.remover.extract( value );
+					return entry.remover.persist( entry.key, data );
+				} )
+				.collect( Collectors.toList() )
+				.forEach( CompletableFuture::join );
+	}
+
+	@Override
+	public void persistAll()
+	{
+		map.values().parallelStream()
+				.map( entry -> {
+					final V value = entry.getValue();
+					if ( value == null )
+						return CompletableFuture.< Void >completedFuture( null );
+
+					final D data = entry.remover.extract( value );
+					return entry.remover.persist( entry.key, data );
+				} )
+				.collect( Collectors.toList() )
+				.forEach( CompletableFuture::join );
 	}
 
 	@Override

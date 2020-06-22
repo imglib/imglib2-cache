@@ -39,6 +39,27 @@ public class AbstractCacheKeyAdapter< K, L, V, C extends AbstractCache< L, V > >
 	}
 
 	@Override
+	public void persist( final K key )
+	{
+		cache.persist( keymap.getTarget( key ) );
+	}
+
+	@Override
+	public void persistIf( final Predicate< K > condition )
+	{
+		cache.persistIf( l -> {
+			final K k = keymap.getSource( l );
+			return k != null && condition.test( k );
+		} );
+	}
+
+	@Override
+	public void persistAll()
+	{
+		cache.persistIf( l -> keymap.getSource( l ) != null );
+	}
+
+	@Override
 	public void invalidate( final K key )
 	{
 		cache.invalidate( keymap.getTarget( key ) );

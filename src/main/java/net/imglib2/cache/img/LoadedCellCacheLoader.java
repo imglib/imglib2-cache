@@ -165,7 +165,7 @@ public class LoadedCellCacheLoader< T extends NativeType< T >, A extends ArrayDa
 	 * {@link CellLoader}.
 	 * </p>
 	 */
-	public static interface ArrayDataAccessWrapper< A extends ArrayDataAccess< A >, W extends ArrayDataAccess< W > >
+	public interface ArrayDataAccessWrapper< A extends ArrayDataAccess< A >, W extends ArrayDataAccess< W > >
 	{
 		W wrap( A access );
 

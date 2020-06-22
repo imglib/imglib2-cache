@@ -118,6 +118,18 @@ public class SoftRefLoaderCache< K, V > implements LoaderCache< K, V >
 	}
 
 	@Override
+	public void persist( final K key )
+	{}
+
+	@Override
+	public void persistIf( final Predicate< K > condition )
+	{}
+
+	@Override
+	public void persistAll()
+	{}
+
+	@Override
 	public void invalidate( final K key )
 	{
 		final Entry entry = map.remove( key );

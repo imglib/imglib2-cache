@@ -46,6 +46,24 @@ public class LoaderRemoverCacheAsRemoverCacheAdapter< K, V, D > implements Remov
 	}
 
 	@Override
+	public void persistIf( final Predicate< K > condition )
+	{
+		cache.persistIf( condition );
+	}
+
+	@Override
+	public void persistAll()
+	{
+		cache.persistAll();
+	}
+
+	@Override
+	public void persist( final K key )
+	{
+		cache.persist( key );
+	}
+
+	@Override
 	public void invalidate( final K key )
 	{
 		cache.invalidate( key );

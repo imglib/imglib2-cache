@@ -7,6 +7,35 @@ public interface AbstractCache< K, V > extends Invalidate< K >
 	V getIfPresent( K key );
 
 	/**
+	 * TODO
+	 *
+	 *
+	 * Persist entry through any backing cache end eventually a CacheRemover.
+	 *
+	 * If there is no eventual CacheRemover (because this is a read-only cache) nothing happens.
+	 *
+	 * Blocks. After the method returns, everything is persisted.
+	 * There must be no concurrent modification of the value associated with {@code key}.
+	 *
+	 * @param key
+	 */
+	void persist( K key );
+
+	/**
+	 * TODO
+	 *
+	 * @param condition
+	 *            condition on keys of entries to persist
+	 */
+	void persistIf( Predicate<K> condition );
+
+	/**
+	 * TODO
+	 *
+	 */
+	void persistAll();
+
+	/**
 	 * Removes and discards the entry with the specified {@code key}.
 	 * <p>
 	 * Note that this will <em>not</em> call
@@ -24,7 +53,7 @@ public interface AbstractCache< K, V > extends Invalidate< K >
 	 *            key of the entry to remove
 	 */
 	@Override
-	void invalidate( final K key );
+	void invalidate( K key );
 
 	/**
 	 * Removes and discards all entries with keys matching {@code condition}.
@@ -48,7 +77,7 @@ public interface AbstractCache< K, V > extends Invalidate< K >
 	 *            condition on keys of entries to remove
 	 */
 	@Override
-	void invalidateIf( final long parallelismThreshold, final Predicate< K > condition );
+	void invalidateIf( long parallelismThreshold, Predicate< K > condition );
 
 	/**
 	 * Removes and discards all entries.
@@ -69,5 +98,5 @@ public interface AbstractCache< K, V > extends Invalidate< K >
 	 *            operation to be executed in parallel
 	 */
 	@Override
-	void invalidateAll( final long parallelismThreshold );
+	void invalidateAll( long parallelismThreshold );
 }
