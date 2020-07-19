@@ -38,7 +38,7 @@ public interface CacheRemover< K, V, D > extends Invalidate< K >
 	 * TODO
 	 *
 	 * @param key
-	 * @param value
+	 * @param valueData
 	 */
 	CompletableFuture< Void > persist( K key, D valueData );
 
