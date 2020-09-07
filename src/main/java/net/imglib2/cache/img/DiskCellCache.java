@@ -325,7 +325,7 @@ public class DiskCellCache< A > implements CacheRemover< Long, Cell< A >, A >, C
 	 * @param path
 	 *            path to delete on virtual machine shutdown.
 	 */
-	public static void addDeleteHook( final Path path )
+	public static synchronized void addDeleteHook( final Path path )
 	{
 		if ( deleteTempFilesHook == null )
 		{
