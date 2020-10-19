@@ -34,6 +34,7 @@
 package net.imglib2.cache.img;
 
 import net.imglib2.cache.Cache;
+import net.imglib2.img.ImgFactory;
 import net.imglib2.img.cell.Cell;
 import net.imglib2.img.cell.CellGrid;
 import net.imglib2.img.cell.LazyCellImg;
@@ -66,6 +67,12 @@ public class CachedCellImg< T extends NativeType< T >, A > extends LazyCellImg< 
 		super( grid, entitiesPerPixel, cache.unchecked()::get );
 		this.cache = cache;
 		this.accessType = accessType;
+	}
+
+	@Override
+	public ImgFactory< T > factory()
+	{
+		return new DiskCachedCellImgFactory<>( linkedType );
 	}
 
 	public CachedCellImg(
