@@ -101,7 +101,7 @@ public class ReadOnlyCachedCellImgFactory
 	}
 
 	/**
-	 * Create {@link CachedCellImg} backed n=by either a {@link CellLoader} or a {@link CacheLoader}.
+	 * Create {@link CachedCellImg} backed by either a {@link CellLoader} or a {@link CacheLoader}.
 	 *
 	 * @param dimensions
 	 *            dimensions of the image to create.
