@@ -57,14 +57,14 @@ public class DiskCachedCellImg< T extends NativeType< T >, A > extends CachedCel
 {
 	private final DiskCachedCellImgFactory< T > factory;
 
-	private final IoSync iosync;
+	private final IoSync< ?, ?, ? > iosync;
 
 	public DiskCachedCellImg(
 			final DiskCachedCellImgFactory< T > factory,
 			final CellGrid grid,
 			final Fraction entitiesPerPixel,
 			final Cache< Long, Cell< A > > cache,
-			final IoSync iosync,
+			final IoSync< ?, ?, ? > iosync,
 			final A accessType )
 	{
 		super( grid, entitiesPerPixel, cache, accessType );
