@@ -49,6 +49,7 @@ import net.imglib2.exception.IncompatibleTypeException;
 import net.imglib2.img.ImgFactory;
 import net.imglib2.img.NativeImgFactory;
 import net.imglib2.img.basictypeaccess.ArrayDataAccessFactory;
+import net.imglib2.img.basictypeaccess.DataAccess;
 import net.imglib2.img.basictypeaccess.array.ArrayDataAccess;
 import net.imglib2.img.cell.Cell;
 import net.imglib2.img.cell.CellGrid;
@@ -139,22 +140,22 @@ public class DiskCachedCellImgFactory< T extends NativeType< T > > extends Nativ
 		return create( Intervals.dimensionsAsLongArray( dimensions ), null, loader, type(), additionalOptions );
 	}
 
-	public < A > DiskCachedCellImg< T, A > createWithCacheLoader( final long[] dimensions, final CacheLoader< Long, Cell< A > > backingLoader )
+	public < A extends DataAccess > DiskCachedCellImg< T, A > createWithCacheLoader( final long[] dimensions, final CacheLoader< Long, Cell< A > > backingLoader )
 	{
 		return create( dimensions, backingLoader, null, type(), null );
 	}
 
-	public < A > DiskCachedCellImg< T, A > createWithCacheLoader( final Dimensions dimensions, final CacheLoader< Long, Cell< A > > backingLoader )
+	public < A extends DataAccess > DiskCachedCellImg< T, A > createWithCacheLoader( final Dimensions dimensions, final CacheLoader< Long, Cell< A > > backingLoader )
 	{
 		return create( Intervals.dimensionsAsLongArray( dimensions ), backingLoader, null, type(), null );
 	}
 
-	public < A > DiskCachedCellImg< T, A > createWithCacheLoader( final long[] dimensions, final CacheLoader< Long, Cell< A > > backingLoader, final DiskCachedCellImgOptions additionalOptions )
+	public < A extends DataAccess > DiskCachedCellImg< T, A > createWithCacheLoader( final long[] dimensions, final CacheLoader< Long, Cell< A > > backingLoader, final DiskCachedCellImgOptions additionalOptions )
 	{
 		return create( dimensions, backingLoader, null, type(), additionalOptions );
 	}
 
-	public < A > DiskCachedCellImg< T, A > createWithCacheLoader( final Dimensions dimensions, final CacheLoader< Long, Cell< A > > backingLoader, final DiskCachedCellImgOptions additionalOptions )
+	public < A extends DataAccess > DiskCachedCellImg< T, A > createWithCacheLoader( final Dimensions dimensions, final CacheLoader< Long, Cell< A > > backingLoader, final DiskCachedCellImgOptions additionalOptions )
 	{
 		return create( Intervals.dimensionsAsLongArray( dimensions ), backingLoader, null, type(), additionalOptions );
 	}
@@ -175,7 +176,7 @@ public class DiskCachedCellImgFactory< T extends NativeType< T > > extends Nativ
 	 *            additional options that partially override general factory
 	 *            options, or {@code null}.
 	 */
-	private < A > DiskCachedCellImg< T, A > create(
+	private < A extends DataAccess > DiskCachedCellImg< T, A > create(
 			final long[] dimensions,
 			final CacheLoader< Long, ? extends Cell< ? extends A > > cacheLoader,
 			final CellLoader< T > cellLoader,
@@ -366,14 +367,14 @@ public class DiskCachedCellImgFactory< T extends NativeType< T > > extends Nativ
 	}
 
 	@Deprecated
-	public < A > DiskCachedCellImg< T, A > createWithCacheLoader( final long[] dim, final T type, final CacheLoader< Long, Cell< A > > backingLoader )
+	public < A extends DataAccess > DiskCachedCellImg< T, A > createWithCacheLoader( final long[] dim, final T type, final CacheLoader< Long, Cell< A > > backingLoader )
 	{
 		cache( type );
 		return create( dim, backingLoader, null, type, null );
 	}
 
 	@Deprecated
-	public < A > DiskCachedCellImg< T, A > createWithCacheLoader( final long[] dim, final T type, final CacheLoader< Long, Cell< A > > backingLoader, final DiskCachedCellImgOptions additionalOptions )
+	public < A extends DataAccess > DiskCachedCellImg< T, A > createWithCacheLoader( final long[] dim, final T type, final CacheLoader< Long, Cell< A > > backingLoader, final DiskCachedCellImgOptions additionalOptions )
 	{
 		cache( type );
 		return create( dim, backingLoader, null, type, additionalOptions );
