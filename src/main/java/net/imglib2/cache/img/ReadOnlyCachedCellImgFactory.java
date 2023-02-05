@@ -41,6 +41,7 @@ import net.imglib2.cache.LoaderCache;
 import net.imglib2.cache.ref.GuardedStrongRefLoaderCache;
 import net.imglib2.cache.ref.SoftRefLoaderCache;
 import net.imglib2.img.basictypeaccess.ArrayDataAccessFactory;
+import net.imglib2.img.basictypeaccess.DataAccess;
 import net.imglib2.img.basictypeaccess.array.ArrayDataAccess;
 import net.imglib2.img.cell.Cell;
 import net.imglib2.img.cell.CellGrid;
@@ -89,13 +90,13 @@ public class ReadOnlyCachedCellImgFactory
 	}
 
 	@SuppressWarnings( "unchecked" )
-	public < T extends NativeType< T >, A > CachedCellImg< T, A > createWithCacheLoader( final long[] dim, final T type, final CacheLoader< Long, Cell< A > > backingLoader )
+	public < T extends NativeType< T >, A extends DataAccess > CachedCellImg< T, A > createWithCacheLoader( final long[] dim, final T type, final CacheLoader< Long, Cell< A > > backingLoader )
 	{
 		return ( CachedCellImg< T, A > ) createInternal( dim, backingLoader, null, type, null );
 	}
 
 	@SuppressWarnings( "unchecked" )
-	public < T extends NativeType< T >, A > CachedCellImg< T, A > createWithCacheLoader( final long[] dim, final T type, final CacheLoader< Long, Cell< A > > backingLoader, final ReadOnlyCachedCellImgOptions additionalOptions )
+	public < T extends NativeType< T >, A extends DataAccess > CachedCellImg< T, A > createWithCacheLoader( final long[] dim, final T type, final CacheLoader< Long, Cell< A > > backingLoader, final ReadOnlyCachedCellImgOptions additionalOptions )
 	{
 		return ( CachedCellImg< T, A > ) createInternal( dim, backingLoader, null, type, additionalOptions );
 	}

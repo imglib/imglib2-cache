@@ -35,6 +35,7 @@ package net.imglib2.cache.img;
 
 import net.imglib2.cache.Cache;
 import net.imglib2.img.ImgFactory;
+import net.imglib2.img.basictypeaccess.DataAccess;
 import net.imglib2.img.cell.Cell;
 import net.imglib2.img.cell.CellGrid;
 import net.imglib2.img.cell.LazyCellImg;
@@ -52,7 +53,7 @@ import net.imglib2.util.Fraction;
  *
  * @author Tobias Pietzsch
  */
-public class CachedCellImg< T extends NativeType< T >, A > extends LazyCellImg< T, A >
+public class CachedCellImg< T extends NativeType< T >, A extends DataAccess > extends LazyCellImg< T, A >
 {
 	private final Cache< Long, Cell< A > > cache;
 
