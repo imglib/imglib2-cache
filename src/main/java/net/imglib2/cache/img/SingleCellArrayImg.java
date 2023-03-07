@@ -326,12 +326,6 @@ public class SingleCellArrayImg< T extends NativeType< T >, A extends ArrayDataA
 		{
 			return new CellArrayRandomAccess( this );
 		}
-
-		@Override
-		public CellArrayRandomAccess copyRandomAccess()
-		{
-			return copy();
-		}
 	}
 
 	@Override
@@ -418,12 +412,6 @@ public class SingleCellArrayImg< T extends NativeType< T >, A extends ArrayDataA
 		{
 			return new CellArrayCursor( this );
 		}
-
-		@Override
-		public CellArrayCursor copyCursor()
-		{
-			return copy();
-		}
 	}
 
 	@Override
@@ -504,12 +492,6 @@ public class SingleCellArrayImg< T extends NativeType< T >, A extends ArrayDataA
 		public CellArrayLocalizingCursor copy()
 		{
 			return new CellArrayLocalizingCursor( this );
-		}
-
-		@Override
-		public CellArrayLocalizingCursor copyCursor()
-		{
-			return copy();
 		}
 	}
 
