@@ -33,8 +33,10 @@
  */
 package net.imglib2.cache.img.optional;
 
+import java.util.Set;
 import java.util.function.BiConsumer;
 import net.imglib2.Dirty;
+import net.imglib2.img.basictypeaccess.AccessFlags;
 import org.scijava.optional.Options;
 import org.scijava.optional.Values;
 
@@ -65,6 +67,13 @@ public interface AccessOptions< T > extends Options< T >
 	default T volatileAccesses( final boolean volatil )
 	{
 		return setValue( "volatileAccesses", volatil );
+	}
+
+	default T accessFlags( final Set< AccessFlags > flags )
+	{
+		final boolean dirty = flags.contains( AccessFlags.DIRTY );
+		final boolean volatil = flags.contains( AccessFlags.VOLATILE );
+		return ( ( AccessOptions< T > ) dirtyAccesses( dirty ) ).volatileAccesses( volatil );
 	}
 
 	interface Val extends Values
