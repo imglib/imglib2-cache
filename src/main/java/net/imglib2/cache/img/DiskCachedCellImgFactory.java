@@ -11,13 +11,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -37,8 +37,10 @@ package net.imglib2.cache.img;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.function.Consumer;
 
 import net.imglib2.Dimensions;
+import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.cache.Cache;
 import net.imglib2.cache.CacheLoader;
 import net.imglib2.cache.IoSync;
@@ -179,7 +181,7 @@ public class DiskCachedCellImgFactory< T extends NativeType< T > > extends Nativ
 	private < A extends DataAccess > DiskCachedCellImg< T, A > create(
 			final long[] dimensions,
 			final CacheLoader< Long, ? extends Cell< ? extends A > > cacheLoader,
-			final CellLoader< T > cellLoader,
+			final  Consumer< RandomAccessibleInterval< T > > cellLoader,
 			final T type,
 			final DiskCachedCellImgOptions additionalOptions )
 	{
@@ -192,7 +194,7 @@ public class DiskCachedCellImgFactory< T extends NativeType< T > > extends Nativ
 	private < A extends ArrayDataAccess< A > > DiskCachedCellImg< T, ? extends A > create(
 			final long[] dimensions,
 			final CacheLoader< Long, ? extends Cell< ? > > cacheLoader,
-			final CellLoader< T > cellLoader,
+			final  Consumer< RandomAccessibleInterval< T > > cellLoader,
 			final T type,
 			final NativeTypeFactory< T, A > typeFactory,
 			final DiskCachedCellImgOptions additionalOptions )
@@ -211,10 +213,10 @@ public class DiskCachedCellImgFactory< T extends NativeType< T > > extends Nativ
 			{
 				final CellLoader< T > actualCellLoader = options.initializeCellsAsDirty()
 						? cell -> {
-							cellLoader.load( cell );
+							cellLoader.accept( cell );
 							cell.setDirty();
 						}
-						: cellLoader;
+						: cell -> cellLoader.accept( cell );
 				backingLoader = LoadedCellCacheLoader.get( grid, actualCellLoader, type, options.accessFlags() );
 			}
 			else

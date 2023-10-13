@@ -11,13 +11,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -36,8 +36,10 @@ package net.imglib2.cache.img;
 import static net.imglib2.img.basictypeaccess.AccessFlags.DIRTY;
 
 import java.util.Set;
+import java.util.function.Consumer;
 
 import net.imglib2.Dirty;
+import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.cache.CacheLoader;
 import net.imglib2.img.basictypeaccess.AccessFlags;
 import net.imglib2.img.basictypeaccess.ArrayDataAccessFactory;
@@ -93,14 +95,14 @@ public class LoadedCellCacheLoader< T extends NativeType< T >, A extends ArrayDa
 
 	private final ArrayDataAccessWrapper< A, ? > wrapper;
 
-	private final CellLoader< T > loader;
+	private final  Consumer< RandomAccessibleInterval< T > > loader;
 
 	public LoadedCellCacheLoader(
 			final CellGrid grid,
 			final T type,
 			final A creator,
 			final ArrayDataAccessWrapper< A, ? > wrapper,
-			final CellLoader< T > loader )
+			final  Consumer< RandomAccessibleInterval< T > > loader )
 	{
 		this.grid = grid;
 		this.entitiesPerPixel = type.getEntitiesPerPixel();
@@ -121,13 +123,13 @@ public class LoadedCellCacheLoader< T extends NativeType< T >, A extends ArrayDa
 		final A array = creator.createArray( ( int ) numEntities );
 		@SuppressWarnings( { "rawtypes", "unchecked" } )
 		final SingleCellArrayImg< T, ? > img = new SingleCellArrayImg( cellDims, cellMin, wrapper.wrap( array ), wrapper.wrapDirty( array ), type );
-		loader.load( img );
+		loader.accept( img );
 		return new Cell<>( cellDims, cellMin, array );
 	}
 
 	public static < T extends NativeType< T >, A extends ArrayDataAccess< A > > LoadedCellCacheLoader< T, A > get(
 			final CellGrid grid,
-			final CellLoader< T > loader,
+			final  Consumer< RandomAccessibleInterval< T > > loader,
 			final T type,
 			final Set< AccessFlags > flags )
 	{
@@ -136,7 +138,7 @@ public class LoadedCellCacheLoader< T extends NativeType< T >, A extends ArrayDa
 
 	public static < T extends NativeType< T >, A extends ArrayDataAccess< A > > LoadedCellCacheLoader< T, A > get(
 			final CellGrid grid,
-			final CellLoader< T > loader,
+			final  Consumer< RandomAccessibleInterval< T > > loader,
 			final T type,
 			final PrimitiveType primitiveType,
 			final Set< AccessFlags > flags )
