@@ -143,7 +143,7 @@ public class LoadedCellCacheLoader< T extends NativeType< T >, A extends ArrayDa
 	{
 		final A creator = ArrayDataAccessFactory.get( primitiveType, flags );
 		final ArrayDataAccessWrapper< A, ? > wrapper = getWrapper( primitiveType, flags );
-		return creator == null ? null : new LoadedCellCacheLoader<>( grid, type, creator, wrapper, loader );
+		return new LoadedCellCacheLoader<>( grid, type, creator, wrapper, loader );
 	}
 
 	@SuppressWarnings( "unchecked" )
