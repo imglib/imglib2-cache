@@ -75,7 +75,7 @@ import net.imglib2.cache.ref.SoftRefLoaderRemoverCache;
  * @param <V>
  *            value type
  * @param <D>
- *            value data type
+ *            value data type, see {@link CacheRemover}
  *
  * @author Tobias Pietzsch
  */
