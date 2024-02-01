@@ -72,6 +72,8 @@ import net.imglib2.cache.LoaderRemoverCache;
  *            key type
  * @param <V>
  *            value type
+ * @param <D>
+ *            value data type, see {@link CacheRemover}
  *
  * @author Tobias Pietzsch
  */
