@@ -41,10 +41,10 @@ import net.imglib2.img.basictypeaccess.ArrayDataAccessFactory;
 import net.imglib2.img.basictypeaccess.array.ArrayDataAccess;
 import net.imglib2.img.cell.Cell;
 import net.imglib2.img.cell.CellGrid;
+import net.imglib2.img.cell.CellGrid.CellDimensionsAndSteps;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.PrimitiveType;
 import net.imglib2.util.Fraction;
-import net.imglib2.util.Intervals;
 
 /**
  * A {@link CacheLoader} that produces empty cells of {@link ArrayDataAccess}
@@ -84,10 +84,9 @@ public class EmptyCellCacheLoader< A extends ArrayDataAccess< A > > implements C
 	{
 		final long index = key;
 		final long[] cellMin = new long[ grid.numDimensions() ];
-		final int[] cellDims = new int[ grid.numDimensions() ];
-		grid.getCellDimensions( index, cellMin, cellDims );
-		final long numEntities = entitiesPerPixel.mulCeil( Intervals.numElements( cellDims ) );
-		return new Cell<>( cellDims, cellMin, creator.createArray( ( int ) numEntities ) );
+		final CellDimensionsAndSteps dimsAndSteps = grid.getCellDimensions( index, cellMin );
+		final long numEntities = entitiesPerPixel.mulCeil( dimsAndSteps.numPixels() );
+		return new Cell<>( dimsAndSteps, cellMin, creator.createArray( ( int ) numEntities ) );
 	}
 
 	public static < T extends NativeType< T >, A extends ArrayDataAccess< A > > EmptyCellCacheLoader< A > get(

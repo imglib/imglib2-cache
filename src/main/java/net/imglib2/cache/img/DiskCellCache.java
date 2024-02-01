@@ -55,6 +55,7 @@ import net.imglib2.cache.CacheRemover;
 import net.imglib2.cache.IoSync;
 import net.imglib2.img.cell.Cell;
 import net.imglib2.img.cell.CellGrid;
+import net.imglib2.img.cell.CellGrid.CellDimensionsAndSteps;
 import net.imglib2.util.Fraction;
 import net.imglib2.util.Intervals;
 
@@ -125,16 +126,14 @@ public class DiskCellCache< A > implements CacheRemover< Long, Cell< A >, A >, C
 		if ( new File( filename ).exists() )
 		{
 			final long[] cellMin = new long[ n ];
-			final int[] cellDims = new int[ n ];
-			grid.getCellDimensions( index, cellMin, cellDims );
-			final long numEntities = entitiesPerPixel.mulCeil( Intervals.numElements( cellDims ) );
+			final CellDimensionsAndSteps dimsAndSteps = grid.getCellDimensions( index, cellMin );
+			final long numEntities = entitiesPerPixel.mulCeil( dimsAndSteps.numPixels() );
 			final long bytesize = numEntities * accessIo.getBytesPerElement();
-			try (
-					final RandomAccessFile mmFile = new RandomAccessFile( filename, "r" ); )
+			try ( final RandomAccessFile mmFile = new RandomAccessFile( filename, "r" ) )
 			{
 				final MappedByteBuffer in = mmFile.getChannel().map( MapMode.READ_ONLY, 0, bytesize );
 				final A access = accessIo.load( in, ( int ) numEntities );
-				return new Cell<>( cellDims, cellMin, access );
+				return new Cell<>( dimsAndSteps, cellMin, access );
 			}
 		}
 		else
@@ -154,9 +153,8 @@ public class DiskCellCache< A > implements CacheRemover< Long, Cell< A >, A >, C
 	{
 		final long index = key;
 		final long[] cellMin = new long[ n ];
-		final int[] cellDims = new int[ n ];
-		grid.getCellDimensions( index, cellMin, cellDims );
-		return new Cell<>( cellDims, cellMin, valueData );
+		final CellDimensionsAndSteps dimsAndSteps = grid.getCellDimensions( index, cellMin );
+		return new Cell<>( dimsAndSteps, cellMin, valueData );
 	}
 
 	@Override
