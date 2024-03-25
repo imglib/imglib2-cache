@@ -209,6 +209,12 @@ public class SingleCellArrayImg< T extends NativeType< T >, A extends ArrayDataA
 		}
 
 		@Override
+		public T getType()
+		{
+			return type;
+		}
+
+		@Override
 		public void fwd( final int d )
 		{
 			type.incIndex( steps[ d ] );
@@ -364,6 +370,12 @@ public class SingleCellArrayImg< T extends NativeType< T >, A extends ArrayDataA
 		}
 
 		@Override
+		public T getType()
+		{
+			return type;
+		}
+
+		@Override
 		public boolean hasNext()
 		{
 			return type.getIndex() < lastIndex;
@@ -446,6 +458,12 @@ public class SingleCellArrayImg< T extends NativeType< T >, A extends ArrayDataA
 
 		@Override
 		public T get()
+		{
+			return type;
+		}
+
+		@Override
+		public T getType()
 		{
 			return type;
 		}
