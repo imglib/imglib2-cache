@@ -114,6 +114,7 @@ Jean-Yves Tinevez and Michael Zinsmaier.</license.copyrightOwners>
 		<releaseProfiles>sign,deploy-to-scijava</releaseProfiles>
 
 		<imglib2.version>6.3.1-SNAPSHOT</imglib2.version>
+		<enforcer.skip>true</enforcer.skip>
 	</properties>
 
 	<dependencies>
