@@ -178,6 +178,12 @@ public class SingleCellArrayImg< T extends NativeType< T >, A extends ArrayDataA
 		return randomAccess();
 	}
 
+	@Override
+	public T getType()
+	{
+		return linkedType;
+	}
+
 	class CellArrayRandomAccess extends AbstractLocalizable implements RandomAccess< T >
 	{
 		final T type;
