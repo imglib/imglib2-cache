@@ -178,6 +178,12 @@ public class SingleCellArrayImg< T extends NativeType< T >, A extends ArrayDataA
 		return randomAccess();
 	}
 
+	@Override
+	public T getType()
+	{
+		return linkedType;
+	}
+
 	class CellArrayRandomAccess extends AbstractLocalizable implements RandomAccess< T >
 	{
 		final T type;
@@ -204,6 +210,12 @@ public class SingleCellArrayImg< T extends NativeType< T >, A extends ArrayDataA
 
 		@Override
 		public T get()
+		{
+			return type;
+		}
+
+		@Override
+		public T getType()
 		{
 			return type;
 		}
@@ -364,6 +376,12 @@ public class SingleCellArrayImg< T extends NativeType< T >, A extends ArrayDataA
 		}
 
 		@Override
+		public T getType()
+		{
+			return type;
+		}
+
+		@Override
 		public boolean hasNext()
 		{
 			return type.getIndex() < lastIndex;
@@ -446,6 +464,12 @@ public class SingleCellArrayImg< T extends NativeType< T >, A extends ArrayDataA
 
 		@Override
 		public T get()
+		{
+			return type;
+		}
+
+		@Override
+		public T getType()
 		{
 			return type;
 		}

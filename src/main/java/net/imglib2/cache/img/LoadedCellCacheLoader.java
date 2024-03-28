@@ -58,6 +58,7 @@ import net.imglib2.img.basictypeaccess.array.LongArray;
 import net.imglib2.img.basictypeaccess.array.ShortArray;
 import net.imglib2.img.cell.Cell;
 import net.imglib2.img.cell.CellGrid;
+import net.imglib2.img.cell.CellGrid.CellDimensionsAndSteps;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.PrimitiveType;
 import net.imglib2.util.Fraction;
@@ -115,14 +116,13 @@ public class LoadedCellCacheLoader< T extends NativeType< T >, A extends ArrayDa
 	{
 		final long index = key;
 		final long[] cellMin = new long[ grid.numDimensions() ];
-		final int[] cellDims = new int[ grid.numDimensions() ];
-		grid.getCellDimensions( index, cellMin, cellDims );
-		final long numEntities = entitiesPerPixel.mulCeil( Intervals.numElements( cellDims ) );
+		final CellDimensionsAndSteps dimsAndSteps = grid.getCellDimensions( index, cellMin );
+		final long numEntities = entitiesPerPixel.mulCeil( dimsAndSteps.numPixels() );
 		final A array = creator.createArray( ( int ) numEntities );
 		@SuppressWarnings( { "rawtypes", "unchecked" } )
-		final SingleCellArrayImg< T, ? > img = new SingleCellArrayImg( cellDims, cellMin, wrapper.wrap( array ), wrapper.wrapDirty( array ), type );
+		final SingleCellArrayImg< T, ? > img = new SingleCellArrayImg( dimsAndSteps.dimensions(), cellMin, wrapper.wrap( array ), wrapper.wrapDirty( array ), type );
 		loader.load( img );
-		return new Cell<>( cellDims, cellMin, array );
+		return new Cell<>( dimsAndSteps, cellMin, array );
 	}
 
 	public static < T extends NativeType< T >, A extends ArrayDataAccess< A > > LoadedCellCacheLoader< T, A > get(
@@ -143,7 +143,7 @@ public class LoadedCellCacheLoader< T extends NativeType< T >, A extends ArrayDa
 	{
 		final A creator = ArrayDataAccessFactory.get( primitiveType, flags );
 		final ArrayDataAccessWrapper< A, ? > wrapper = getWrapper( primitiveType, flags );
-		return creator == null ? null : new LoadedCellCacheLoader<>( grid, type, creator, wrapper, loader );
+		return new LoadedCellCacheLoader<>( grid, type, creator, wrapper, loader );
 	}
 
 	@SuppressWarnings( "unchecked" )

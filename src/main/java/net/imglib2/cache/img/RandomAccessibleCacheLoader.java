@@ -36,6 +36,7 @@ package net.imglib2.cache.img;
 import static net.imglib2.img.basictypeaccess.AccessFlags.DIRTY;
 import static net.imglib2.img.basictypeaccess.AccessFlags.VOLATILE;
 
+import java.util.Arrays;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -78,11 +79,11 @@ import net.imglib2.img.basictypeaccess.volatiles.array.VolatileLongArray;
 import net.imglib2.img.basictypeaccess.volatiles.array.VolatileShortArray;
 import net.imglib2.img.cell.Cell;
 import net.imglib2.img.cell.CellGrid;
+import net.imglib2.img.cell.CellGrid.CellDimensionsAndSteps;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.PrimitiveType;
 import net.imglib2.type.NativeTypeFactory;
 import net.imglib2.util.Fraction;
-import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
 
 /**
@@ -151,22 +152,19 @@ public class RandomAccessibleCacheLoader<
 
 		final int n = grid.numDimensions();
 		final long[] cellMin = new long[ n ];
-		final int[] cellDims = new int[ n ];
 		final long[] cellMax = new long[ n ];
-
-		grid.getCellDimensions( index, cellMin, cellDims );
-		final long numEntities = entitiesPerPixel.mulCeil( Intervals.numElements( cellDims ) );
+		final CellDimensionsAndSteps dimsAndSteps = grid.getCellDimensions( index, cellMin );
+		Arrays.setAll( cellMax, d -> cellMin[ d ] + dimsAndSteps.dimensions()[ d ] - 1 );
+		final long numEntities = entitiesPerPixel.mulCeil( dimsAndSteps.numPixels() );
 		final A data = creator.createArray( ( int ) numEntities );
 		final T t = createType( data );
 		t.updateIndex( 0 );
-		for ( int d = 0; d < n; ++d )
-			cellMax[ d ] = cellMin[ d ] + cellDims[ d ] - 1;
 		for ( final T s : Views.interval( source, cellMin, cellMax ) )
 		{
 			t.set( s );
 			t.incIndex();
 		}
-		return new Cell<>( cellDims, cellMin, rewrap.apply( data ) );
+		return new Cell<>( dimsAndSteps, cellMin, rewrap.apply( data ) );
 	}
 
 	public static < T extends NativeType< T >, A extends ArrayDataAccess< A >, CA extends ArrayDataAccess< CA > > RandomAccessibleCacheLoader< T, A, CA > get(
