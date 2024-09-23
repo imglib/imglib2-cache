@@ -92,6 +92,7 @@ public class CachedCellImg< T extends NativeType< T >, A extends DataAccess > ex
 		return cache;
 	}
 
+	@Override
 	public A getAccessType()
 	{
 		return accessType;
