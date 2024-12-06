@@ -82,7 +82,15 @@ public class SoftRefLoaderCache< K, V > implements LoaderCache< K, V >
 
 		public V getValue()
 		{
-			return ref.get();
+			// instead of synchronize statement
+			final CacheSoftReference< V > myRef = ref;
+			if ( myRef == null )
+				return null;
+			else
+				return myRef.get();
+
+			// old code (Problem: myRef can be null when calling invalidateAll()
+			// return myRef.get();
 		}
 
 		public void setValue( final V value )
