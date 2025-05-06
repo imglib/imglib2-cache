@@ -41,6 +41,7 @@ import java.util.Set;
 import java.util.function.Function;
 
 import net.imglib2.Cursor;
+import net.imglib2.FinalInterval;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessible;
 import net.imglib2.cache.CacheLoader;
@@ -80,11 +81,11 @@ import net.imglib2.img.basictypeaccess.volatiles.array.VolatileShortArray;
 import net.imglib2.img.cell.Cell;
 import net.imglib2.img.cell.CellGrid;
 import net.imglib2.img.cell.CellGrid.CellDimensionsAndSteps;
+import net.imglib2.type.Index;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.PrimitiveType;
 import net.imglib2.type.NativeTypeFactory;
 import net.imglib2.util.Fraction;
-import net.imglib2.view.Views;
 
 /**
  * A {@link CacheLoader} that produces cells from a given source
@@ -148,21 +149,20 @@ public class RandomAccessibleCacheLoader<
 	@Override
 	public Cell< CA > get( final Long key ) throws Exception
 	{
-		final long index = key;
-
 		final int n = grid.numDimensions();
 		final long[] cellMin = new long[ n ];
 		final long[] cellMax = new long[ n ];
-		final CellDimensionsAndSteps dimsAndSteps = grid.getCellDimensions( index, cellMin );
+		final CellDimensionsAndSteps dimsAndSteps = grid.getCellDimensions( key, cellMin );
 		Arrays.setAll( cellMax, d -> cellMin[ d ] + dimsAndSteps.dimensions()[ d ] - 1 );
 		final long numEntities = entitiesPerPixel.mulCeil( dimsAndSteps.numPixels() );
 		final A data = creator.createArray( ( int ) numEntities );
 		final T t = createType( data );
-		t.updateIndex( 0 );
-		for ( final T s : Views.interval( source, cellMin, cellMax ) )
+		final Index index = t.index();
+		index.set( 0 );
+		for ( final T s : source.view().interval( FinalInterval.wrap( cellMin, cellMax ) ).flatIterable() )
 		{
 			t.set( s );
-			t.incIndex();
+			index.inc();
 		}
 		return new Cell<>( dimsAndSteps, cellMin, rewrap.apply( data ) );
 	}
@@ -172,7 +172,7 @@ public class RandomAccessibleCacheLoader<
 			final RandomAccessible< T > source,
 			final Set< AccessFlags > flags )
 	{
-		return get( grid, source, source.randomAccess().get(), flags );
+		return get( grid, source, source.getType(), flags );
 	}
 
 	@SuppressWarnings( "unchecked" )
