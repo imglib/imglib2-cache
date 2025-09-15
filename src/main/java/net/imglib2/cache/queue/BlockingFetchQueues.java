@@ -34,6 +34,7 @@
 package net.imglib2.cache.queue;
 
 import java.util.ArrayDeque;
+import java.util.Arrays;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
@@ -55,6 +56,9 @@ import java.util.concurrent.locks.ReentrantLock;
  * <em>n</em>. Priorities are consecutive integers <em>0 ... n-1</em>, where 0
  * is the highest priority. Priorities of {@link #put(Object, int, boolean)
  * enqueued} entries are clamped to the range <em>0 ... n-1</em>.
+ * <p>
+ * The number of priority levels can be increased (after construction) using
+ * {@link #ensureNumPriorities(int)}.
  *
  * @param <E>
  *            element type.
@@ -63,9 +67,9 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class BlockingFetchQueues< E >
 {
-	private final ArrayDeque< E >[] queues;
+	private ArrayDeque< E >[] queues;
 
-	private final int maxPriority;
+	private int maxPriority;
 
 	private final int prefetchCapacity;
 
@@ -197,6 +201,29 @@ public class BlockingFetchQueues< E >
 				if ( !q.isEmpty() )
 					return q.remove();
 			return prefetch.poll();
+		}
+		finally
+		{
+			lock.unlock();
+		}
+	}
+
+	/**
+	 * Ensure that at least {@code numPriorities} priority levels (each with a
+	 * separate {@code ArrayDeque}) exist.
+	 */
+	public void ensureNumPriorities( final int numPriorities )
+	{
+		final ReentrantLock lock = this.lock;
+		lock.lock();
+		try
+		{
+			if ( numPriorities > maxPriority + 1 ) {
+				queues = Arrays.copyOf( queues, numPriorities );
+				for ( int i = maxPriority + 1; i < numPriorities; i++ )
+					queues[ i ] = new ArrayDeque<>();
+				maxPriority = numPriorities - 1;
+			}
 		}
 		finally
 		{
